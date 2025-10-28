@@ -3,7 +3,7 @@
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { OnboardingCheck } from '@/components/providers/onboarding-check';
+// import { OnboardingCheck } from '@/components/providers/onboarding-check';
 
 export default function DashboardLayout({
   children,

@@ -2,7 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { AlertCircle, Clock, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/use-auth';
 
@@ -50,7 +50,7 @@ export function KYCBanner() {
         </AlertTitle>
         <AlertDescription className="text-blue-800 mt-2">
           <p className="mb-3">
-            Your KYC documents are being reviewed. This typically takes 1-2 business days. We'll notify you once the review is complete.
+            Your KYC documents are being reviewed. This typically takes 1-2 business days. We&apos;ll notify you once the review is complete.
           </p>
           <Link href="/vendor/kyc">
             <Button size="sm" variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-100">

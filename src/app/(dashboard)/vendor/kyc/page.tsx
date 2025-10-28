@@ -45,10 +45,10 @@ export default function KYCPage() {
     resolver: zodResolver(kycSchema),
   });
 
-  const documentType = watch('document_type');
+  // const documentType = watch('document_type');
 
   // Fetch existing KYC documents
-  const { data: documents, isLoading: isLoadingDocuments } = useQuery({
+  const { data: documents } = useQuery({
     queryKey: ['kyc', 'documents', organizationId],
     queryFn: () => kycApi.getDocuments(organizationId!),
     enabled: !!organizationId,
@@ -212,7 +212,7 @@ export default function KYCPage() {
         <CardHeader>
           <CardTitle>Submit KYC Document</CardTitle>
           <CardDescription>
-            Upload a valid identification document (Passport, National ID, or Driver's License)
+            Upload a valid identification document (Passport, National ID, or Driver&apos;s License)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -221,7 +221,7 @@ export default function KYCPage() {
             <div>
               <Label htmlFor="document_type">Document Type *</Label>
               <Select
-                onValueChange={(value) => setValue('document_type', value as any)}
+                onValueChange={(value) => setValue('document_type', value as KYCFormData['document_type'])}
               >
                 <SelectTrigger className="mt-2">
                   <SelectValue placeholder="Select document type" />
@@ -229,7 +229,7 @@ export default function KYCPage() {
                 <SelectContent>
                   <SelectItem value="passport">Passport</SelectItem>
                   <SelectItem value="national_id">National ID</SelectItem>
-                  <SelectItem value="drivers_license">Driver's License</SelectItem>
+                  <SelectItem value="drivers_license">Driver&apos;s License</SelectItem>
                   <SelectItem value="business_registration">Business Registration</SelectItem>
                   <SelectItem value="tax_certificate">Tax Certificate</SelectItem>
                   <SelectItem value="proof_of_address">Proof of Address</SelectItem>
