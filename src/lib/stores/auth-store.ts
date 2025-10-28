@@ -42,31 +42,33 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       // Check if user has platform role
-      hasRole: (role) => {
+      hasRole: (role:string|string[]) => {
         const { user } = get();
         if (!user) return false;
 
         const roles = Array.isArray(role) ? role : [role];
-        return user.roles.some((r) => roles.includes(r.name));
+        return !!(user.roles && user.roles.some((r) => roles.includes(r.name)));
       },
 
       // Check if user has platform permission
-      hasPermission: (permission) => {
+      hasPermission: (permission:string) => {
         const { user } = get();
         if (!user) return false;
 
         // Super admin has all permissions
-        if (user.roles.some((r) => r.name === 'super_admin')) return true;
+        if (user.roles && user.roles.some((r) => r.name === 'super_admin')) return true;
 
-        return user.permissions.includes(permission);
+        return !!(user.permissions && user.permissions.includes(permission));
       },
 
       // Check if user has organization permission
-      hasOrganizationPermission: (permission) => {
-        const { user } = get();
-        if (!user || !user.default_organization) return false;
+      // hasOrganizationPermission: (permission) => {
+      hasOrganizationPermission: () => {
+        // const { user } = get();
+        return false;
+        // if (!user || !user.default_organization) return false;
 
-        return user.default_organization.member_permissions.includes(permission);
+        // return user.default_organization.member_permissions.includes(permission);
       },
     }),
     {

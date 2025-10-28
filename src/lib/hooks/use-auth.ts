@@ -8,7 +8,7 @@ import type { AuthUser } from '@/types';
 export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, setUser, logout: clearAuth } = useAuthStore();
+  const { user, setUser, logout: clearAuth, hasRole, hasPermission, hasOrganizationPermission } = useAuthStore();
 
   // Fetch current user - skip only on login/register, but fetch on all other routes
   const isAuthRoute = typeof window !== 'undefined' &&
@@ -119,5 +119,10 @@ export function useAuth() {
 
     // Logout
     logout: logoutMutation.mutate,
+
+    // Permissions (from auth store)
+    hasRole,
+    hasPermission,
+    hasOrganizationPermission,
   };
 }

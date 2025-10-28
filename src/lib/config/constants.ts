@@ -74,6 +74,7 @@ export const KYC_STATUSES = {
   IN_REVIEW: 'in_review',
   APPROVED: 'approved',
   REJECTED: 'rejected',
+  NOT_SUBMITTED: 'not_submitted',
 } as const;
 
 export const KYC_STATUS_LABELS = {
@@ -81,6 +82,7 @@ export const KYC_STATUS_LABELS = {
   [KYC_STATUSES.IN_REVIEW]: 'In Review',
   [KYC_STATUSES.APPROVED]: 'Approved',
   [KYC_STATUSES.REJECTED]: 'Rejected',
+  [KYC_STATUSES.NOT_SUBMITTED]: 'Not Submitted',
 } as const;
 
 export const KYC_STATUS_COLORS = {
@@ -88,6 +90,7 @@ export const KYC_STATUS_COLORS = {
   [KYC_STATUSES.IN_REVIEW]: 'bg-blue-100 text-blue-800',
   [KYC_STATUSES.APPROVED]: 'bg-green-100 text-green-800',
   [KYC_STATUSES.REJECTED]: 'bg-red-100 text-red-800',
+  [KYC_STATUSES.NOT_SUBMITTED]: 'bg-red-100 text-red-800',
 } as const;
 
 // Organization Types

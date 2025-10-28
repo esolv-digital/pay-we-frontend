@@ -40,7 +40,6 @@ export default function KYCPage() {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
   } = useForm<KYCFormData>({
     resolver: zodResolver(kycSchema),
   });

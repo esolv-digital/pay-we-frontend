@@ -48,6 +48,8 @@ export interface AuthUser {
   created_at: string;
   updated_at: string;
   organizations?: Organization[];
+  roles?: Role[];
+  permissions?: string[];
 
   // Computed property
   full_name?: string;
@@ -74,4 +76,9 @@ export interface Organization {
   owner_id: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface Role {
+  id?: string;
+  name: string;
 }
