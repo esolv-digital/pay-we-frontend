@@ -11,6 +11,7 @@ const navigation = [
   { name: 'Payment Pages', href: VENDOR_ROUTES.PAYMENT_PAGES, icon: '📄' },
   { name: 'Transactions', href: VENDOR_ROUTES.TRANSACTIONS, icon: '💳' },
   { name: 'Disbursements', href: VENDOR_ROUTES.DISBURSEMENTS, icon: '💰' },
+  { name: 'KYC Verification', href: '/vendor/kyc', icon: '🔐' },
   { name: 'Settings', href: VENDOR_ROUTES.SETTINGS, icon: '⚙️' },
 ];
 

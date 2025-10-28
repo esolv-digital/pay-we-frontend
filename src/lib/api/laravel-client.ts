@@ -20,7 +20,14 @@ class LaravelApiClient {
   }
 
   async post<T>(url: string, data?: unknown): Promise<T> {
-    const response = await this.client.post(url, data);
+    // Let axios handle Content-Type for FormData automatically
+    const config = data instanceof FormData ? {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    } : undefined;
+
+    const response = await this.client.post(url, data, config);
     return response.data;
   }
 

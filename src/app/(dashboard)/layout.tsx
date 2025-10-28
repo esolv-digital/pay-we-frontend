@@ -35,8 +35,8 @@ export default function DashboardLayout({
   }
 
   return (
-    <OnboardingCheck>
-      {children}
-    </OnboardingCheck>
+    // <OnboardingCheck>
+    <>{children}</>
+    // </OnboardingCheck>
   );
 }

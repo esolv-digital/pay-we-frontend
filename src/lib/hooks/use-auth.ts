@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { AuthUser } from '@/types';
@@ -20,6 +21,13 @@ export function useAuth() {
     retry: false,
     enabled: !user && !isAuthRoute,
   });
+
+  // Automatically set user in auth store when query succeeds
+  useEffect(() => {
+    if (currentUser && !user) {
+      setUser(currentUser);
+    }
+  }, [currentUser, user, setUser]);
 
   // Helper function to check if user needs onboarding
   const needsOnboarding = (user: AuthUser) => {
@@ -92,7 +100,7 @@ export function useAuth() {
   return {
     user: user || currentUser,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!(user || currentUser),
 
     // Registration
     register: registerMutation.mutate,

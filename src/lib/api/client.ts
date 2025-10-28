@@ -16,6 +16,26 @@ class ApiClient {
     this.setupInterceptors();
   }
 
+  private clearAuthAndRedirect() {
+    if (typeof window === 'undefined') return;
+
+    // Clear localStorage (auth store is persisted here)
+    localStorage.clear();
+
+    // Clear sessionStorage
+    sessionStorage.clear();
+
+    // Clear cookies by calling logout endpoint
+    // This will be a fire-and-forget call
+    this.client.post('/auth/logout').catch(() => {
+      // Ignore errors - we're logging out anyway
+    });
+
+    // Redirect to login
+    console.log('[API Client] Redirecting to login page...');
+    window.location.href = '/login';
+  }
+
   private setupInterceptors() {
     // Request interceptor
     this.client.interceptors.request.use(
@@ -42,24 +62,32 @@ class ApiClient {
            window.location.pathname === '/register' ||
            window.location.pathname === '/');
 
-        if (
-          error.response?.status === 401 &&
-          !originalRequest._retry &&
-          !isAuthEndpoint &&
-          !isPublicRoute
-        ) {
+        // If 401 and not already retrying
+        if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
+          // Skip refresh attempt for auth endpoints
+          if (isAuthEndpoint || isPublicRoute) {
+            return Promise.reject(error);
+          }
+
           try {
+            // Try to refresh the token
             await this.client.post('/auth/refresh');
+            // Retry the original request
             return this.client(originalRequest);
           } catch (refreshError) {
-            // Refresh failed, redirect to login
-            if (typeof window !== 'undefined' && !isPublicRoute) {
-              window.location.href = '/login';
-            }
+            // Refresh failed - clean up and redirect
+            console.log('[API Client] Token refresh failed. Cleaning up and redirecting to login...');
+            this.clearAuthAndRedirect();
             return Promise.reject(refreshError);
           }
+        }
+
+        // If we get a 401 and already retried, clean up and redirect
+        if (error.response?.status === 401 && originalRequest._retry) {
+          console.log('[API Client] 401 after retry. Cleaning up and redirecting to login...');
+          this.clearAuthAndRedirect();
         }
 
         return Promise.reject(error);
