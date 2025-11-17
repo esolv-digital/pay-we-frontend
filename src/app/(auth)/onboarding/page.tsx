@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { onboardingSchema, type OnboardingFormData } from '@/lib/utils/validators';
@@ -11,7 +13,38 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, Globe, LogOut } from 'lucide-react';
 
 export default function OnboardingPage() {
-  const { completeOnboarding, isOnboardingPending, logout } = useAuth();
+  const router = useRouter();
+  const { user, isLoading, completeOnboarding, isOnboardingPending, logout } = useAuth();
+
+  // Redirect to dashboard if user already has an organization
+  useEffect(() => {
+    console.log('[Onboarding Page] User state changed:', {
+      isLoading,
+      hasUser: !!user,
+      userId: user?.id,
+      email: user?.email,
+      organizationsCount: user?.organizations?.length || 0,
+      organizations: user?.organizations,
+    });
+
+    // Skip check if still loading user data
+    if (isLoading) {
+      console.log('[Onboarding Page] Still loading, skipping check');
+      return;
+    }
+
+    // If user has organizations, redirect to appropriate dashboard
+    if (user && user.organizations && user.organizations.length > 0) {
+      console.log('[Onboarding Page] User has organizations, redirecting to dashboard...');
+      if (user.is_super_admin) {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/vendor/dashboard');
+      }
+    } else {
+      console.log('[Onboarding Page] User needs to complete onboarding');
+    }
+  }, [user, isLoading, router]);
 
   const {
     register,
@@ -34,6 +67,30 @@ export default function OnboardingPage() {
   const handleLogout = () => {
     logout();
   };
+
+  // Show loading state while checking if user already has organization
+  if (isLoading) {
+    return (
+      <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user already has organization, don't render the form (redirect is happening)
+  if (user && user.organizations && user.organizations.length > 0) {
+    return (
+      <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">

@@ -23,12 +23,26 @@ export function useAuth() {
     enabled: !user && !isAuthRoute,
   });
 
-  // Automatically set user in auth store when query succeeds
+  // Sync React Query cache data to Zustand store
+  // This ensures Zustand always has the latest data from the cache
   useEffect(() => {
-    if (currentUser && !user) {
-      setUser(currentUser);
+    // Get the latest data from React Query cache
+    const cachedUser = queryClient.getQueryData<AuthUser>(['auth', 'me']);
+
+    console.log('[useAuth] Syncing cache to store:', {
+      hasCachedUser: !!cachedUser,
+      hasStoreUser: !!user,
+      cacheOrgsCount: cachedUser?.organizations?.length || 0,
+      storeOrgsCount: user?.organizations?.length || 0,
+      needsSync: JSON.stringify(cachedUser) !== JSON.stringify(user)
+    });
+
+    // If cache has data and it's different from store, update store
+    if (cachedUser && JSON.stringify(cachedUser) !== JSON.stringify(user)) {
+      console.log('[useAuth] Updating store with cached data');
+      setUser(cachedUser);
     }
-  }, [currentUser, user, setUser]);
+  }, [currentUser, user, setUser, queryClient]);
 
   // Helper function to check if user needs onboarding
   const needsOnboarding = (user: AuthUser) => {
@@ -90,15 +104,38 @@ export function useAuth() {
   // Onboarding mutation
   const onboardingMutation = useMutation({
     mutationFn: authApi.completeOnboarding,
-    onSuccess: () => {
+    onSuccess: async () => {
       showSuccess('Organization setup completed successfully!');
 
-      // Refresh user data
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-      // Redirect to vendor dashboard
-      router.push('/vendor/dashboard');
+      console.log('[Onboarding] Fetching fresh user data after organization creation...');
+
+      // Force fetch fresh user data (bypasses the 'enabled' flag)
+      // This ensures we get the updated user with the new organization
+      const updatedUser = await queryClient.fetchQuery({
+        queryKey: ['auth', 'me'],
+        queryFn: authApi.me,
+        staleTime: 0, // Force fresh data
+      });
+
+      console.log('[Onboarding] Updated user data:', {
+        userId: updatedUser.id,
+        email: updatedUser.email,
+        organizationsCount: updatedUser.organizations?.length || 0,
+        organizations: updatedUser.organizations,
+      });
+
+      // Update both React Query cache and Zustand store with fresh data
+      queryClient.setQueryData(['auth', 'me'], updatedUser);
+      setUser(updatedUser);
+
+      console.log('[Onboarding] User data updated in store.');
+
+      // NOTE: We don't redirect here. Instead, we let the onboarding page's useEffect
+      // detect the updated user.organizations and handle the redirect.
+      // This ensures the component has the latest state before navigation.
     },
     onError: (error) => {
+      console.error('[Onboarding] Error during onboarding:', error);
       showApiError(error);
     },
   });
@@ -121,10 +158,14 @@ export function useAuth() {
     },
   });
 
+  // Always prefer the most recent data from React Query cache
+  const cachedUser = queryClient.getQueryData<AuthUser>(['auth', 'me']);
+  const latestUser = cachedUser || user || currentUser;
+
   return {
-    user: user || currentUser,
+    user: latestUser,
     isLoading,
-    isAuthenticated: !!(user || currentUser),
+    isAuthenticated: !!latestUser,
 
     // Registration
     register: registerMutation.mutate,
@@ -140,7 +181,7 @@ export function useAuth() {
     completeOnboarding: onboardingMutation.mutate,
     isOnboardingPending: onboardingMutation.isPending,
     onboardingError: onboardingMutation.error,
-    needsOnboarding: !!(user || currentUser) && needsOnboarding((user || currentUser)!),
+    needsOnboarding: !!latestUser && needsOnboarding(latestUser),
 
     // Logout
     logout: logoutMutation.mutate,

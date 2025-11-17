@@ -1,12 +1,20 @@
 import { apiClient } from './client';
 
 export interface KYCDocumentSubmission {
-  document_type: 'passport' | 'national_id' | 'drivers_license' | 'business_registration' | 'tax_certificate' | 'proof_of_address';
+  document_type: 'passport' | 'national_id' | 'drivers_license' | 'voters_card' | 'proof_of_address' | 'selfie' | 'business_registration' | 'tax_certificate' | 'directors_id';
   document_number: string;
   issue_date?: string;
   expiry_date?: string;
   issuing_authority?: string;
   document_file: File;
+  proof_of_address_file?: File;
+}
+
+export interface KYCBulkSubmission {
+  id_document: File;
+  proof_of_address: File;
+  registration_certificate?: File;
+  tax_id?: string;
 }
 
 export interface KYCDocument {
@@ -36,9 +44,35 @@ export const kycApi = {
     if (data.issue_date) formData.append('issue_date', data.issue_date);
     if (data.expiry_date) formData.append('expiry_date', data.expiry_date);
     if (data.issuing_authority) formData.append('issuing_authority', data.issuing_authority);
-    formData.append('document', data.document_file);
+    formData.append('document_file', data.document_file);
+    if (data.proof_of_address_file) {
+      formData.append('proof_of_address', data.proof_of_address_file);
+    }
 
     return apiClient.post<KYCDocument>(
+      `/organizations/${organizationId}/kyc/documents`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  },
+
+  // Submit all KYC documents at once (matches Laravel API)
+  submitKYCDocuments: async (organizationId: string, data: KYCBulkSubmission) => {
+    const formData = new FormData();
+    formData.append('id_document', data.id_document);
+    formData.append('proof_of_address', data.proof_of_address);
+    if (data.registration_certificate) {
+      formData.append('registration_certificate', data.registration_certificate);
+    }
+    if (data.tax_id) {
+      formData.append('tax_id', data.tax_id);
+    }
+
+    return apiClient.post(
       `/organizations/${organizationId}/kyc/documents`,
       formData,
       {

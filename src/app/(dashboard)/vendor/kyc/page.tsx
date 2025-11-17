@@ -18,18 +18,28 @@ import { Badge } from '@/components/ui/badge';
 import { FileText, Upload, CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react';
 
 const kycSchema = z.object({
-  document_type: z.enum(['passport', 'national_id', 'drivers_license', 'business_registration', 'tax_certificate', 'proof_of_address']),
+  document_type: z.enum([
+    'passport',
+    'national_id',
+    'drivers_license',
+    'voters_card',
+    'proof_of_address',
+    'selfie',
+    'business_registration',
+    'tax_certificate',
+    'directors_id'
+  ]),
   document_number: z.string().min(1, 'Document number is required'),
   issue_date: z.string().optional(),
   expiry_date: z.string().optional(),
-  issuing_authority: z.string().optional(),
 });
 
 type KYCFormData = z.infer<typeof kycSchema>;
 
 export default function KYCPage() {
   const queryClient = useQueryClient();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [proofOfAddressFile, setProofOfAddressFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>('');
 
   // Enable polling to get real-time KYC status updates while on this page
@@ -39,17 +49,20 @@ export default function KYCPage() {
   });
 
   const organizationId = organization?.id;
+  const isCorporate = organization?.type === 'corporate';
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
+    reset,
   } = useForm<KYCFormData>({
     resolver: zodResolver(kycSchema),
   });
 
-  // const documentType = watch('document_type');
+  const documentType = watch('document_type');
 
   // Fetch existing KYC documents
   const { data: documents } = useQuery({
@@ -61,7 +74,7 @@ export default function KYCPage() {
   // Submit KYC mutation
   const submitMutation = useMutation({
     mutationFn: async (data: KYCFormData) => {
-      if (!selectedFile) {
+      if (!documentFile) {
         throw new Error('Please select a document file');
       }
       if (!organizationId) {
@@ -70,13 +83,16 @@ export default function KYCPage() {
 
       return kycApi.submitDocument(organizationId, {
         ...data,
-        document_file: selectedFile,
+        document_file: documentFile,
+        proof_of_address_file: proofOfAddressFile || undefined,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kyc', 'documents'] });
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-      setSelectedFile(null);
+      setDocumentFile(null);
+      setProofOfAddressFile(null);
+      reset();
       showSuccess('KYC document submitted successfully!');
     },
     onError: (error) => {
@@ -84,15 +100,18 @@ export default function KYCPage() {
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: (file: File | null) => void
+  ) => {
     const file = e.target.files?.[0];
     setFileError('');
 
     if (!file) return;
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setFileError('File size must be less than 5MB');
+    // Validate file size (max 2MB per Laravel API)
+    if (file.size > 2 * 1024 * 1024) {
+      setFileError('File size must be less than 2MB');
       return;
     }
 
@@ -103,11 +122,11 @@ export default function KYCPage() {
       return;
     }
 
-    setSelectedFile(file);
+    setter(file);
   };
 
   const onSubmit = (data: KYCFormData) => {
-    if (!selectedFile) {
+    if (!documentFile) {
       setFileError('Please select a document file');
       return;
     }
@@ -168,10 +187,37 @@ export default function KYCPage() {
         <AlertCircle className="h-5 w-5 text-orange-600" />
         <AlertDescription className="text-orange-800">
           Please complete your KYC verification to start accepting payments and unlock all features.
+          {isCorporate
+            ? ' As a corporate organization, you need to submit: business registration, tax certificate, and directors ID documents.'
+            : ' Please submit your ID document (passport, national ID, or drivers license) and proof of address.'}
         </AlertDescription>
       </Alert>
     );
   };
+
+  // Helper to check which documents are still needed
+  const getRequiredDocuments = () => {
+    if (!documents) return [];
+
+    const submittedTypes = documents.map(doc => doc.document_type);
+
+    if (isCorporate) {
+      const required = ['business_registration', 'tax_certificate', 'directors_id'];
+      return required.filter(type => !submittedTypes.includes(type));
+    } else {
+      const hasIdDoc = submittedTypes.some(type =>
+        ['passport', 'national_id', 'drivers_license', 'voters_card'].includes(type)
+      );
+      const hasProofOfAddress = submittedTypes.includes('proof_of_address');
+
+      const needed = [];
+      if (!hasIdDoc) needed.push('ID Document (passport/national_id/drivers_license)');
+      if (!hasProofOfAddress) needed.push('proof_of_address');
+      return needed;
+    }
+  };
+
+  const requiredDocs = getRequiredDocuments();
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
@@ -183,6 +229,15 @@ export default function KYCPage() {
       </div>
 
       {getOrgStatusAlert()}
+
+      {requiredDocs.length > 0 && (
+        <Alert className="mb-6 border-l-4 border-l-blue-500 bg-blue-50">
+          <AlertCircle className="h-5 w-5 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            <strong>Still needed:</strong> {requiredDocs.join(', ')}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Existing Documents */}
       {documents && documents.length > 0 && (
@@ -219,7 +274,7 @@ export default function KYCPage() {
         <CardHeader>
           <CardTitle>Submit KYC Document</CardTitle>
           <CardDescription>
-            Upload a valid identification document (Passport, National ID, or Driver&apos;s License)
+            Upload one document at a time. You can submit multiple documents by filling out this form multiple times.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -237,9 +292,16 @@ export default function KYCPage() {
                   <SelectItem value="passport">Passport</SelectItem>
                   <SelectItem value="national_id">National ID</SelectItem>
                   <SelectItem value="drivers_license">Driver&apos;s License</SelectItem>
-                  <SelectItem value="business_registration">Business Registration</SelectItem>
-                  <SelectItem value="tax_certificate">Tax Certificate</SelectItem>
+                  <SelectItem value="voters_card">Voter&apos;s Card</SelectItem>
                   <SelectItem value="proof_of_address">Proof of Address</SelectItem>
+                  {!isCorporate && <SelectItem value="selfie">Selfie</SelectItem>}
+                  {isCorporate && (
+                    <>
+                      <SelectItem value="business_registration">Business Registration</SelectItem>
+                      <SelectItem value="tax_certificate">Tax Certificate</SelectItem>
+                      <SelectItem value="directors_id">Director&apos;s ID</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
               {errors.document_type && (
@@ -286,19 +348,7 @@ export default function KYCPage() {
               </div>
             </div>
 
-            {/* Issuing Authority */}
-            <div>
-              <Label htmlFor="issuing_authority">Issuing Authority (Optional)</Label>
-              <Input
-                {...register('issuing_authority')}
-                type="text"
-                id="issuing_authority"
-                placeholder="e.g., Nigerian Immigration Service"
-                className="mt-2"
-              />
-            </div>
-
-            {/* File Upload */}
+            {/* Document File Upload */}
             <div>
               <Label htmlFor="document_file">Upload Document *</Label>
               <div className="mt-2">
@@ -311,30 +361,69 @@ export default function KYCPage() {
                     <p className="mb-2 text-sm text-gray-600">
                       <span className="font-semibold">Click to upload</span> or drag and drop
                     </p>
-                    <p className="text-xs text-gray-500">PNG, JPG or PDF (MAX. 5MB)</p>
+                    <p className="text-xs text-gray-500">PNG, JPG or PDF (MAX. 2MB)</p>
                   </div>
                   <input
                     id="document_file"
                     type="file"
                     className="hidden"
                     accept="image/jpeg,image/png,image/jpg,application/pdf"
-                    onChange={handleFileChange}
+                    onChange={(e) => handleFileChange(e, setDocumentFile)}
                   />
                 </label>
-                {selectedFile && (
+                {documentFile && (
                   <p className="text-sm text-green-600 mt-2">
-                    Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
+                    Selected: {documentFile.name} ({(documentFile.size / 1024).toFixed(2)} KB)
                   </p>
-                )}
-                {fileError && (
-                  <p className="text-red-600 text-sm mt-1">{fileError}</p>
                 )}
               </div>
             </div>
 
+            {/* Proof of Address Upload (Optional) */}
+            {documentType !== 'proof_of_address' && (
+              <div>
+                <Label htmlFor="proof_of_address_file">
+                  Additional Proof of Address (Optional)
+                </Label>
+                <p className="text-xs text-gray-500 mt-1 mb-2">
+                  You can optionally attach a proof of address document with this submission
+                </p>
+                <div className="mt-2">
+                  <label
+                    htmlFor="proof_of_address_file"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-10 h-10 text-gray-400 mb-3" />
+                      <p className="mb-2 text-sm text-gray-600">
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500">PNG, JPG or PDF (MAX. 2MB)</p>
+                    </div>
+                    <input
+                      id="proof_of_address_file"
+                      type="file"
+                      className="hidden"
+                      accept="image/jpeg,image/png,image/jpg,application/pdf"
+                      onChange={(e) => handleFileChange(e, setProofOfAddressFile)}
+                    />
+                  </label>
+                  {proofOfAddressFile && (
+                    <p className="text-sm text-green-600 mt-2">
+                      Selected: {proofOfAddressFile.name} ({(proofOfAddressFile.size / 1024).toFixed(2)} KB)
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {fileError && (
+              <p className="text-red-600 text-sm">{fileError}</p>
+            )}
+
             <Button
               type="submit"
-              disabled={submitMutation.isPending || !selectedFile}
+              disabled={submitMutation.isPending || !documentFile}
               className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
             >
               {submitMutation.isPending ? 'Submitting...' : 'Submit KYC Document'}
