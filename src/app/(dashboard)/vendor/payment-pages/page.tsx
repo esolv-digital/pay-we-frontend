@@ -3,9 +3,13 @@
 import { usePaymentPages } from '@/lib/hooks/use-payment-pages';
 import { formatDate } from '@/lib/utils/format';
 import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 
 export default function PaymentPagesPage() {
-  const { data: pages, isLoading } = usePaymentPages();
+  const { data: response, isLoading } = usePaymentPages();
+
+  // Extract pages array from paginated response
+  const pages = response?.data || [];
 
   if (isLoading) {
     return (
@@ -79,21 +83,36 @@ export default function PaymentPagesPage() {
                     <span className="text-gray-500">Created:</span>
                     <span className="ml-2">{formatDate(page.created_at)}</span>
                   </div>
+                  <div>
+                    <span className="text-gray-500">Short URL:</span>
+                    <span className="ml-2 font-mono text-blue-600">{page.short_url}</span>
+                  </div>
                 </div>
 
-                <div className="mt-6 flex gap-2">
+                <div className="mt-6 flex flex-col gap-2">
                   <Link
-                    href={`/vendor/payment-pages/${page.id}`}
-                    className="flex-1 text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                    href={`/pay/${page.short_url}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
                   >
-                    View
+                    <ExternalLink className="h-4 w-4" />
+                    Preview Page
                   </Link>
-                  <Link
-                    href={`/vendor/payment-pages/${page.id}/edit`}
-                    className="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                  >
-                    Edit
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link
+                      href={`/vendor/payment-pages/${page.id}`}
+                      className="flex-1 text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                    >
+                      View
+                    </Link>
+                    <Link
+                      href={`/vendor/payment-pages/${page.id}/edit`}
+                      className="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    >
+                      Edit
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

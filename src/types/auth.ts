@@ -66,7 +66,7 @@ export interface Organization {
   region: 'africa' | 'caribbean' | 'global';
   tax_id?: string;
   registration_number?: string;
-  status: 'active' | 'suspended' | 'inactive';
+  status: 'active' | 'suspended' | 'inactive' | 'pending';
   kyc_status: 'not_submitted' | 'pending' | 'approved' | 'rejected';
   kyc_submitted_at?: string;
   kyc_reviewed_at?: string;
@@ -74,6 +74,26 @@ export interface Organization {
   kyc_rejected_at?: string;
   kyc_expiry_date?: string;
   owner_id: string;
+  created_at: string;
+  updated_at: string;
+  vendors?: OrganizationVendor[];
+}
+
+export interface OrganizationVendor {
+  id: string;
+  business_name: string;
+  slug: string;
+  description?: string;
+  logo_url?: string;
+  website?: string;
+  support_email?: string;
+  support_phone?: string;
+  currency_code: string;
+  payment_methods: ('card' | 'mobile_money' | 'bank_transfer' | 'crypto')[];
+  status: 'active' | 'inactive';
+  is_active: boolean;
+  is_test_mode: boolean;
+  organization_id: string;
   created_at: string;
   updated_at: string;
 }

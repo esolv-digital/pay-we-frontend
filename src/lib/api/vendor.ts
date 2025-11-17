@@ -2,73 +2,88 @@ import { apiClient } from './client';
 import type {
   PaymentPage,
   CreatePaymentPageInput,
+  UpdatePaymentPageInput,
   Transaction,
   TransactionFilters,
   Vendor,
+  PaginatedResponse,
 } from '@/types';
 
+/**
+ * Note: All vendor endpoints require a vendor_slug parameter.
+ * The vendor slug should be obtained from the authenticated user's vendor profile.
+ * These methods will be called by Next.js API routes which will inject the vendor_slug.
+ */
 export const vendorApi = {
   // Dashboard
-  getDashboardStats: async () => {
+  getDashboardStats: async (vendorSlug: string) => {
     return apiClient.get<{
       balance: number;
       total_revenue: number;
       total_transactions: number;
       pending_disbursements: number;
-    }>('/vendor/dashboard');
+    }>(`/vendors/${vendorSlug}/dashboard`);
   },
 
   // Payment Pages
-  getPaymentPages: async () => {
-    return apiClient.get<PaymentPage[]>('/vendor/payment-pages');
-  },
-
-  getPaymentPage: async (id: string) => {
-    return apiClient.get<PaymentPage>(`/vendor/payment-pages/${id}`);
-  },
-
-  createPaymentPage: async (data: CreatePaymentPageInput) => {
-    return apiClient.post<PaymentPage>('/vendor/payment-pages', data);
-  },
-
-  updatePaymentPage: async (id: string, data: Partial<CreatePaymentPageInput>) => {
-    return apiClient.put<PaymentPage>(`/vendor/payment-pages/${id}`, data);
-  },
-
-  deletePaymentPage: async (id: string) => {
-    return apiClient.delete(`/vendor/payment-pages/${id}`);
-  },
-
-  togglePaymentPage: async (id: string, isActive: boolean) => {
-    return apiClient.patch(`/vendor/payment-pages/${id}/toggle`, { is_active: isActive });
-  },
-
-  // Transactions
-  getTransactions: async (filters?: TransactionFilters) => {
-    return apiClient.get<Transaction[]>('/vendor/transactions', {
+  getPaymentPages: async (vendorSlug: string, filters?: {
+    page?: number;
+    per_page?: number;
+    is_active?: boolean;
+    amount_type?: 'fixed' | 'flexible' | 'donation';
+    search?: string;
+  }) => {
+    return apiClient.get<PaginatedResponse<PaymentPage>>(`/vendors/${vendorSlug}/payment-pages`, {
       params: filters,
     });
   },
 
-  getTransaction: async (id: string) => {
-    return apiClient.get<Transaction>(`/vendor/transactions/${id}`);
+  getPaymentPage: async (vendorSlug: string, id: string) => {
+    return apiClient.get<PaymentPage>(`/vendors/${vendorSlug}/payment-pages/${id}`);
+  },
+
+  createPaymentPage: async (vendorSlug: string, data: CreatePaymentPageInput) => {
+    return apiClient.post<PaymentPage>(`/vendors/${vendorSlug}/payment-pages`, data);
+  },
+
+  updatePaymentPage: async (vendorSlug: string, id: string, data: UpdatePaymentPageInput) => {
+    return apiClient.put<PaymentPage>(`/vendors/${vendorSlug}/payment-pages/${id}`, data);
+  },
+
+  deletePaymentPage: async (vendorSlug: string, id: string) => {
+    return apiClient.delete(`/vendors/${vendorSlug}/payment-pages/${id}`);
+  },
+
+  togglePaymentPage: async (vendorSlug: string, id: string) => {
+    return apiClient.post(`/vendors/${vendorSlug}/payment-pages/${id}/toggle-status`);
+  },
+
+  // Transactions
+  getTransactions: async (vendorSlug: string, filters?: TransactionFilters) => {
+    return apiClient.get<Transaction[]>(`/vendors/${vendorSlug}/transactions`, {
+      params: filters,
+    });
+  },
+
+  getTransaction: async (vendorSlug: string, id: string) => {
+    return apiClient.get<Transaction>(`/vendors/${vendorSlug}/transactions/${id}`);
   },
 
   // Vendor Profile
-  getVendor: async () => {
-    return apiClient.get<Vendor>('/vendor/profile');
+  getVendor: async (vendorSlug: string) => {
+    return apiClient.get<Vendor>(`/vendors/${vendorSlug}`);
   },
 
-  updateVendor: async (data: Partial<Vendor>) => {
-    return apiClient.put<Vendor>('/vendor/profile', data);
+  updateVendor: async (vendorSlug: string, data: Partial<Vendor>) => {
+    return apiClient.put<Vendor>(`/vendors/${vendorSlug}`, data);
   },
 
   // Disbursements
-  getDisbursements: async () => {
-    return apiClient.get('/vendor/disbursements');
+  getDisbursements: async (vendorSlug: string) => {
+    return apiClient.get(`/vendors/${vendorSlug}/disbursements`);
   },
 
-  requestDisbursement: async () => {
-    return apiClient.post('/vendor/disbursements/request');
+  requestDisbursement: async (vendorSlug: string) => {
+    return apiClient.post(`/vendors/${vendorSlug}/disbursements/request`);
   },
 };

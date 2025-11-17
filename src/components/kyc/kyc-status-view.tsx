@@ -142,8 +142,8 @@ export function KYCStatusView({ status, documents, submittedAt }: KYCStatusViewP
               <ul className="list-disc list-inside space-y-1">
                 <li>Our compliance team is reviewing your documents</li>
                 <li>You will receive an email notification once the review is complete</li>
-                <li>If approved, you'll have full access to all platform features</li>
-                <li>If any documents are rejected, you'll be able to resubmit them</li>
+                <li>If approved, you&apos;ll have full access to all platform features</li>
+                <li>If any documents are rejected, you&apos;ll be able to resubmit them</li>
               </ul>
             </div>
           </div>
