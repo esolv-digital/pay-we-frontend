@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
-  const { login, isLoginPending, loginError } = useAuth();
+  const { login, isLoginPending } = useAuth();
 
   const {
     register,
@@ -67,14 +67,6 @@ export default function LoginPage() {
             <p className="text-red-600 text-sm mt-1">{errors.password.message}</p>
           )}
         </div>
-
-        {loginError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-            <p className="text-sm">
-              {loginError.message || 'Invalid email or password. Please try again.'}
-            </p>
-          </div>
-        )}
 
         <Button
           type="submit"

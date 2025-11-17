@@ -46,6 +46,9 @@ export const useAuthStore = create<AuthState>()(
         const { user } = get();
         if (!user) return false;
 
+        // Super admin has all roles
+        if (user.is_super_admin) return true;
+
         const roles = Array.isArray(role) ? role : [role];
         return !!(user.roles && user.roles.some((r) => roles.includes(r.name)));
       },
@@ -56,6 +59,7 @@ export const useAuthStore = create<AuthState>()(
         if (!user) return false;
 
         // Super admin has all permissions
+        if (user.is_super_admin) return true;
         if (user.roles && user.roles.some((r) => r.name === 'super_admin')) return true;
 
         return !!(user.permissions && user.permissions.includes(permission));

@@ -5,8 +5,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/lib/hooks/use-auth';
+import { useKYCStatus } from '@/lib/hooks/use-kyc-status';
 import { kycApi } from '@/lib/api/kyc';
+import { showApiError, showSuccess } from '@/lib/utils/error-handler';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,12 +28,16 @@ const kycSchema = z.object({
 type KYCFormData = z.infer<typeof kycSchema>;
 
 export default function KYCPage() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>('');
 
-  const organization = user?.organizations?.[0];
+  // Enable polling to get real-time KYC status updates while on this page
+  const { organization } = useKYCStatus({
+    enablePolling: true,
+    pollingInterval: 10000 // Poll every 10 seconds
+  });
+
   const organizationId = organization?.id;
 
   const {
@@ -72,7 +77,10 @@ export default function KYCPage() {
       queryClient.invalidateQueries({ queryKey: ['kyc', 'documents'] });
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
       setSelectedFile(null);
-      alert('KYC document submitted successfully!');
+      showSuccess('KYC document submitted successfully!');
+    },
+    onError: (error) => {
+      showApiError(error);
     },
   });
 
@@ -323,15 +331,6 @@ export default function KYCPage() {
                 )}
               </div>
             </div>
-
-            {submitMutation.error && (
-              <Alert className="border-red-200 bg-red-50">
-                <XCircle className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-800">
-                  {submitMutation.error.message || 'Failed to submit KYC document'}
-                </AlertDescription>
-              </Alert>
-            )}
 
             <Button
               type="submit"

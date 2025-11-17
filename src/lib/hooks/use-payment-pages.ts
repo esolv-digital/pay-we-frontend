@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { vendorApi } from '@/lib/api/vendor';
+import { showApiError, showSuccess } from '@/lib/utils/error-handler';
 import type { CreatePaymentPageInput } from '@/types';
 
 export function usePaymentPages() {
@@ -24,6 +25,10 @@ export function useCreatePaymentPage() {
     mutationFn: vendorApi.createPaymentPage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-pages'] });
+      showSuccess('Payment page created successfully!');
+    },
+    onError: (error) => {
+      showApiError(error);
     },
   });
 }
@@ -37,6 +42,10 @@ export function useUpdatePaymentPage(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-pages'] });
       queryClient.invalidateQueries({ queryKey: ['payment-page', id] });
+      showSuccess('Payment page updated successfully!');
+    },
+    onError: (error) => {
+      showApiError(error);
     },
   });
 }
@@ -48,6 +57,10 @@ export function useDeletePaymentPage() {
     mutationFn: vendorApi.deletePaymentPage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-pages'] });
+      showSuccess('Payment page deleted successfully!');
+    },
+    onError: (error) => {
+      showApiError(error);
     },
   });
 }

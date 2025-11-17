@@ -4,10 +4,12 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Clock, XCircle } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/use-auth';
 
 export function KYCBanner() {
   const { user } = useAuth();
+  const pathname = usePathname();
 
   // Get user's organization
   const organization = user?.organizations?.[0];
@@ -18,6 +20,9 @@ export function KYCBanner() {
 
   // Don't show banner if KYC is approved
   if (kycStatus === 'approved') return null;
+
+  // Don't show banner if user is already on the KYC verification page
+  if (pathname === '/vendor/kyc') return null;
 
   // Render different banners based on KYC status
   if (kycStatus === 'not_submitted') {

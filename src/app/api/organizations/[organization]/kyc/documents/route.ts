@@ -26,12 +26,34 @@ export async function POST(
     // Get form data
     const formData = await request.formData();
 
+    // Add organization_id to formData for Laravel validation
+    formData.append('organization_id', organization);
+
+    // Map 'document' field to appropriate Laravel field based on document_type
+    const documentType = formData.get('document_type') as string;
+    const documentFile = formData.get('document');
+
+    if (documentFile && documentType) {
+      // Map frontend document_type to Laravel field names
+      const fieldMapping: Record<string, string> = {
+        'passport': 'id_document',
+        'national_id': 'id_document',
+        'drivers_license': 'id_document',
+        'proof_of_address': 'proof_of_address',
+        'business_registration': 'registration_certificate',
+        'tax_certificate': 'registration_certificate',
+      };
+
+      const laravelFieldName = fieldMapping[documentType] || 'id_document';
+      formData.delete('document');
+      formData.append(laravelFieldName, documentFile);
+    }
+
     // Forward to Laravel API
     const laravelClient = createLaravelClient(accessToken);
-    const response = await laravelClient.post(
-      `/api/v1/organizations/${organization}/kyc/documents`,
-      formData
-    );
+    const apiUrl = `/api/v1/organizations/${organization}/kyc/submit`;
+    console.log('Posting to Laravel:', apiUrl);
+    const response = await laravelClient.post(apiUrl, formData);
 
     return NextResponse.json(response);
   } catch (error: unknown) {

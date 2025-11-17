@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 export default function RegisterPage() {
-  const { register: registerUser, isRegisterPending, registerError } = useAuth();
+  const { register: registerUser, isRegisterPending } = useAuth();
 
   const {
     register,
@@ -148,14 +148,6 @@ export default function RegisterPage() {
             )}
           </div>
         </div>
-
-        {registerError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-            <p className="text-sm">
-              {registerError.message || 'Registration failed. Please try again.'}
-            </p>
-          </div>
-        )}
 
         <Button
           type="submit"

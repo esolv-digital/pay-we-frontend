@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
+import { showApiError, showSuccess } from '@/lib/utils/error-handler';
 import type { AuthUser } from '@/types';
 
 export function useAuth() {
@@ -58,9 +59,14 @@ export function useAuth() {
       setUser(data.user);
       queryClient.setQueryData(['auth', 'me'], data.user);
 
+      showSuccess('Account created successfully! Please complete your setup.');
+
       // Always redirect to onboarding after registration
       // User needs to create their organization
       router.push('/onboarding');
+    },
+    onError: (error) => {
+      showApiError(error);
     },
   });
 
@@ -71,8 +77,13 @@ export function useAuth() {
       setUser(data.user);
       queryClient.setQueryData(['auth', 'me'], data.user);
 
+      showSuccess('Welcome back!');
+
       // Check if user has organization
       redirectAfterAuth(data.user);
+    },
+    onError: (error) => {
+      showApiError(error);
     },
   });
 
@@ -80,10 +91,15 @@ export function useAuth() {
   const onboardingMutation = useMutation({
     mutationFn: authApi.completeOnboarding,
     onSuccess: () => {
+      showSuccess('Organization setup completed successfully!');
+
       // Refresh user data
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
       // Redirect to vendor dashboard
       router.push('/vendor/dashboard');
+    },
+    onError: (error) => {
+      showApiError(error);
     },
   });
 
@@ -93,7 +109,15 @@ export function useAuth() {
     onSuccess: () => {
       clearAuth();
       queryClient.clear();
+      showSuccess('Logged out successfully');
       router.push('/login');
+    },
+    onError: (error) => {
+      // Even if logout fails on server, clear client state
+      clearAuth();
+      queryClient.clear();
+      router.push('/login');
+      showApiError(error);
     },
   });
 
@@ -116,6 +140,7 @@ export function useAuth() {
     completeOnboarding: onboardingMutation.mutate,
     isOnboardingPending: onboardingMutation.isPending,
     onboardingError: onboardingMutation.error,
+    needsOnboarding: !!(user || currentUser) && needsOnboarding((user || currentUser)!),
 
     // Logout
     logout: logoutMutation.mutate,

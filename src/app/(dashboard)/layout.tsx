@@ -1,9 +1,9 @@
 'use client';
 
 import { useAuth } from '@/lib/hooks/use-auth';
+import { useOrganizationCheck } from '@/lib/hooks/use-organization-check';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-// import { OnboardingCheck } from '@/components/providers/onboarding-check';
 
 export default function DashboardLayout({
   children,
@@ -11,6 +11,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const { isLoading: isOrgCheckLoading, needsOnboarding } = useOrganizationCheck();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,7 +20,8 @@ export default function DashboardLayout({
     }
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading) {
+  // Show loading while checking authentication or organization
+  if (isLoading || isOrgCheckLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -34,9 +36,11 @@ export default function DashboardLayout({
     return null;
   }
 
-  return (
-    // <OnboardingCheck>
-    <>{children}</>
-    // </OnboardingCheck>
-  );
+  // Organization check hook will handle redirect to /onboarding
+  // Don't render children if user needs onboarding
+  if (needsOnboarding) {
+    return null;
+  }
+
+  return <>{children}</>;
 }

@@ -20,10 +20,10 @@ class LaravelApiClient {
   }
 
   async post<T>(url: string, data?: unknown): Promise<T> {
-    // Let axios handle Content-Type for FormData automatically
+    // For FormData, we need to override the default headers to let axios set the boundary
     const config = data instanceof FormData ? {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': undefined, // Let axios set multipart/form-data with boundary
       },
     } : undefined;
 

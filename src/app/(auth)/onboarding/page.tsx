@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Globe } from 'lucide-react';
+import { Building2, Globe, LogOut } from 'lucide-react';
 
 export default function OnboardingPage() {
-  const { completeOnboarding, isOnboardingPending, onboardingError } = useAuth();
+  const { completeOnboarding, isOnboardingPending, logout } = useAuth();
 
   const {
     register,
@@ -31,16 +31,34 @@ export default function OnboardingPage() {
     completeOnboarding(data);
   };
 
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
       <div className="mb-8">
-        <Badge className="mb-4 px-4 py-1 bg-blue-50 text-blue-700 border-blue-200">
-          Step 2 of 2
-        </Badge>
-        <h1 className="text-2xl font-bold text-gray-900">Complete Your Setup</h1>
-        <p className="text-gray-600 mt-2">
-          Set up your organization to start accepting payments
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <Badge className="mb-4 px-4 py-1 bg-blue-50 text-blue-700 border-blue-200">
+              Step 2 of 2
+            </Badge>
+            <h1 className="text-2xl font-bold text-gray-900">Complete Your Setup</h1>
+            <p className="text-gray-600 mt-2">
+              Set up your organization to start accepting payments
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -142,14 +160,6 @@ export default function OnboardingPage() {
             ISO 3166-1 alpha-2 country code (e.g., NG for Nigeria, US for United States, GB for United Kingdom)
           </p>
         </div>
-
-        {onboardingError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-            <p className="text-sm">
-              {onboardingError.message || 'Failed to complete onboarding. Please try again.'}
-            </p>
-          </div>
-        )}
 
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-md">
           <p className="text-sm text-blue-800">
