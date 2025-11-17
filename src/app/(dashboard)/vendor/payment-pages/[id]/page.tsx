@@ -74,7 +74,7 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
       <div className="p-8">
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <h2 className="text-2xl font-semibold mb-2">Payment Page Not Found</h2>
-          <p className="text-gray-600 mb-6">The payment page you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-6">The payment page you&apos;re looking for doesn&apos;t exist.</p>
           <Link href="/vendor/payment-pages">
             <Button>Back to Payment Pages</Button>
           </Link>

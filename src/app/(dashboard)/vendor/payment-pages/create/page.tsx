@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { PaymentPagePreview } from '@/components/payment/payment-page-preview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Settings } from 'lucide-react';
-import type { PaymentPageCustomization } from '@/types';
+import type { PaymentPageCustomization, PaymentPage } from '@/types';
 
 export default function CreatePaymentPagePage() {
   const router = useRouter();
@@ -478,7 +478,7 @@ export default function CreatePaymentPagePage() {
             </div>
             <div className="bg-gray-100">
               <PaymentPagePreview
-                paymentPage={formValues as any}
+                paymentPage={formValues as Partial<PaymentPage>}
                 customization={customization}
                 previewAmount={
                   formValues.amount_type === 'fixed'

@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { vendorApi } from '@/lib/api/vendor';
 import { formatCurrency } from '@/lib/utils/format';
+import Link from 'next/link';
 
 export default function VendorDashboardPage() {
   const { data: stats, isLoading } = useQuery({
@@ -69,13 +70,13 @@ export default function VendorDashboardPage() {
       <div className="mt-8 bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
+          <Link
             href="/vendor/payment-pages/create"
             className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-center"
           >
             <span className="text-3xl block mb-2">➕</span>
             <span className="font-medium">Create Payment Page</span>
-          </a>
+          </Link>
           <a
             href="/vendor/transactions"
             className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-center"

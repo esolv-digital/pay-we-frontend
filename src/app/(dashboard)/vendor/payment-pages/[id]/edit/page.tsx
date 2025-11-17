@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { PaymentPagePreview } from '@/components/payment/payment-page-preview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Settings, ArrowLeft } from 'lucide-react';
-import type { PaymentPageCustomization } from '@/types';
+import type { PaymentPageCustomization, PaymentPage } from '@/types';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -45,7 +45,6 @@ export default function EditPaymentPagePage({ params }: PageProps) {
     register,
     handleSubmit,
     watch,
-    setValue,
     reset,
     formState: { errors },
   } = useForm<PaymentPageFormData>({
@@ -87,20 +86,6 @@ export default function EditPaymentPagePage({ params }: PageProps) {
 
   const formValues = watch();
   const amountType = watch('amount_type');
-  const titleValue = watch('title');
-
-  // Auto-generate slug from title (only if manually editing title)
-  const generateSlug = (title: string): string => {
-    if (!title) return '';
-
-    return title
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .substring(0, 50);
-  };
 
   const onSubmit = (data: PaymentPageFormData) => {
     updatePage(
@@ -137,7 +122,7 @@ export default function EditPaymentPagePage({ params }: PageProps) {
       <div className="p-8">
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <h2 className="text-2xl font-semibold mb-2">Payment Page Not Found</h2>
-          <p className="text-gray-600 mb-6">The payment page you're trying to edit doesn't exist.</p>
+          <p className="text-gray-600 mb-6">The payment page you&apos;re trying to edit doesn&apos;t exist.</p>
           <Link href="/vendor/payment-pages">
             <Button>Back to Payment Pages</Button>
           </Link>
@@ -542,7 +527,7 @@ export default function EditPaymentPagePage({ params }: PageProps) {
             </div>
             <div className="bg-gray-100">
               <PaymentPagePreview
-                paymentPage={formValues as any}
+                paymentPage={formValues as Partial<PaymentPage>}
                 customization={customization}
                 previewAmount={
                   formValues.amount_type === 'fixed'

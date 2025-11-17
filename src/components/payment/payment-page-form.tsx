@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import type { CreateTransactionData } from '@/lib/api/public';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,7 +47,6 @@ interface PaymentPageFormProps {
  * DRY: Shared component used by both short URL and SEO URL payment pages
  */
 export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps) {
-  const router = useRouter();
   const [transactionCreated, setTransactionCreated] = useState(false);
 
   const {
