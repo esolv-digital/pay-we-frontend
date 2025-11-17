@@ -4,11 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { vendorApi } from '@/lib/api/vendor';
 import { formatCurrency } from '@/lib/utils/format';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/use-auth';
 
 export default function VendorDashboardPage() {
+  const { user } = useAuth();
+
+  // Get the vendor slug from the user's first organization's first vendor
+  const vendorSlug = user?.organizations?.[0]?.vendors?.[0]?.slug;
+
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['vendor', 'dashboard'],
-    queryFn: vendorApi.getDashboardStats,
+    queryKey: ['vendor', 'dashboard', vendorSlug],
+    queryFn: () => vendorApi.getDashboardStats(vendorSlug!),
+    enabled: !!vendorSlug,
   });
 
   if (isLoading) {
