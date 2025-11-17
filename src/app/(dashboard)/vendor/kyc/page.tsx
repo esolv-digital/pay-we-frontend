@@ -221,8 +221,8 @@ export default function KYCPage() {
   const requiredDocs = getRequiredDocuments();
   const kycStatus = organization?.kyc_status;
 
-  // If KYC is pending or in review, show the status view instead of the form
-  if (kycStatus === 'pending' || kycStatus === 'in_review') {
+  // If KYC is pending (in review), show the status view instead of the form
+  if (kycStatus === 'pending') {
     return (
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         <div className="mb-8">
