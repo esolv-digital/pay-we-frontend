@@ -9,28 +9,34 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { PaymentPageForm } from '@/components/payment/payment-page-form';
 
 /**
- * Public Payment Page (Short URL)
+ * SEO-Friendly Public Payment Page
  *
- * Single Responsibility: Handle public payment page display via short URLs
+ * Single Responsibility: Handle SEO-friendly public payment page display
  * Open/Closed: Open for extension via payment gateway integration
- * Liskov Substitution: Can be replaced with SEO URL page without breaking functionality
+ * Liskov Substitution: Can replace short URL page without breaking functionality
  * Interface Segregation: Separates concerns between URL structure and payment logic
  * Dependency Inversion: Depends on abstractions (publicApi) not concrete implementations
  *
  * DRY: Uses shared PaymentPageForm component to avoid code duplication
+ *
+ * SEO Benefits:
+ * - Readable URLs: /pay/{vendor-slug}/{payment-page-slug}
+ * - Better crawlability for search engines
+ * - More descriptive URLs for sharing
  */
-export default function PublicPaymentPage() {
+export default function SeoPaymentPage() {
   const params = useParams();
-  const shortUrl = params.slug as string; // Route param is still 'slug' but represents short_url
+  const vendorSlug = params.vendor_slug as string;
+  const paymentPageSlug = params.payment_page_slug as string;
 
   const { data: paymentPage, isLoading, error } = useQuery({
-    queryKey: ['public-payment-page', shortUrl],
-    queryFn: () => publicApi.getPaymentPageByShortUrl(shortUrl),
+    queryKey: ['public-payment-page-seo', vendorSlug, paymentPageSlug],
+    queryFn: () => publicApi.getPaymentPageBySeoUrl(vendorSlug, paymentPageSlug),
     retry: 1,
   });
 
-  const handleCreateTransaction = async (data: Parameters<typeof publicApi.createTransaction>[1]) => {
-    return publicApi.createTransaction(shortUrl, data);
+  const handleCreateTransaction = async (data: Parameters<typeof publicApi.createTransactionBySeoUrl>[2]) => {
+    return publicApi.createTransactionBySeoUrl(vendorSlug, paymentPageSlug, data);
   };
 
   if (isLoading) {
@@ -53,7 +59,7 @@ export default function PublicPaymentPage() {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">
-              The payment page you&apos;re looking for doesn&apos;t exist or has been disabled.
+              The payment page you're looking for doesn't exist or has been disabled.
             </p>
             <Button onClick={() => window.location.href = '/'} className="w-full">
               Go to Homepage

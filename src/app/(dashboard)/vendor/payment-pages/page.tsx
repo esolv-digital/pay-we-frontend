@@ -1,15 +1,41 @@
 'use client';
 
-import { usePaymentPages } from '@/lib/hooks/use-payment-pages';
+import { useState } from 'react';
+import { usePaymentPages, useDeletePaymentPage } from '@/lib/hooks/use-payment-pages';
 import { formatDate } from '@/lib/utils/format';
 import Link from 'next/link';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Trash2 } from 'lucide-react';
+import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmation-dialog';
+import { Button } from '@/components/ui/button';
 
 export default function PaymentPagesPage() {
-  const { data: response, isLoading } = usePaymentPages();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [pageToDelete, setPageToDelete] = useState<{ id: string; title: string } | null>(null);
 
-  // Extract pages array from paginated response
+  const { data: response, isLoading } = usePaymentPages({
+    page: currentPage,
+    per_page: 12,
+  });
+
+  const deletePage = useDeletePaymentPage();
+
+  // Extract pages array and meta from paginated response
   const pages = response?.data || [];
+  const meta = response?.meta;
+
+  const handleDeleteClick = (id: string, title: string) => {
+    setPageToDelete({ id, title });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!pageToDelete) return;
+
+    await deletePage.mutateAsync(pageToDelete.id);
+    setDeleteDialogOpen(false);
+    setPageToDelete(null);
+  };
 
   if (isLoading) {
     return (
@@ -91,7 +117,7 @@ export default function PaymentPagesPage() {
 
                 <div className="mt-6 flex flex-col gap-2">
                   <Link
-                    href={`/pay/${page.short_url}`}
+                    href={page.vendor ? `/pay/${page.vendor.slug}/${page.slug}` : `/pay/${page.short_url}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
@@ -99,19 +125,27 @@ export default function PaymentPagesPage() {
                     <ExternalLink className="h-4 w-4" />
                     Preview Page
                   </Link>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <Link
                       href={`/vendor/payment-pages/${page.id}`}
-                      className="flex-1 text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                      className="text-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
                     >
                       View
                     </Link>
                     <Link
                       href={`/vendor/payment-pages/${page.id}/edit`}
-                      className="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      className="text-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                     >
                       Edit
                     </Link>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteClick(page.id, page.title)}
+                      className="text-sm font-medium"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -119,6 +153,66 @@ export default function PaymentPagesPage() {
           ))}
         </div>
       )}
+
+      {meta && meta.last_page > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+
+          <div className="flex items-center gap-2">
+            {Array.from({ length: meta.last_page }, (_, i) => i + 1)
+              .filter((page) => {
+                // Show first page, last page, current page, and pages around current
+                return (
+                  page === 1 ||
+                  page === meta.last_page ||
+                  (page >= currentPage - 1 && page <= currentPage + 1)
+                );
+              })
+              .map((page, index, array) => {
+                // Add ellipsis if there's a gap
+                const showEllipsisBefore = index > 0 && page - array[index - 1] > 1;
+
+                return (
+                  <div key={page} className="flex items-center gap-2">
+                    {showEllipsisBefore && (
+                      <span className="text-gray-500 px-2">...</span>
+                    )}
+                    <Button
+                      variant={currentPage === page ? 'default' : 'outline'}
+                      onClick={() => setCurrentPage(page)}
+                      className="min-w-10"
+                    >
+                      {page}
+                    </Button>
+                  </div>
+                );
+              })}
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.min(meta.last_page, prev + 1))}
+            disabled={currentPage === meta.last_page}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        itemName={pageToDelete?.title}
+        isDeleting={deletePage.isPending}
+        description="This will permanently delete this payment page and all associated data. This action cannot be undone."
+      />
     </div>
   );
 }

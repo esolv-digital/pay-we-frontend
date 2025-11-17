@@ -42,9 +42,9 @@ export const paymentPageSchema = z.object({
     .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
   description: z.string().optional(),
   amount_type: z.enum(['fixed', 'flexible', 'donation']),
-  fixed_amount: z.number().positive().optional(),
-  min_amount: z.number().positive().optional(),
-  max_amount: z.number().positive().optional(),
+  fixed_amount: z.union([z.number().min(0), z.nan(), z.undefined()]).optional(),
+  min_amount: z.union([z.number().min(0), z.nan(), z.undefined()]).optional(),
+  max_amount: z.union([z.number().min(0), z.nan(), z.undefined()]).optional(),
   currency_code: z.string().length(3),
   collect_customer_info: z.boolean().optional(),
   collect_shipping_address: z.boolean().optional(),
@@ -52,8 +52,14 @@ export const paymentPageSchema = z.object({
   redirect_url: z.string().url().optional().or(z.literal('')),
 }).refine(
   (data) => {
+    // Validate fixed_amount when amount_type is 'fixed'
     if (data.amount_type === 'fixed') {
-      return !!data.fixed_amount && data.fixed_amount > 0;
+      return (
+        data.fixed_amount !== undefined &&
+        data.fixed_amount !== null &&
+        !isNaN(data.fixed_amount) &&
+        data.fixed_amount > 0
+      );
     }
     return true;
   },
@@ -63,8 +69,28 @@ export const paymentPageSchema = z.object({
   }
 ).refine(
   (data) => {
-    if (data.amount_type === 'flexible' && data.min_amount && data.max_amount) {
-      return data.max_amount > data.min_amount;
+    // Validate min_amount when amount_type is 'flexible' or 'donation'
+    if (data.amount_type === 'flexible' || data.amount_type === 'donation') {
+      return (
+        data.min_amount !== undefined &&
+        data.min_amount !== null &&
+        !isNaN(data.min_amount) &&
+        data.min_amount >= 0
+      );
+    }
+    return true;
+  },
+  {
+    message: 'Minimum amount is required for flexible and donation payment types (can be 0)',
+    path: ['min_amount'],
+  }
+).refine(
+  (data) => {
+    // Validate max_amount > min_amount when amount_type is 'flexible'
+    if (data.amount_type === 'flexible') {
+      if (data.min_amount !== undefined && !isNaN(data.min_amount) && data.max_amount && !isNaN(data.max_amount)) {
+        return data.max_amount > data.min_amount;
+      }
     }
     return true;
   },

@@ -298,3 +298,246 @@ Based on the design document in the user's message, implement in this order:
 - Project uses Turbopack (Next.js 15's default bundler)
 - ESLint with Next.js config and TanStack Query plugin
 - Consider adding Prettier for consistent formatting
+
+---
+
+## Public Payment Pages Implementation
+
+### Overview
+The PayWe frontend supports two URL formats for public payment pages:
+
+1. **Short URL Format** (Legacy): `/pay/{short_url}` - e.g., `/pay/Xorp2Pto`
+2. **SEO-Friendly URL Format** (Recommended): `/pay/{vendor_slug}/{payment_page_slug}` - e.g., `/pay/qqq-YM2D/product-purchase`
+
+### Architecture & Design Principles
+
+This implementation follows **SOLID** principles and **DRY** (Don't Repeat Yourself):
+
+#### Single Responsibility Principle (SRP)
+- **API Routes**: Each route handles one specific endpoint (payment page retrieval or transaction creation)
+- **Components**: `PaymentPageForm` component is responsible only for rendering the payment form
+- **Page Components**: Short URL and SEO URL pages only handle data fetching and routing logic
+
+#### Open/Closed Principle (OCP)
+- The system is open for extension (new payment methods, customizations) but closed for modification
+- New URL formats can be added without modifying existing code
+
+#### Liskov Substitution Principle (LSP)
+- Both short URL and SEO URL pages can be used interchangeably
+- They both return the same payment page structure and behavior
+
+#### Interface Segregation Principle (ISP)
+- Public API methods have focused, clean interfaces
+- Each method does one thing well
+
+#### Dependency Inversion Principle (DIP)
+- All components depend on abstractions (`publicApi`, `PaymentPage` types) not concrete implementations
+- Laravel client is abstracted away from the components
+
+#### DRY (Don't Repeat Yourself)
+- **Shared Component**: `PaymentPageForm` is used by both URL formats
+- **Type Definitions**: `CreateTransactionData` interface is reused across all transaction methods
+- **API Client**: Both URL formats use the same underlying API client
+
+### File Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── pay/
+│   │       ├── [short_url]/
+│   │       │   ├── route.ts                          # Short URL API endpoint
+│   │       │   └── transactions/
+│   │       │       └── route.ts                      # Short URL transaction endpoint
+│   │       └── [vendor_slug]/
+│   │           └── [payment_page_slug]/
+│   │               ├── route.ts                      # SEO URL API endpoint
+│   │               └── transactions/
+│   │                   └── route.ts                  # SEO URL transaction endpoint
+│   └── (public)/
+│       └── pay/
+│           ├── [slug]/
+│           │   └── page.tsx                          # Short URL public page
+│           └── [vendor_slug]/
+│               └── [payment_page_slug]/
+│                   └── page.tsx                      # SEO URL public page
+├── components/
+│   └── payment/
+│       └── payment-page-form.tsx                     # Shared payment form component (DRY)
+└── lib/
+    └── api/
+        └── public.ts                                 # Public API client methods
+```
+
+### API Endpoints
+
+#### Backend (Laravel)
+```
+GET  /api/v1/pay/{short_url}                          # Get payment page by short URL
+POST /api/v1/pay/{short_url}/transactions             # Create transaction via short URL
+GET  /api/v1/pay/{vendor_slug}/{payment_page_slug}    # Get payment page by SEO URL
+POST /api/v1/pay/{vendor_slug}/{payment_page_slug}/transactions  # Create transaction via SEO URL
+```
+
+#### Frontend (Next.js API Routes - BFF Pattern)
+```
+GET  /api/pay/{short_url}                             # Proxies to backend short URL
+POST /api/pay/{short_url}/transactions                # Proxies to backend transactions
+GET  /api/pay/{vendor_slug}/{payment_page_slug}       # Proxies to backend SEO URL
+POST /api/pay/{vendor_slug}/{payment_page_slug}/transactions  # Proxies to backend SEO transactions
+```
+
+#### Frontend (Public Pages)
+```
+/pay/{short_url}                                      # Short URL payment page
+/pay/{vendor_slug}/{payment_page_slug}                # SEO-friendly payment page
+```
+
+### Public API Methods
+
+Located in [src/lib/api/public.ts](src/lib/api/public.ts):
+
+```typescript
+// Short URL methods
+publicApi.getPaymentPageByShortUrl(shortUrl: string): Promise<PaymentPage>
+publicApi.createTransaction(shortUrl: string, data: CreateTransactionData): Promise<Transaction>
+
+// SEO URL methods
+publicApi.getPaymentPageBySeoUrl(vendorSlug: string, paymentPageSlug: string): Promise<PaymentPage>
+publicApi.createTransactionBySeoUrl(vendorSlug: string, paymentPageSlug: string, data: CreateTransactionData): Promise<Transaction>
+
+// Transaction lookup
+publicApi.getTransactionByReference(reference: string): Promise<Transaction>
+```
+
+### Component Usage
+
+#### PaymentPageForm Component
+
+**Location:** [src/components/payment/payment-page-form.tsx](src/components/payment/payment-page-form.tsx)
+
+Shared component that handles all payment form logic (following **DRY** principle):
+
+```typescript
+interface PaymentPageFormProps {
+  paymentPage: PaymentPage;
+  onSubmit: (data: CreateTransactionData) => Promise<unknown>;
+}
+```
+
+**Features:**
+- Handles all form validation using React Hook Form + Zod
+- Supports customization (colors, themes, logos)
+- Manages transaction creation state
+- Handles success/error states
+- Supports all payment page types (fixed, flexible, donation)
+- Collects customer info and shipping address when configured
+
+**SOLID Principles Applied:**
+- **SRP**: Only responsible for rendering the payment form UI
+- **OCP**: Customizations can be extended via metadata without modifying the component
+- **DIP**: Depends on `PaymentPage` abstraction, not concrete implementation
+
+### SEO Benefits
+
+The SEO-friendly URL format provides:
+
+1. **Better Search Engine Ranking**: Readable URLs with keywords
+2. **Improved User Experience**: Users can understand the URL structure
+3. **Better Sharing**: URLs are more descriptive when shared on social media
+4. **Brand Recognition**: Vendor slug in URL reinforces brand identity
+
+### Example URLs
+
+**Short URL (Legacy)**
+```
+https://pay-we.com/pay/Xorp2Pto
+```
+
+**SEO URL (Recommended)**
+```
+https://pay-we.com/pay/qqq-YM2D/product-purchase
+```
+
+Both URLs render the exact same payment page using the shared `PaymentPageForm` component, but the SEO URL is:
+- More descriptive
+- Better for search engines
+- Easier to remember
+- Better for brand recognition
+
+### Payment Pages List
+
+The payment pages list ([src/app/(dashboard)/vendor/payment-pages/page.tsx](src/app/(dashboard)/vendor/payment-pages/page.tsx)) displays:
+
+- Payment page title and status
+- Amount type (fixed, flexible, donation)
+- Short URL code
+- **Preview Page** button that opens the SEO-friendly URL in a new tab
+- View and Edit buttons for management
+
+The preview link uses the SEO-friendly format when vendor data is available, falling back to short URL if not:
+
+```typescript
+href={page.vendor ? `/pay/${page.vendor.slug}/${page.slug}` : `/pay/${page.short_url}`}
+```
+
+### Error Handling
+
+All API routes include proper error handling:
+
+- **503 Service Unavailable**: When backend API is unreachable (`ECONNREFUSED`)
+- **404 Not Found**: When payment page doesn't exist
+- **500 Internal Server Error**: For other backend errors
+- Validation errors are returned with proper status codes and error details
+
+### Security
+
+- All public endpoints are **unauthenticated** (as intended for public payment pages)
+- No sensitive data is exposed in responses
+- HTTP-only cookies are used for authenticated routes (not applicable to public pages)
+- CORS is handled at the Next.js API route level
+- Input validation on all transaction creation endpoints
+
+### Testing URLs
+
+**Short URL Example:**
+```
+http://localhost:3000/pay/Xorp2Pto
+```
+
+**SEO URL Example:**
+```
+http://localhost:3000/pay/qqq-YM2D/product-purchase
+```
+
+### Future Enhancements
+
+Potential improvements following SOLID principles:
+
+1. **Payment Gateway Integration**: Add payment provider adapters (Stripe, PayPal, etc.) using Strategy pattern
+2. **Analytics Tracking**: Add event tracking for page views and conversions (Observer pattern)
+3. **A/B Testing**: Support for testing different page customizations (Strategy pattern)
+4. **Multi-language Support**: Internationalization for payment pages (i18n)
+5. **Custom Domain Support**: Allow vendors to use custom domains (requires DNS configuration)
+6. **QR Code Generation**: Generate QR codes for payment pages on-the-fly
+
+### Best Practices for Extension
+
+When extending this implementation:
+
+1. **Always use the shared component** (`PaymentPageForm`) for consistency (DRY)
+2. **Add new URL formats as new routes**, don't modify existing ones (OCP)
+3. **Keep API methods focused** on single responsibility (SRP)
+4. **Use TypeScript types** for all data structures (type safety)
+5. **Document SOLID principles** in comments for complex logic
+6. **Test both URL formats** when making changes
+7. **Follow the BFF pattern** - never call Laravel API directly from client
+
+### Related Files
+
+- **Types**: [src/types/payment-page.ts](src/types/payment-page.ts), [src/types/vendor.ts](src/types/vendor.ts)
+- **API Client**: [src/lib/api/client.ts](src/lib/api/client.ts), [src/lib/api/laravel-client.ts](src/lib/api/laravel-client.ts)
+- **Public API**: [src/lib/api/public.ts](src/lib/api/public.ts)
+- **Hooks**: [src/lib/hooks/use-payment-pages.ts](src/lib/hooks/use-payment-pages.ts)
+- **Utils**: [src/lib/utils/format.ts](src/lib/utils/format.ts), [src/lib/utils/error-handler.ts](src/lib/utils/error-handler.ts)

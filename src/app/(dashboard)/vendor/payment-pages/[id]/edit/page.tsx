@@ -1,21 +1,38 @@
+/**
+ * Edit Payment Page
+ *
+ * Allows editing existing payment pages with live preview.
+ * Follows SOLID principles:
+ * - SRP: Focused on payment page editing
+ * - DRY: Reuses PaymentPagePreview component
+ * - OCP: Can extend with new fields without modifying core logic
+ */
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { paymentPageSchema, type PaymentPageFormData } from '@/lib/utils/validators';
-import { useCreatePaymentPage } from '@/lib/hooks/use-payment-pages';
+import { usePaymentPage, useUpdatePaymentPage } from '@/lib/hooks/use-payment-pages';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { PaymentPagePreview } from '@/components/payment/payment-page-preview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, Settings } from 'lucide-react';
+import { Eye, Settings, ArrowLeft } from 'lucide-react';
 import type { PaymentPageCustomization } from '@/types';
 
-export default function CreatePaymentPagePage() {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function EditPaymentPagePage({ params }: PageProps) {
+  const resolvedParams = React.use(params);
   const router = useRouter();
-  const { mutate: createPage, isPending } = useCreatePaymentPage();
+  const { data: paymentPage, isLoading } = usePaymentPage(resolvedParams.id);
+  const { mutate: updatePage, isPending } = useUpdatePaymentPage(resolvedParams.id);
+
   const [customization, setCustomization] = useState<PaymentPageCustomization>({
     primary_color: '#3b82f6',
     background_color: '#ffffff',
@@ -29,45 +46,64 @@ export default function CreatePaymentPagePage() {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<PaymentPageFormData>({
     resolver: zodResolver(paymentPageSchema),
-    defaultValues: {
-      amount_type: 'fixed',
-      currency_code: 'USD',
-      collect_customer_info: true,
-      collect_shipping_address: false,
-      allow_quantity: false,
-    },
   });
+
+  // Load existing data when payment page is fetched
+  useEffect(() => {
+    if (paymentPage) {
+      reset({
+        title: paymentPage.title,
+        slug: paymentPage.slug,
+        description: paymentPage.description || '',
+        amount_type: paymentPage.amount_type,
+        fixed_amount: paymentPage.fixed_amount || undefined,
+        min_amount: paymentPage.min_amount || undefined,
+        max_amount: paymentPage.max_amount || undefined,
+        currency_code: paymentPage.currency_code,
+        collect_customer_info: paymentPage.collect_customer_info,
+        collect_shipping_address: paymentPage.collect_shipping_address,
+        allow_quantity: paymentPage.allow_quantity,
+      });
+
+      // Load customization from metadata
+      if (paymentPage.metadata?.customization) {
+        setCustomization({
+          primary_color: paymentPage.metadata.customization.primary_color || '#3b82f6',
+          background_color: paymentPage.metadata.customization.background_color || '#ffffff',
+          background_image_url: paymentPage.metadata.customization.background_image_url,
+          logo_url: paymentPage.metadata.customization.logo_url,
+          button_text: paymentPage.metadata.customization.button_text || 'Pay Now',
+          success_message: paymentPage.metadata.customization.success_message,
+          show_vendor_info: paymentPage.metadata.customization.show_vendor_info ?? true,
+          theme: paymentPage.metadata.customization.theme || 'light',
+        });
+      }
+    }
+  }, [paymentPage, reset]);
 
   const formValues = watch();
   const amountType = watch('amount_type');
   const titleValue = watch('title');
 
-  // Auto-generate slug from title
+  // Auto-generate slug from title (only if manually editing title)
   const generateSlug = (title: string): string => {
     if (!title) return '';
 
     return title
       .toLowerCase()
       .trim()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-      .substring(0, 50); // Limit to 50 characters
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .substring(0, 50);
   };
 
-  // Auto-update slug when title changes
-  useEffect(() => {
-    if (titleValue) {
-      const slug = generateSlug(titleValue);
-      setValue('slug', slug);
-    }
-  }, [titleValue, setValue]);
-
   const onSubmit = (data: PaymentPageFormData) => {
-    createPage(
+    updatePage(
       {
         ...data,
         metadata: {
@@ -76,24 +112,53 @@ export default function CreatePaymentPagePage() {
       },
       {
         onSuccess: () => {
-          router.push('/vendor/payment-pages');
+          router.push(`/vendor/payment-pages/${resolvedParams.id}`);
         },
       }
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="h-96 bg-gray-200 rounded"></div>
+            <div className="h-96 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!paymentPage) {
+    return (
+      <div className="p-8">
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <h2 className="text-2xl font-semibold mb-2">Payment Page Not Found</h2>
+          <p className="text-gray-600 mb-6">The payment page you're trying to edit doesn't exist.</p>
+          <Link href="/vendor/payment-pages">
+            <Button>Back to Payment Pages</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8">
       <div className="mb-6">
         <Link
-          href="/vendor/payment-pages"
-          className="text-blue-600 hover:text-blue-800 text-sm"
+          href={`/vendor/payment-pages/${resolvedParams.id}`}
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
-          ← Back to Payment Pages
+          <ArrowLeft className="h-4 w-4" />
+          Back to Payment Page
         </Link>
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Create Payment Page</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Edit Payment Page</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Form Section */}
@@ -129,17 +194,16 @@ export default function CreatePaymentPagePage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Page Slug (Auto-generated)
+                    Page Slug
                   </label>
                   <input
                     {...register('slug')}
                     type="text"
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
-                    placeholder="Auto-generated from title..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="page-slug"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    This will be automatically generated from the page title
+                    URL-friendly identifier for this page
                   </p>
                   {errors.slug && (
                     <p className="text-red-600 text-sm mt-1">{errors.slug.message}</p>
@@ -309,7 +373,7 @@ export default function CreatePaymentPagePage() {
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isPending} className="flex-1">
-                    {isPending ? 'Creating...' : 'Create Payment Page'}
+                    {isPending ? 'Updating...' : 'Update Payment Page'}
                   </Button>
                 </div>
               </form>
@@ -459,7 +523,7 @@ export default function CreatePaymentPagePage() {
                     disabled={isPending}
                     className="flex-1"
                   >
-                    {isPending ? 'Creating...' : 'Create Payment Page'}
+                    {isPending ? 'Updating...' : 'Update Payment Page'}
                   </Button>
                 </div>
               </div>
