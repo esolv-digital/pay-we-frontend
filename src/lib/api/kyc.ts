@@ -85,7 +85,8 @@ export const kycApi = {
 
   // Get KYC documents for organization
   getDocuments: async (organizationId: string) => {
-    return apiClient.get<KYCDocument[]>(`/organizations/${organizationId}/kyc/documents`);
+    const response = await apiClient.get<{ documents: KYCDocument[]; total: number }>(`/organizations/${organizationId}/kyc/documents`);
+    return response.documents;
   },
 
   // Get single KYC document

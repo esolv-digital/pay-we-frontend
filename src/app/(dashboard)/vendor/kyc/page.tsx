@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Upload, CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react';
+import { KYCStatusView } from '@/components/kyc/kyc-status-view';
 
 const kycSchema = z.object({
   document_type: z.enum([
@@ -197,7 +198,7 @@ export default function KYCPage() {
 
   // Helper to check which documents are still needed
   const getRequiredDocuments = () => {
-    if (!documents) return [];
+    if (!documents || !Array.isArray(documents)) return [];
 
     const submittedTypes = documents.map(doc => doc.document_type);
 
@@ -218,7 +219,47 @@ export default function KYCPage() {
   };
 
   const requiredDocs = getRequiredDocuments();
+  const kycStatus = organization?.kyc_status;
 
+  // If KYC is pending or in review, show the status view instead of the form
+  if (kycStatus === 'pending' || kycStatus === 'in_review') {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">KYC Verification</h1>
+          <p className="text-gray-600 mt-2">
+            Your KYC submission status
+          </p>
+        </div>
+        <KYCStatusView
+          status={kycStatus}
+          documents={Array.isArray(documents) ? documents : []}
+          submittedAt={organization?.kyc_submitted_at}
+        />
+      </div>
+    );
+  }
+
+  // For approved status, show a simple success message
+  if (kycStatus === 'approved') {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">KYC Verification</h1>
+          <p className="text-gray-600 mt-2">
+            Your verification is complete
+          </p>
+        </div>
+        <KYCStatusView
+          status={kycStatus}
+          documents={Array.isArray(documents) ? documents : []}
+          submittedAt={organization?.kyc_submitted_at}
+        />
+      </div>
+    );
+  }
+
+  // For rejected or not_submitted status, show the form
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="mb-8">
@@ -240,7 +281,7 @@ export default function KYCPage() {
       )}
 
       {/* Existing Documents */}
-      {documents && documents.length > 0 && (
+      {Array.isArray(documents) && documents.length > 0 && (
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Submitted Documents</CardTitle>

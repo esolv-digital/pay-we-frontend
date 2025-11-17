@@ -5,19 +5,29 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { VENDOR_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { useKYCStatus } from '@/lib/hooks/use-kyc-status';
 
-const navigation = [
+const baseNavigation = [
   { name: 'Dashboard', href: VENDOR_ROUTES.DASHBOARD, icon: '📊' },
   { name: 'Payment Pages', href: VENDOR_ROUTES.PAYMENT_PAGES, icon: '📄' },
   { name: 'Transactions', href: VENDOR_ROUTES.TRANSACTIONS, icon: '💳' },
   { name: 'Disbursements', href: VENDOR_ROUTES.DISBURSEMENTS, icon: '💰' },
-  { name: 'KYC Verification', href: '/vendor/kyc', icon: '🔐' },
+  { name: 'KYC Verification', href: '/vendor/kyc', icon: '🔐', hideWhenApproved: true },
   { name: 'Settings', href: VENDOR_ROUTES.SETTINGS, icon: '⚙️' },
 ];
 
 export function VendorSidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { organization } = useKYCStatus();
+
+  // Filter out KYC Verification link if KYC is approved
+  const navigation = baseNavigation.filter((item) => {
+    if (item.hideWhenApproved && organization?.kyc_status === 'approved') {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white w-64">
@@ -49,6 +59,7 @@ export function VendorSidebar() {
 
       <div className="p-4 border-t border-gray-800">
         <button
+          type="button"
           onClick={() => logout()}
           className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
         >
