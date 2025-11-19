@@ -4,14 +4,22 @@ import { useState } from 'react';
 import { usePaymentPages, useDeletePaymentPage } from '@/lib/hooks/use-payment-pages';
 import { formatDate } from '@/lib/utils/format';
 import Link from 'next/link';
-import { ExternalLink, Trash2 } from 'lucide-react';
+import { ExternalLink, Trash2, QrCode } from 'lucide-react';
 import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmation-dialog';
+import { ShareButton } from '@/components/shared/share-button';
+import { QRCodeModal } from '@/components/shared/qr-code-modal';
 import { Button } from '@/components/ui/button';
 
 export default function PaymentPagesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pageToDelete, setPageToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [selectedPageForQR, setSelectedPageForQR] = useState<{
+    url: string;
+    title: string;
+    description?: string;
+  } | null>(null);
 
   const { data: response, isLoading } = usePaymentPages({
     page: currentPage,
@@ -35,6 +43,11 @@ export default function PaymentPagesPage() {
     await deletePage.mutateAsync(pageToDelete.id);
     setDeleteDialogOpen(false);
     setPageToDelete(null);
+  };
+
+  const handleQRClick = (url: string, title: string, description?: string) => {
+    setSelectedPageForQR({ url, title, description });
+    setQrModalOpen(true);
   };
 
   if (isLoading) {
@@ -125,6 +138,39 @@ export default function PaymentPagesPage() {
                     <ExternalLink className="h-4 w-4" />
                     Preview Page
                   </Link>
+
+                  {/* Share and QR Code Actions */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <ShareButton
+                      url={
+                        page.vendor
+                          ? `${window.location.origin}/pay/${page.vendor.slug}/${page.slug}`
+                          : `${window.location.origin}/pay/${page.short_url}`
+                      }
+                      title={page.title}
+                      description={page.description || `Payment page for ${page.title}`}
+                      variant="outline"
+                      size="sm"
+                      showLabel={true}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        handleQRClick(
+                          page.vendor
+                            ? `${window.location.origin}/pay/${page.vendor.slug}/${page.slug}`
+                            : `${window.location.origin}/pay/${page.short_url}`,
+                          page.title,
+                          page.description || `Scan to access ${page.title}`
+                        )
+                      }
+                    >
+                      <QrCode className="h-4 w-4" />
+                      <span className="ml-2">QR Code</span>
+                    </Button>
+                  </div>
+
                   <div className="grid grid-cols-3 gap-2">
                     <Link
                       href={`/vendor/payment-pages/${page.id}`}
@@ -213,6 +259,16 @@ export default function PaymentPagesPage() {
         isDeleting={deletePage.isPending}
         description="This will permanently delete this payment page and all associated data. This action cannot be undone."
       />
+
+      {selectedPageForQR && (
+        <QRCodeModal
+          open={qrModalOpen}
+          onOpenChange={setQrModalOpen}
+          url={selectedPageForQR.url}
+          title={selectedPageForQR.title}
+          description={selectedPageForQR.description}
+        />
+      )}
     </div>
   );
 }

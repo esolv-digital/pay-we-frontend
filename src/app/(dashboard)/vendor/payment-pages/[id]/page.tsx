@@ -20,10 +20,12 @@ import { useRouter } from 'next/navigation';
 import { usePaymentPage, useDeletePaymentPage, useTogglePaymentPage } from '@/lib/hooks/use-payment-pages';
 import { PaymentPagePreview } from '@/components/payment/payment-page-preview';
 import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmation-dialog';
+import { ShareButton } from '@/components/shared/share-button';
+import { QRCodeModal } from '@/components/shared/qr-code-modal';
 import { Button } from '@/components/ui/button';
 import { formatDate, formatCurrency } from '@/lib/utils/format';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, Edit, Trash2, Copy, Check } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Edit, Trash2, Copy, Check, QrCode } from 'lucide-react';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -33,6 +35,7 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
   const resolvedParams = React.use(params);
   const router = useRouter();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
   const { data: paymentPage, isLoading } = usePaymentPage(resolvedParams.id);
@@ -188,9 +191,9 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Public URLs */}
+          {/* Public URLs & Sharing */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Public URLs</h2>
+            <h2 className="text-xl font-semibold mb-4">Share & Promote</h2>
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-500 mb-2 block">
@@ -220,6 +223,30 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
                       <ExternalLink className="h-4 w-4" />
                     </Button>
                   </Link>
+                </div>
+              </div>
+
+              {/* Share Options */}
+              <div>
+                <label className="text-sm font-medium text-gray-500 mb-2 block">
+                  Share Options
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <ShareButton
+                    url={publicUrl}
+                    title={paymentPage.title}
+                    description={paymentPage.description || `Payment page for ${paymentPage.title}`}
+                    variant="outline"
+                    size="default"
+                    showLabel={true}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => setQrModalOpen(true)}
+                  >
+                    <QrCode className="h-4 w-4 mr-2" />
+                    Generate QR Code
+                  </Button>
                 </div>
               </div>
             </div>
@@ -277,6 +304,14 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
         itemName={paymentPage.title}
         isDeleting={deletePage.isPending}
         description="This will permanently delete this payment page and all associated data. This action cannot be undone."
+      />
+
+      <QRCodeModal
+        open={qrModalOpen}
+        onOpenChange={setQrModalOpen}
+        url={publicUrl}
+        title={paymentPage.title}
+        description={paymentPage.description || `Scan to access ${paymentPage.title}`}
       />
     </div>
   );

@@ -1,95 +1,182 @@
-'use client';
-
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { publicApi } from '@/lib/api/public';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { PaymentPageForm } from '@/components/payment/payment-page-form';
+import { Metadata } from 'next';
+import { PublicPaymentPageClient } from './client';
 
 /**
- * Unified Public Payment Page
+ * Unified Public Payment Page with SEO Optimization
  *
  * Handles both URL formats:
  * 1. Short URL: /pay/{short_url} (e.g., /pay/Xorp2Pto)
  * 2. SEO URL: /pay/{vendor_slug}/{payment_page_slug} (e.g., /pay/qqq-YM2D/product-purchase)
  *
- * SOLID Principles:
- * - SRP: Single responsibility of displaying payment pages
- * - OCP: Open for extension via new payment methods
- * - DIP: Depends on publicApi abstraction
+ * SEO Features:
+ * - Dynamic metadata (title, description)
+ * - Open Graph tags for social sharing
+ * - Twitter Card support
+ * - Structured data (JSON-LD)
+ * - Vendor branding integration
  *
- * DRY: Uses shared PaymentPageForm component
+ * SOLID Principles:
+ * - SRP: Server component handles metadata, client handles interactivity
+ * - DIP: Depends on API abstraction
  */
-export default function PublicPaymentPage() {
-  const params = useParams();
-  const slugParts = params.slug as string[];
 
-  // Determine if it's a short URL (1 segment) or SEO URL (2 segments)
-  const isShortUrl = slugParts.length === 1;
-  const shortUrl = isShortUrl ? slugParts[0] : null;
-  const vendorSlug = !isShortUrl ? slugParts[0] : null;
-  const paymentPageSlug = !isShortUrl ? slugParts[1] : null;
+interface PageProps {
+  params: Promise<{ slug: string[] }>;
+}
 
-  // Fetch payment page based on URL type
-  const { data: paymentPage, isLoading, error } = useQuery({
-    queryKey: isShortUrl
-      ? ['public-payment-page', shortUrl]
-      : ['public-payment-page-seo', vendorSlug, paymentPageSlug],
-    queryFn: () => {
-      if (isShortUrl && shortUrl) {
-        return publicApi.getPaymentPageByShortUrl(shortUrl);
-      } else if (vendorSlug && paymentPageSlug) {
-        return publicApi.getPaymentPageBySeoUrl(vendorSlug, paymentPageSlug);
-      }
-      throw new Error('Invalid URL format');
-    },
-    retry: 1,
-  });
+/**
+ * Fetch payment page data for metadata generation
+ * Follows DRY: Reuses same API endpoint as client
+ */
+async function getPaymentPageData(slugParts: string[]) {
+  try {
+    const isShortUrl = slugParts.length === 1;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-  // Handle transaction creation based on URL type
-  const handleCreateTransaction = async (
-    data: Parameters<typeof publicApi.createTransaction>[1]
-  ) => {
-    if (isShortUrl && shortUrl) {
-      return publicApi.createTransaction(shortUrl, data);
-    } else if (vendorSlug && paymentPageSlug) {
-      return publicApi.createTransactionBySeoUrl(vendorSlug, paymentPageSlug, data);
+    let apiUrl: string;
+    if (isShortUrl) {
+      apiUrl = `${baseUrl}/api/pay/${slugParts[0]}`;
+    } else {
+      apiUrl = `${baseUrl}/api/pay/${slugParts[0]}/${slugParts[1]}`;
     }
-    throw new Error('Invalid URL format');
+
+    const response = await fetch(apiUrl, {
+      cache: 'no-store', // Always fetch fresh data for metadata
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data.data || data;
+  } catch (error) {
+    console.error('Failed to fetch payment page for metadata:', error);
+    return null;
+  }
+}
+
+/**
+ * Generate dynamic metadata for SEO
+ * Includes Open Graph, Twitter Cards, and structured data
+ */
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const paymentPage = await getPaymentPageData(slug);
+
+  if (!paymentPage) {
+    return {
+      title: 'Payment Page Not Found',
+      description: 'The payment page you are looking for does not exist.',
+    };
+  }
+
+  // Build public URL
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const publicUrl = slug.length === 1
+    ? `${baseUrl}/pay/${slug[0]}`
+    : `${baseUrl}/pay/${slug[0]}/${slug[1]}`;
+
+  // Extract vendor info
+  const vendorName = paymentPage.vendor?.business_name || 'PayWe';
+  const vendorLogo = paymentPage.vendor?.logo_url;
+  const description = paymentPage.description ||
+    `Make a payment for ${paymentPage.title} - Secure payment processing powered by ${vendorName}`;
+
+  // Format amount for description
+  let amountText = '';
+  if (paymentPage.amount_type === 'fixed' && paymentPage.fixed_amount) {
+    amountText = ` - ${paymentPage.currency_code} ${paymentPage.fixed_amount.toFixed(2)}`;
+  } else if (paymentPage.amount_type === 'donation') {
+    amountText = ' - Donation';
+  } else if (paymentPage.amount_type === 'flexible') {
+    amountText = ' - Flexible Amount';
+  }
+
+  const fullDescription = `${description}${amountText}`;
+
+  return {
+    title: `${paymentPage.title} | ${vendorName}`,
+    description: fullDescription,
+    keywords: [
+      'payment',
+      'secure payment',
+      paymentPage.title,
+      vendorName,
+      paymentPage.currency_code,
+      'online payment',
+    ].join(', '),
+
+    // Open Graph tags for social sharing
+    openGraph: {
+      type: 'website',
+      url: publicUrl,
+      title: `${paymentPage.title} | ${vendorName}`,
+      description: fullDescription,
+      siteName: vendorName,
+      images: vendorLogo ? [
+        {
+          url: vendorLogo,
+          width: 1200,
+          height: 630,
+          alt: `${vendorName} Logo`,
+        },
+      ] : [],
+    },
+
+    // Twitter Card tags
+    twitter: {
+      card: 'summary_large_image',
+      title: `${paymentPage.title} | ${vendorName}`,
+      description: fullDescription,
+      images: vendorLogo ? [vendorLogo] : [],
+    },
+
+    // Additional meta tags
+    robots: {
+      index: paymentPage.is_active,
+      follow: true,
+    },
+
+    // Canonical URL
+    alternates: {
+      canonical: publicUrl,
+    },
   };
+}
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
+export default async function PublicPaymentPage({ params }: PageProps) {
+  const { slug } = await params;
+  const paymentPage = await getPaymentPageData(slug);
 
-  if (error || !paymentPage) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-6">
-        <Card className="max-w-md w-full">
-          <CardHeader>
-            <div className="flex items-center gap-3 text-red-600">
-              <AlertCircle className="h-8 w-8" />
-              <CardTitle>Payment Page Not Found</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 mb-4">
-              The payment page you&apos;re looking for doesn&apos;t exist or has been disabled.
-            </p>
-            <Button onClick={() => window.location.href = '/'} className="w-full">
-              Go to Homepage
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Add structured data (JSON-LD) for search engines
+  const structuredData = paymentPage ? {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: paymentPage.title,
+    description: paymentPage.description || `Payment for ${paymentPage.title}`,
+    brand: {
+      '@type': 'Brand',
+      name: paymentPage.vendor?.business_name || 'PayWe',
+      logo: paymentPage.vendor?.logo_url,
+    },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: paymentPage.currency_code,
+      price: paymentPage.amount_type === 'fixed' ? paymentPage.fixed_amount : undefined,
+      availability: paymentPage.is_active ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    },
+  } : null;
 
-  return <PaymentPageForm paymentPage={paymentPage} onSubmit={handleCreateTransaction} />;
+  return (
+    <>
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      )}
+      <PublicPaymentPageClient slug={slug} />
+    </>
+  );
 }
