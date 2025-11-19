@@ -26,32 +26,83 @@ interface PageProps {
 
 /**
  * Fetch payment page data for metadata generation
- * Follows DRY: Reuses same API endpoint as client
+ * Follows DRY: Uses Laravel API directly for server-side rendering
  */
 async function getPaymentPageData(slugParts: string[]) {
   try {
     const isShortUrl = slugParts.length === 1;
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-    let apiUrl: string;
-    if (isShortUrl) {
-      apiUrl = `${baseUrl}/api/pay/${slugParts[0]}`;
+    // Determine base URL based on environment
+    // Priority: LARAVEL_API_URL > Next.js API routes (fallback)
+    let baseUrl: string;
+    let useNextJsApi = false;
+
+    if (process.env.LARAVEL_API_URL) {
+      // Server-side: Use Laravel API directly (preferred)
+      baseUrl = process.env.LARAVEL_API_URL;
+      console.log('[Metadata] Using Laravel API:', baseUrl);
     } else {
-      apiUrl = `${baseUrl}/api/pay/${slugParts[0]}/${slugParts[1]}`;
+      // Fallback: Use Next.js API routes (works in production)
+      if (process.env.VERCEL_URL) {
+        baseUrl = `https://${process.env.VERCEL_URL}`;
+      } else if (process.env.NEXT_PUBLIC_SITE_URL) {
+        baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+      } else {
+        baseUrl = 'http://localhost:3000';
+      }
+      useNextJsApi = true;
+      console.log('[Metadata] Using Next.js API:', baseUrl);
     }
 
+    let apiUrl: string;
+    if (useNextJsApi) {
+      // Use Next.js BFF routes
+      if (isShortUrl) {
+        apiUrl = `${baseUrl}/api/pay/${slugParts[0]}`;
+      } else {
+        apiUrl = `${baseUrl}/api/pay/${slugParts[0]}/${slugParts[1]}`;
+      }
+    } else {
+      // Use Laravel API directly
+      if (isShortUrl) {
+        apiUrl = `${baseUrl}/api/v1/pay/${slugParts[0]}`;
+      } else {
+        apiUrl = `${baseUrl}/api/v1/pay/${slugParts[0]}/${slugParts[1]}`;
+      }
+    }
+
+    console.log('[Metadata] Fetching from:', apiUrl);
+
     const response = await fetch(apiUrl, {
-      cache: 'no-store', // Always fetch fresh data for metadata
+      cache: 'no-store',
+      headers: {
+        'Accept': 'application/json',
+      },
     });
 
     if (!response.ok) {
+      console.error('[Metadata] Fetch failed:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('[Metadata] Response:', errorText);
       return null;
     }
 
-    const data = await response.json();
-    return data.data || data;
+    const result = await response.json();
+
+    // Handle both Laravel and Next.js API response structures
+    // Laravel: { success: true, data: {...} }
+    // Next.js: { data: {...} } or direct data
+    const paymentPage = result.data || result;
+
+    if (paymentPage?.title) {
+      console.log('[Metadata] Success:', paymentPage.title);
+    } else {
+      console.error('[Metadata] Invalid response structure:', JSON.stringify(result).substring(0, 200));
+    }
+
+    return paymentPage;
   } catch (error) {
-    console.error('Failed to fetch payment page for metadata:', error);
+    console.error('[Metadata] Error:', error);
     return null;
   }
 }
