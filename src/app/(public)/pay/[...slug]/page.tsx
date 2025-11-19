@@ -122,15 +122,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  // Build public URL
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  // Build public URL - use actual deployment URL
+  let baseUrl: string;
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  } else if (process.env.VERCEL_URL) {
+    baseUrl = `https://${process.env.VERCEL_URL}`;
+  } else if (typeof window !== 'undefined') {
+    // Client-side fallback
+    baseUrl = window.location.origin;
+  } else {
+    // Development fallback
+    baseUrl = 'http://localhost:3000';
+  }
+
   const publicUrl = slug.length === 1
     ? `${baseUrl}/pay/${slug[0]}`
     : `${baseUrl}/pay/${slug[0]}/${slug[1]}`;
 
   // Extract vendor info
   const vendorName = paymentPage.vendor?.business_name || 'PayWe';
-  const vendorLogo = paymentPage.vendor?.logo_url;
+
+  // Use payment page custom logo if provided, otherwise fallback to vendor logo
+  const logoUrl = paymentPage.metadata?.customization?.logo_url || paymentPage.vendor?.logo_url;
+
   const description = paymentPage.description ||
     `Make a payment for ${paymentPage.title} - Secure payment processing powered by ${vendorName}`;
 
@@ -165,12 +180,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${paymentPage.title} | ${vendorName}`,
       description: fullDescription,
       siteName: vendorName,
-      images: vendorLogo ? [
+      images: logoUrl ? [
         {
-          url: vendorLogo,
+          url: logoUrl,
           width: 1200,
           height: 630,
-          alt: `${vendorName} Logo`,
+          alt: `${paymentPage.title} Logo`,
         },
       ] : [],
     },
@@ -180,7 +195,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: 'summary_large_image',
       title: `${paymentPage.title} | ${vendorName}`,
       description: fullDescription,
-      images: vendorLogo ? [vendorLogo] : [],
+      images: logoUrl ? [logoUrl] : [],
     },
 
     // Additional meta tags
@@ -209,7 +224,7 @@ export default async function PublicPaymentPage({ params }: PageProps) {
     brand: {
       '@type': 'Brand',
       name: paymentPage.vendor?.business_name || 'PayWe',
-      logo: paymentPage.vendor?.logo_url,
+      logo: paymentPage.metadata?.customization?.logo_url || paymentPage.vendor?.logo_url,
     },
     offers: {
       '@type': 'Offer',

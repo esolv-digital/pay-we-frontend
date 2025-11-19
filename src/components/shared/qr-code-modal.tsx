@@ -88,68 +88,97 @@ export function QRCodeModal({
   };
 
   /**
-   * Share QR code as image
-   * Uses Web Share API if available
+   * Share QR code as image or URL
+   * Uses Web Share API if available, with proper fallback handling
    */
   const handleShare = async () => {
-    const svg = qrRef.current?.querySelector('svg');
-    if (!svg) return;
+    // Check if Web Share API is available
+    if (navigator.share) {
+      try {
+        // First try sharing with image file
+        const svg = qrRef.current?.querySelector('svg');
+        if (!svg) return;
 
-    // Create canvas from SVG
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+        // Create canvas from SVG
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const img = new Image();
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url_img = URL.createObjectURL(svgBlob);
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const img = new Image();
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url_img = URL.createObjectURL(svgBlob);
 
-    img.onload = async () => {
-      const padding = 40;
-      canvas.width = img.width + padding * 2;
-      canvas.height = img.height + padding * 2;
+        img.onload = async () => {
+          const padding = 40;
+          canvas.width = img.width + padding * 2;
+          canvas.height = img.height + padding * 2;
 
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, padding, padding);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, padding, padding);
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-
-        // Check if Web Share API is available
-        if (navigator.share && navigator.canShare) {
-          try {
-            const file = new File([blob], `${title}-qr-code.png`, {
-              type: 'image/png',
-            });
-
-            const shareData = {
-              title: title,
-              text: description || `Scan this QR code to access ${title}`,
-              files: [file],
-            };
-
-            if (navigator.canShare(shareData)) {
-              await navigator.share(shareData);
-            } else {
-              // Fallback: download
-              handleDownload();
+          canvas.toBlob(async (blob) => {
+            if (!blob) {
+              URL.revokeObjectURL(url_img);
+              return;
             }
-          } catch (error) {
-            // User cancelled or error occurred
-            console.error('Share failed:', error);
-          }
-        } else {
-          // Fallback: download
-          handleDownload();
-        }
-      });
 
-      URL.revokeObjectURL(url_img);
-    };
+            try {
+              const file = new File([blob], `${title.toLowerCase().replace(/\s+/g, '-')}-qr-code.png`, {
+                type: 'image/png',
+              });
 
-    img.src = url_img;
+              const shareData = {
+                title: title,
+                text: description || `Scan this QR code to access ${title}`,
+                files: [file],
+              };
+
+              // Check if sharing files is supported
+              if (navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+              } else {
+                // If file sharing not supported, try sharing URL only
+                await navigator.share({
+                  title: title,
+                  text: `${description || `Scan this QR code to access ${title}`}\n\n${url}`,
+                  url: url,
+                });
+              }
+            } catch (error) {
+              // User cancelled or error occurred
+              if ((error as Error).name !== 'AbortError') {
+                console.error('Share failed:', error);
+                // Fallback: download
+                handleDownload();
+              }
+            }
+
+            URL.revokeObjectURL(url_img);
+          }, 'image/png');
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(url_img);
+          // Fallback: just share the URL
+          navigator.share({
+            title: title,
+            text: `${description || `Scan this QR code to access ${title}`}\n\n${url}`,
+            url: url,
+          }).catch(() => handleDownload());
+        };
+
+        img.src = url_img;
+      } catch (error) {
+        console.error('Share failed:', error);
+        // Fallback: download
+        handleDownload();
+      }
+    } else {
+      // Web Share API not available, fallback to download
+      handleDownload();
+    }
   };
 
   return (
