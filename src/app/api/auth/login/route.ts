@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
         access_token: string;
         token_type: string;
       };
-    }>('/api/v1/auth/login', {
+    }>('/auth/login', {
       email,
       password,
     });

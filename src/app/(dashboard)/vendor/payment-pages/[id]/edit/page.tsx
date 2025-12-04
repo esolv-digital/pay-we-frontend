@@ -77,6 +77,7 @@ export default function EditPaymentPagePage({ params }: PageProps) {
           logo_url: paymentPage.metadata.customization.logo_url,
           button_text: paymentPage.metadata.customization.button_text || 'Pay Now',
           success_message: paymentPage.metadata.customization.success_message,
+          store_url: paymentPage.metadata.customization.store_url,
           show_vendor_info: paymentPage.metadata.customization.show_vendor_info ?? true,
           theme: paymentPage.metadata.customization.theme || 'light',
         });
@@ -458,6 +459,25 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Thank you for your payment!"
                   />
+                </div>
+
+                <div>
+                  <label htmlFor="store-url" className="block text-sm font-medium text-gray-700 mb-2">
+                    Store URL (Optional)
+                  </label>
+                  <input
+                    id="store-url"
+                    type="url"
+                    value={customization.store_url || ''}
+                    onChange={(e) =>
+                      setCustomization({ ...customization, store_url: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://yourstore.com"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    After successful payment, customers will see a button to visit your store
+                  </p>
                 </div>
 
                 <div>

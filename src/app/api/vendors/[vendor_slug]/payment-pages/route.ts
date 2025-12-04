@@ -33,7 +33,7 @@ export async function GET(
     });
 
     const queryString = queryParams.toString();
-    const apiUrl = `/api/v1/vendors/${vendor_slug}/payment-pages${queryString ? `?${queryString}` : ''}`;
+    const apiUrl = `/vendors/${vendor_slug}/payment-pages${queryString ? `?${queryString}` : ''}`;
 
     // Call Laravel API
     const laravelClient = createLaravelClient(accessToken);
@@ -102,7 +102,7 @@ export async function POST(
     // Call Laravel API
     const laravelClient = createLaravelClient(accessToken);
     const response = await laravelClient.post(
-      `/api/v1/vendors/${vendor_slug}/payment-pages`,
+      `/vendors/${vendor_slug}/payment-pages`,
       body
     );
 

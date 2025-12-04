@@ -31,7 +31,7 @@ export async function POST(
 
     // Forward to Laravel API
     const laravelClient = createLaravelClient(accessToken);
-    const apiUrl = `/api/v1/organizations/${organization}/kyc/submit`;
+    const apiUrl = `/organizations/${organization}/kyc/submit`;
     console.log('Posting to Laravel:', apiUrl);
     const response = await laravelClient.post(apiUrl, formData);
 
@@ -97,7 +97,7 @@ export async function GET(
     // Call Laravel API
     const laravelClient = createLaravelClient(accessToken);
     const response = await laravelClient.get(
-      `/api/v1/organizations/${organization}/kyc/documents`
+      `/organizations/${organization}/kyc/documents`
     );
 
     return NextResponse.json(response);

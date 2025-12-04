@@ -1,11 +1,12 @@
 import axios, { AxiosInstance } from 'axios';
+import { getLaravelApiBaseUrl } from './config';
 
 class LaravelApiClient {
   private client: AxiosInstance;
 
   constructor(accessToken?: string) {
     this.client = axios.create({
-      baseURL: process.env.LARAVEL_API_URL || 'http://localhost:8000',
+      baseURL: getLaravelApiBaseUrl(),
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',

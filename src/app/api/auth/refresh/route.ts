@@ -21,7 +21,7 @@ export async function POST() {
         access_token: string;
         expires_in: number;
       };
-    }>('/api/v1/auth/refresh');
+    }>('/auth/refresh');
 
     const { access_token, expires_in } = response.data;
 

@@ -26,7 +26,7 @@ export async function GET(
     // Call Laravel API
     const laravelClient = createLaravelClient(accessToken);
     const response = await laravelClient.get(
-      `/api/v1/vendors/${vendor_slug}/payment-pages/${id}`
+      `/vendors/${vendor_slug}/payment-pages/${id}`
     );
 
     return NextResponse.json(response);
@@ -92,7 +92,7 @@ export async function PUT(
     // Call Laravel API
     const laravelClient = createLaravelClient(accessToken);
     const response = await laravelClient.put(
-      `/api/v1/vendors/${vendor_slug}/payment-pages/${id}`,
+      `/vendors/${vendor_slug}/payment-pages/${id}`,
       body
     );
 
@@ -158,7 +158,7 @@ export async function DELETE(
     // Call Laravel API
     const laravelClient = createLaravelClient(accessToken);
     const response = await laravelClient.delete(
-      `/api/v1/vendors/${vendor_slug}/payment-pages/${id}`
+      `/vendors/${vendor_slug}/payment-pages/${id}`
     );
 
     return NextResponse.json(response);

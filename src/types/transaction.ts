@@ -14,7 +14,7 @@ export interface Transaction {
   customer_name?: string;
   gateway: 'flutterwave' | 'paystack' | 'wipay';
   payment_method: 'card' | 'mobile_money' | 'bank_transfer' | 'crypto';
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded' | 'success' | 'cancelled';
   gateway_fee: number;
   platform_fee: number;
   net_amount: number;
@@ -27,6 +27,9 @@ export interface Transaction {
   created_at: string;
   vendor?: Vendor;
   payment_page?: PaymentPage;
+  // Payment Gateway Integration Fields
+  authorization_url?: string; // Paystack/WePay checkout URL
+  access_code?: string; // Paystack access code (alternative to URL)
 }
 
 export interface TransactionFilters {

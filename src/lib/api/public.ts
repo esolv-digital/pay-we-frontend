@@ -41,22 +41,49 @@ export const publicApi = {
     return apiClient.get<PaymentPage>(`/pay/${vendorSlug}/${paymentPageSlug}`);
   },
 
-  // Create a transaction for a payment page using short URL (no auth required)
-  createTransaction: async (shortUrl: string, data: CreateTransactionData) => {
-    return apiClient.post<Transaction>(`/pay/${shortUrl}/transactions`, data);
+  // Initiate payment transaction
+  // IMPORTANT: Backend uses /payments/initiate (not /pay/{slug}/transactions)
+  // Requires payment_page_id and currency_code from payment page
+  initiatePayment: async (paymentPage: PaymentPage, data: CreateTransactionData) => {
+    return apiClient.post<Transaction>(`/payments/initiate`, {
+      payment_page_id: paymentPage.id,
+      amount: data.amount,
+      currency_code: paymentPage.currency_code,
+      customer_email: data.customer_email,
+      customer_name: data.customer_name,
+      customer_phone: data.customer_phone,
+      description: `Payment for ${paymentPage.title}`,
+      metadata: {
+        quantity: data.quantity,
+        shipping_address: data.shipping_address,
+        custom_field_values: data.custom_field_values,
+      },
+    });
   },
 
-  // Create a transaction for a payment page using SEO-friendly URL (no auth required)
+  // Verify transaction by reference
+  // Backend uses /payments/verify/{reference} (POST, not GET)
+  verifyTransaction: async (reference: string) => {
+    return apiClient.post<Transaction>(`/payments/verify/${reference}`, {});
+  },
+
+  // Backward compatibility - createTransaction now uses initiatePayment
+  createTransaction: async (paymentPage: PaymentPage, data: CreateTransactionData) => {
+    return publicApi.initiatePayment(paymentPage, data);
+  },
+
+  // Backward compatibility - createTransactionBySeoUrl now uses initiatePayment
   createTransactionBySeoUrl: async (
-    vendorSlug: string,
-    paymentPageSlug: string,
+    paymentPage: PaymentPage,
+    _vendorSlug: string,
+    _paymentPageSlug: string,
     data: CreateTransactionData
   ) => {
-    return apiClient.post<Transaction>(`/pay/${vendorSlug}/${paymentPageSlug}/transactions`, data);
+    return publicApi.initiatePayment(paymentPage, data);
   },
 
-  // Get transaction by reference
+  // Backward compatibility - getTransactionByReference now uses verifyTransaction
   getTransactionByReference: async (reference: string) => {
-    return apiClient.get<Transaction>(`/public/transactions/${reference}`);
+    return publicApi.verifyTransaction(reference);
   },
 };

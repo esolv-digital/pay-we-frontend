@@ -16,19 +16,46 @@ export async function GET() {
 
     // Call Laravel API
     const laravelClient = createLaravelClient(token);
-    const response = await laravelClient.get<{ data: unknown }>('/api/v1/auth/me');
+    const response = await laravelClient.get<{ data: unknown }>('/auth/me');
 
     return NextResponse.json({ data: response.data });
   } catch (error: unknown) {
-    console.error('Get user error:', error);
-    const apiError = error as { response?: { data?: { message?: string }; status?: number } };
+    const apiError = error as { response?: { data?: { message?: string }; status?: number }; code?: string };
+    const status = apiError.response?.status || 500;
 
+    // Log detailed error information
+    console.error('\n========================================');
+    console.error('[/api/auth/me] Error fetching user');
+    console.error('========================================');
+    console.error('Status:', status);
+    console.error('Error Code:', apiError.code);
+    console.error('Message:', apiError.response?.data?.message || 'Unknown error');
+    console.error('========================================\n');
+
+    // Handle 401 - User is unauthenticated, clear cookies and return 401
+    // The frontend will automatically logout the user
+    if (status === 401) {
+      const response = NextResponse.json(
+        {
+          error: 'Unauthenticated',
+          message: 'Your session has expired. Please login again.',
+        },
+        { status: 401 }
+      );
+
+      // Clear the access token cookie
+      response.cookies.delete('access_token');
+
+      return response;
+    }
+
+    // For other errors, return appropriate status
     return NextResponse.json(
       {
         error: 'Failed to fetch user',
-        message: apiError.response?.data?.message || 'Unauthorized',
+        message: apiError.response?.data?.message || 'An error occurred',
       },
-      { status: apiError.response?.status || 401 }
+      { status }
     );
   }
 }

@@ -10,7 +10,7 @@ export async function POST() {
     if (token) {
       // Call Laravel logout
       const laravelClient = createLaravelClient(token);
-      await laravelClient.post('/api/v1/auth/logout');
+      await laravelClient.post('/auth/logout');
     }
 
     // Clear cookies

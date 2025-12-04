@@ -36,11 +36,11 @@ export async function GET(
 
     let apiUrl: string;
     if (isShortUrl) {
-      // Short URL format: /api/v1/pay/{short_url}
-      apiUrl = `/api/v1/pay/${slug[0]}`;
+      // Short URL format: /pay/{short_url}
+      apiUrl = `/pay/${slug[0]}`;
     } else if (slug.length === 2) {
-      // SEO URL format: /api/v1/pay/{vendor_slug}/{payment_page_slug}
-      apiUrl = `/api/v1/pay/${slug[0]}/${slug[1]}`;
+      // SEO URL format: /pay/{vendor_slug}/{payment_page_slug}
+      apiUrl = `/pay/${slug[0]}/${slug[1]}`;
     } else {
       return NextResponse.json(
         {
@@ -129,11 +129,11 @@ export async function POST(
 
     let apiUrl: string;
     if (isShortUrl) {
-      // Short URL format: /api/v1/pay/{short_url}/transactions
-      apiUrl = `/api/v1/pay/${paymentPageSlug[0]}/transactions`;
+      // Short URL format: /pay/{short_url}/transactions
+      apiUrl = `/pay/${paymentPageSlug[0]}/transactions`;
     } else if (paymentPageSlug.length === 2) {
-      // SEO URL format: /api/v1/pay/{vendor_slug}/{payment_page_slug}/transactions
-      apiUrl = `/api/v1/pay/${paymentPageSlug[0]}/${paymentPageSlug[1]}/transactions`;
+      // SEO URL format: /pay/{vendor_slug}/{payment_page_slug}/transactions
+      apiUrl = `/pay/${paymentPageSlug[0]}/${paymentPageSlug[1]}/transactions`;
     } else {
       return NextResponse.json(
         {

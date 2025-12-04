@@ -8,6 +8,7 @@ import type {
   Vendor,
   PaginatedResponse,
 } from '@/types';
+import type { PayoutMethod, FeeBearer } from '@/types/vendor';
 
 /**
  * Note: All vendor endpoints require a vendor_slug parameter.
@@ -85,5 +86,16 @@ export const vendorApi = {
 
   requestDisbursement: async (vendorSlug: string) => {
     return apiClient.post(`/vendors/${vendorSlug}/disbursements/request`);
+  },
+
+  // Payout Settings (NEW)
+  updatePayoutSettings: async (vendorSlug: string, data: {
+    payout_recipient?: string;
+    payout_method?: PayoutMethod;
+    fee_bearer?: FeeBearer;
+    fee_percentage?: number;
+    custom_fee_amount?: number;
+  }) => {
+    return apiClient.patch<Vendor>(`/vendors/${vendorSlug}`, data);
   },
 };

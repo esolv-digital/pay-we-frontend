@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         vendor: unknown;
         onboarding_complete: boolean;
       };
-    }>('/api/v1/onboarding/organization', {
+    }>('/onboarding/organization', {
       name,
       type: type || 'individual',
       country_code,

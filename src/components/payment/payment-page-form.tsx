@@ -58,7 +58,9 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
       quantity: 1,
-      amount: paymentPage?.amount_type === 'fixed' ? paymentPage.fixed_amount : paymentPage?.min_amount || 0,
+      amount: paymentPage?.amount_type === 'fixed'
+        ? Number(paymentPage.fixed_amount)
+        : Number(paymentPage?.min_amount) || 0,
     },
   });
 
@@ -83,14 +85,39 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
         shipping_address: shippingAddress,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data: unknown) => {
       setTransactionCreated(true);
-      showSuccess(customization?.success_message || 'Payment initiated successfully!');
-      // Redirect to payment gateway or success page
-      if (paymentPage?.redirect_url) {
+
+      // Extract transaction data from response
+      // Backend returns: { success: true, data: { ...transaction, metadata: { authorization_url } } }
+      const responseData = data as {
+        data?: {
+          metadata?: {
+            authorization_url?: string;
+            access_code?: string;
+          };
+          reference?: string;
+        }
+      };
+      const transaction = responseData.data || (data as { metadata?: { authorization_url?: string } });
+
+      // CRITICAL: Extract authorization_url from metadata (backend stores it there)
+      const authorizationUrl = transaction.metadata?.authorization_url;
+
+      if (authorizationUrl) {
+        showSuccess('Redirecting to payment gateway...');
+        // Redirect to payment gateway (Paystack/WePay)
         setTimeout(() => {
-          window.location.href = paymentPage.redirect_url!;
-        }, 2000);
+          window.location.href = authorizationUrl;
+        }, 1000);
+      } else {
+        // Fallback: If no payment URL, show success and redirect to custom URL
+        showSuccess(customization?.success_message || 'Payment initiated successfully!');
+        if (paymentPage?.redirect_url) {
+          setTimeout(() => {
+            window.location.href = paymentPage.redirect_url!;
+          }, 2000);
+        }
       }
     },
     onError: (error) => {
@@ -229,9 +256,9 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                 </Label>
                 {paymentPage.amount_type === 'fixed' ? (
                   <>
-                    <input type="hidden" {...register('amount', { valueAsNumber: true })} value={paymentPage.fixed_amount} />
+                    <input type="hidden" {...register('amount', { valueAsNumber: true })} value={Number(paymentPage.fixed_amount)} />
                     <div className="text-4xl font-bold text-center py-4" style={{ color: primary_color }}>
-                      {formatCurrency(paymentPage.fixed_amount || 0, paymentPage.currency_code)}
+                      {formatCurrency(Number(paymentPage.fixed_amount) || 0, paymentPage.currency_code)}
                     </div>
                   </>
                 ) : (

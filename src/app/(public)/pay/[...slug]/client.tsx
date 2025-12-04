@@ -48,16 +48,16 @@ export function PublicPaymentPageClient({ slug }: PublicPaymentPageClientProps) 
     retry: 1,
   });
 
-  // Handle transaction creation based on URL type
+  // Handle transaction creation
+  // Updated to pass payment page object (backend requires payment_page_id)
   const handleCreateTransaction = async (
     data: Parameters<typeof publicApi.createTransaction>[1]
   ) => {
-    if (isShortUrl && shortUrl) {
-      return publicApi.createTransaction(shortUrl, data);
-    } else if (vendorSlug && paymentPageSlug) {
-      return publicApi.createTransactionBySeoUrl(vendorSlug, paymentPageSlug, data);
+    if (!paymentPage) {
+      throw new Error('Payment page not loaded');
     }
-    throw new Error('Invalid URL format');
+    // Backend API requires payment page object with id and currency_code
+    return publicApi.initiatePayment(paymentPage, data);
   };
 
   if (isLoading) {

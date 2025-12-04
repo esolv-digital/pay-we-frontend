@@ -35,24 +35,30 @@ export const TRANSACTION_STATUSES = {
   PENDING: 'pending',
   PROCESSING: 'processing',
   COMPLETED: 'completed',
+  SUCCESS: 'success',
   FAILED: 'failed',
   REFUNDED: 'refunded',
+  CANCELLED: 'cancelled',
 } as const;
 
 export const TRANSACTION_STATUS_LABELS = {
   [TRANSACTION_STATUSES.PENDING]: 'Pending',
   [TRANSACTION_STATUSES.PROCESSING]: 'Processing',
   [TRANSACTION_STATUSES.COMPLETED]: 'Completed',
+  [TRANSACTION_STATUSES.SUCCESS]: 'Success',
   [TRANSACTION_STATUSES.FAILED]: 'Failed',
   [TRANSACTION_STATUSES.REFUNDED]: 'Refunded',
+  [TRANSACTION_STATUSES.CANCELLED]: 'Cancelled',
 } as const;
 
 export const TRANSACTION_STATUS_COLORS = {
   [TRANSACTION_STATUSES.PENDING]: 'bg-yellow-100 text-yellow-800',
   [TRANSACTION_STATUSES.PROCESSING]: 'bg-blue-100 text-blue-800',
   [TRANSACTION_STATUSES.COMPLETED]: 'bg-green-100 text-green-800',
+  [TRANSACTION_STATUSES.SUCCESS]: 'bg-green-100 text-green-800',
   [TRANSACTION_STATUSES.FAILED]: 'bg-red-100 text-red-800',
   [TRANSACTION_STATUSES.REFUNDED]: 'bg-gray-100 text-gray-800',
+  [TRANSACTION_STATUSES.CANCELLED]: 'bg-gray-100 text-gray-800',
 } as const;
 
 // User Statuses

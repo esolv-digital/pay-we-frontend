@@ -56,6 +56,7 @@ class ApiClient {
         };
 
         // Handle token refresh on 401, but skip for auth endpoints
+        const isAuthMeEndpoint = originalRequest.url?.includes('/auth/me');
         const isAuthEndpoint = originalRequest.url?.includes('/auth/');
         const isPublicRoute = typeof window !== 'undefined' &&
           (window.location.pathname === '/login' ||
@@ -66,7 +67,14 @@ class ApiClient {
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
-          // Skip refresh attempt for auth endpoints
+          // Special case: /auth/me returning 401 means token is invalid - logout immediately
+          if (isAuthMeEndpoint) {
+            console.log('[API Client] 401 from /auth/me - user is unauthenticated. Logging out...');
+            this.clearAuthAndRedirect();
+            return Promise.reject(error);
+          }
+
+          // Skip refresh attempt for other auth endpoints (login, register, etc.) and public routes
           if (isAuthEndpoint || isPublicRoute) {
             return Promise.reject(error);
           }

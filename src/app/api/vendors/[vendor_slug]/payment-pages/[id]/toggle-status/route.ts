@@ -26,7 +26,7 @@ export async function POST(
     // Call Laravel API
     const laravelClient = createLaravelClient(accessToken);
     const response = await laravelClient.post(
-      `/api/v1/vendors/${vendor_slug}/payment-pages/${id}/toggle-status`
+      `/vendors/${vendor_slug}/payment-pages/${id}/toggle-status`
     );
 
     return NextResponse.json(response);

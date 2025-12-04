@@ -10,6 +10,7 @@ export interface PaymentPageCustomization {
   success_message?: string;
   show_vendor_info?: boolean;
   theme?: 'light' | 'dark' | 'auto';
+  store_url?: string; // Store/Website URL for post-payment redirect
 }
 
 export interface CustomField {
@@ -44,6 +45,9 @@ export interface PaymentPage {
     customization?: PaymentPageCustomization;
     [key: string]: string | number | boolean | null | PaymentPageCustomization | undefined;
   };
+  // NEW FIELDS
+  allowed_countries?: string[] | null; // Array of country codes
+  allowed_payment_methods?: string[] | null; // Array of payment methods
   created_at: string;
   updated_at: string;
   vendor?: Vendor;
@@ -68,6 +72,9 @@ export interface CreatePaymentPageInput {
     customization?: PaymentPageCustomization;
     [key: string]: string | number | boolean | null | PaymentPageCustomization | undefined;
   };
+  // NEW FIELDS
+  allowed_countries?: string[] | null;
+  allowed_payment_methods?: string[] | null;
 }
 
 export interface UpdatePaymentPageInput extends Partial<CreatePaymentPageInput> {

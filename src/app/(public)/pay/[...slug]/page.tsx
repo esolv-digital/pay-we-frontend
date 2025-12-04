@@ -152,7 +152,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // Format amount for description
   let amountText = '';
   if (paymentPage.amount_type === 'fixed' && paymentPage.fixed_amount) {
-    amountText = ` - ${paymentPage.currency_code} ${paymentPage.fixed_amount.toFixed(2)}`;
+    const amount = Number(paymentPage.fixed_amount);
+    amountText = ` - ${paymentPage.currency_code} ${amount.toFixed(2)}`;
   } else if (paymentPage.amount_type === 'donation') {
     amountText = ' - Donation';
   } else if (paymentPage.amount_type === 'flexible') {
@@ -229,7 +230,9 @@ export default async function PublicPaymentPage({ params }: PageProps) {
     offers: {
       '@type': 'Offer',
       priceCurrency: paymentPage.currency_code,
-      price: paymentPage.amount_type === 'fixed' ? paymentPage.fixed_amount : undefined,
+      price: paymentPage.amount_type === 'fixed' && paymentPage.fixed_amount
+        ? Number(paymentPage.fixed_amount)
+        : undefined,
       availability: paymentPage.is_active ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
     },
   } : null;

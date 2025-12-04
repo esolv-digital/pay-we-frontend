@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
         token_type: string;
         requires_onboarding: boolean;
       };
-    }>('/api/v1/auth/register', {
+    }>('/auth/register', {
       first_name,
       last_name,
       middle_name,
