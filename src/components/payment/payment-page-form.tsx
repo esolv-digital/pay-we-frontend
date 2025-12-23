@@ -9,11 +9,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatCurrency } from '@/lib/utils/format';
 import { showApiError, showSuccess } from '@/lib/utils/error-handler';
+import { getDefaultCountryCode, isWipayPaymentPage, requiresCountrySelection } from '@/lib/utils/payment';
+import { WIPAY_COUNTRIES, WIPAY_COUNTRY_LABELS } from '@/lib/config/constants';
 import { Building2, ShoppingCart, Loader2, CheckCircle2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { PaymentPage, PaymentPageCustomization } from '@/types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const paymentFormSchema = z.object({
   amount: z.number().positive('Amount must be greater than 0'),
@@ -21,6 +30,7 @@ const paymentFormSchema = z.object({
   customer_name: z.string().min(1, 'Name is required').optional(),
   customer_email: z.string().email('Invalid email address').optional(),
   customer_phone: z.string().optional(),
+  country_code: z.string().optional(), // Required for Wipay payments (TT, JM, BB, GY)
   shipping_street: z.string().optional(),
   shipping_city: z.string().optional(),
   shipping_state: z.string().optional(),
@@ -53,6 +63,7 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
@@ -61,6 +72,7 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
       amount: paymentPage?.amount_type === 'fixed'
         ? Number(paymentPage.fixed_amount)
         : Number(paymentPage?.min_amount) || 0,
+      country_code: getDefaultCountryCode(paymentPage), // Auto-set country for Wipay
     },
   });
 
@@ -82,6 +94,7 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
         customer_email: data.customer_email,
         customer_name: data.customer_name,
         customer_phone: data.customer_phone,
+        country_code: data.country_code, // Wipay requires this field
         shipping_address: shippingAddress,
       });
     },
@@ -377,6 +390,44 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                       }}
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Country Selection for Wipay */}
+              {isWipayPaymentPage(paymentPage) && requiresCountrySelection(paymentPage) && (
+                <div className="space-y-2 border-t pt-4" style={{ borderColor: isDark ? '#374151' : '#e5e7eb' }}>
+                  <Label htmlFor="country_code" style={{ color: defaultText }}>
+                    Country *
+                  </Label>
+                  <Select
+                    value={watch('country_code') || ''}
+                    onValueChange={(value) => setValue('country_code', value)}
+                  >
+                    <SelectTrigger
+                      id="country_code"
+                      style={{
+                        backgroundColor: isDark ? '#374151' : '#f9fafb',
+                        borderColor: isDark ? '#4b5563' : '#e5e7eb',
+                        color: defaultText,
+                      }}
+                    >
+                      <SelectValue placeholder="Select your country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paymentPage.allowed_countries?.map((countryCode) => (
+                        <SelectItem key={countryCode} value={countryCode}>
+                          {WIPAY_COUNTRY_LABELS[countryCode as keyof typeof WIPAY_COUNTRY_LABELS] || countryCode}
+                        </SelectItem>
+                      )) || Object.entries(WIPAY_COUNTRIES).map(([key, value]) => (
+                        <SelectItem key={key} value={value}>
+                          {WIPAY_COUNTRY_LABELS[value]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs" style={{ color: defaultMutedText }}>
+                    Payment will be processed via WiPay for {paymentPage.currency_code}
+                  </p>
                 </div>
               )}
 

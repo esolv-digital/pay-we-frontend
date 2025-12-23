@@ -11,7 +11,7 @@ import { paymentRedirectService } from '@/lib/services/payment-redirect.service'
 import type { PaymentVerificationResult } from '@/lib/services/payment-verification.service';
 
 /**
- * Payment Callback Content Component
+ * Payment Verification Content Component
  * Handles redirects from payment gateways (Paystack, Wipay)
  *
  * Features:
@@ -26,7 +26,7 @@ import type { PaymentVerificationResult } from '@/lib/services/payment-verificat
  * - status: Payment status (success, failed, cancelled)
  * - trxref: Alternative reference parameter
  */
-function PaymentCallbackContent() {
+function PaymentVerificationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -109,9 +109,9 @@ function PaymentCallbackContent() {
         setIsVerifying(true);
         verificationAbortRef.current = false;
 
-        // Log callback parameters for debugging (helps identify gateway-specific issues)
+        // Log verification parameters for debugging (helps identify gateway-specific issues)
         if (process.env.NODE_ENV === 'development') {
-          console.log('[Payment Callback] Gateway callback received:', {
+          console.log('[Payment Verification] Gateway verification received:', {
             reference,
             status: searchParams.get('status'),
             gateway_tx_id: searchParams.get('transaction_id'),
@@ -585,10 +585,10 @@ function PaymentCallbackContent() {
 }
 
 /**
- * Payment Callback Page
+ * Payment Verification Page
  * Wrapper component with Suspense boundary
  */
-export default function PaymentCallback() {
+export default function PaymentVerification() {
   return (
     <Suspense
       fallback={
@@ -609,7 +609,7 @@ export default function PaymentCallback() {
         </div>
       }
     >
-      <PaymentCallbackContent />
+      <PaymentVerificationContent />
     </Suspense>
   );
 }

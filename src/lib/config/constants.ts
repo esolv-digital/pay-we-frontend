@@ -133,6 +133,9 @@ export const CURRENCIES = {
   KES: 'KES',
   ZAR: 'ZAR',
   TTD: 'TTD',
+  JMD: 'JMD',
+  BBD: 'BBD',
+  GYD: 'GYD',
 } as const;
 
 export const CURRENCY_LABELS = {
@@ -144,6 +147,32 @@ export const CURRENCY_LABELS = {
   [CURRENCIES.KES]: 'Kenyan Shilling',
   [CURRENCIES.ZAR]: 'South African Rand',
   [CURRENCIES.TTD]: 'Trinidad & Tobago Dollar',
+  [CURRENCIES.JMD]: 'Jamaican Dollar',
+  [CURRENCIES.BBD]: 'Barbados Dollar',
+  [CURRENCIES.GYD]: 'Guyanese Dollar',
+} as const;
+
+// Country Codes (Wipay Supported Countries)
+export const WIPAY_COUNTRIES = {
+  TT: 'TT', // Trinidad & Tobago
+  JM: 'JM', // Jamaica
+  BB: 'BB', // Barbados
+  GY: 'GY', // Guyana
+} as const;
+
+export const WIPAY_COUNTRY_LABELS = {
+  [WIPAY_COUNTRIES.TT]: 'Trinidad & Tobago',
+  [WIPAY_COUNTRIES.JM]: 'Jamaica',
+  [WIPAY_COUNTRIES.BB]: 'Barbados',
+  [WIPAY_COUNTRIES.GY]: 'Guyana',
+} as const;
+
+// Currency to Country Mapping (for Wipay)
+export const WIPAY_CURRENCY_COUNTRY_MAP = {
+  TTD: 'TT',
+  JMD: 'JM',
+  BBD: 'BB',
+  GYD: 'GY',
 } as const;
 
 // Pagination

@@ -4,6 +4,10 @@ import type { PaymentPage, Transaction } from '@/types';
 /**
  * Transaction creation data interface
  * DRY: Single source of truth for transaction creation parameters
+ *
+ * SOLID Principles:
+ * - SRP: Defines only transaction creation data structure
+ * - OCP: Open for extension with optional fields
  */
 export interface CreateTransactionData {
   amount: number;
@@ -11,6 +15,7 @@ export interface CreateTransactionData {
   customer_email?: string;
   customer_name?: string;
   customer_phone?: string;
+  country_code?: string; // Required for Wipay (TT, JM, BB, GY)
   shipping_address?: {
     street: string;
     city: string;
@@ -44,6 +49,7 @@ export const publicApi = {
   // Initiate payment transaction
   // IMPORTANT: Backend uses /payments/initiate (not /pay/{slug}/transactions)
   // Requires payment_page_id and currency_code from payment page
+  // For Wipay: country_code is required (TT, JM, BB, GY)
   initiatePayment: async (paymentPage: PaymentPage, data: CreateTransactionData) => {
     return apiClient.post<Transaction>(`/payments/initiate`, {
       payment_page_id: paymentPage.id,
@@ -52,6 +58,7 @@ export const publicApi = {
       customer_email: data.customer_email,
       customer_name: data.customer_name,
       customer_phone: data.customer_phone,
+      country_code: data.country_code, // Wipay requires this field
       description: `Payment for ${paymentPage.title}`,
       metadata: {
         quantity: data.quantity,

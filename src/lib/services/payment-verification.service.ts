@@ -15,7 +15,7 @@ export interface PaymentVerificationConfig {
 /**
  * Payment Verification Status
  */
-export type PaymentStatus = 'pending' | 'completed' | 'success' | 'failed' | 'cancelled';
+export type PaymentStatus = 'pending' | 'completed' | 'success' | 'failed' | 'cancelled' | 'incomplete' | 'error';
 
 /**
  * Payment Verification Result
@@ -155,7 +155,7 @@ export class PaymentVerificationService {
    * Check if status is terminal (no further polling needed)
    */
   private isTerminalStatus(status: PaymentStatus): boolean {
-    return status === 'completed' || status === 'success' || status === 'failed' || status === 'cancelled';
+    return status === 'completed' || status === 'success' || status === 'failed' || status === 'cancelled' || status === 'incomplete' || status === 'error';
   }
 
   /**
@@ -168,7 +168,7 @@ export class PaymentVerificationService {
       return 'success';
     }
 
-    if (normalized === 'failed' || normalized === 'cancelled') {
+    if (normalized === 'failed' || normalized === 'cancelled' || normalized === 'incomplete' || normalized === 'error') {
       return 'failed';
     }
 
