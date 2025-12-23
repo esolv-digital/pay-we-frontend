@@ -9,7 +9,7 @@ import type { AuthUser } from '@/types';
 export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, setUser, logout: clearAuth, hasRole, hasPermission, hasOrganizationPermission } = useAuthStore();
+  const { user, setUser, logout: clearAuth, hasRole, hasPermission, hasOrganizationPermission, hasHydrated } = useAuthStore();
 
   // Fetch current user - skip only on login/register, but fetch on all other routes
   const isAuthRoute = typeof window !== 'undefined' &&
@@ -20,7 +20,15 @@ export function useAuth() {
     queryKey: ['auth', 'me'],
     queryFn: authApi.me,
     retry: false,
-    enabled: !user && !isAuthRoute,
+    // Only fetch if:
+    // 1. Not on auth routes (login/register)
+    // 2. Store has hydrated (to avoid race conditions)
+    // 3. No user in store (need to fetch)
+    enabled: !isAuthRoute && hasHydrated && !user,
+    // Refetch on mount to ensure fresh data after navigation
+    refetchOnMount: true,
+    // Consider data stale after 30 seconds
+    staleTime: 30 * 1000,
   });
 
   // Sync React Query cache data to Zustand store
@@ -69,9 +77,25 @@ export function useAuth() {
   // Register mutation
   const registerMutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: (data) => {
-      setUser(data.user);
-      queryClient.setQueryData(['auth', 'me'], data.user);
+    onSuccess: async (data) => {
+      console.log('[Register] Registration successful, fetching fresh user data...');
+
+      // Force fetch fresh user data to ensure we have the latest state
+      const freshUser = await queryClient.fetchQuery({
+        queryKey: ['auth', 'me'],
+        queryFn: authApi.me,
+        staleTime: 0, // Force fresh data
+      });
+
+      // Update both React Query cache and Zustand store with fresh data
+      queryClient.setQueryData(['auth', 'me'], freshUser);
+      setUser(freshUser);
+
+      console.log('[Register] Fresh user data loaded:', {
+        userId: freshUser.id,
+        email: freshUser.email,
+        organizationsCount: freshUser.organizations?.length || 0,
+      });
 
       showSuccess('Account created successfully! Please complete your setup.');
 
@@ -87,14 +111,30 @@ export function useAuth() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: (data) => {
-      setUser(data.user);
-      queryClient.setQueryData(['auth', 'me'], data.user);
+    onSuccess: async (data) => {
+      console.log('[Login] Login successful, fetching fresh user data...');
+
+      // Force fetch fresh user data to ensure we have the latest state
+      const freshUser = await queryClient.fetchQuery({
+        queryKey: ['auth', 'me'],
+        queryFn: authApi.me,
+        staleTime: 0, // Force fresh data
+      });
+
+      // Update both React Query cache and Zustand store with fresh data
+      queryClient.setQueryData(['auth', 'me'], freshUser);
+      setUser(freshUser);
+
+      console.log('[Login] Fresh user data loaded:', {
+        userId: freshUser.id,
+        email: freshUser.email,
+        organizationsCount: freshUser.organizations?.length || 0,
+      });
 
       showSuccess('Welcome back!');
 
-      // Check if user has organization
-      redirectAfterAuth(data.user);
+      // Check if user has organization and redirect
+      redirectAfterAuth(freshUser);
     },
     onError: (error) => {
       showApiError(error);
@@ -162,10 +202,13 @@ export function useAuth() {
   const cachedUser = queryClient.getQueryData<AuthUser>(['auth', 'me']);
   const latestUser = cachedUser || user || currentUser;
 
+  // Consider loading if store hasn't hydrated OR query is loading
+  const isLoadingAuth = !hasHydrated || isLoading;
+
   return {
     user: latestUser,
-    isLoading,
-    isAuthenticated: !!latestUser,
+    isLoading: isLoadingAuth,
+    isAuthenticated: !!latestUser && hasHydrated,
 
     // Registration
     register: registerMutation.mutate,

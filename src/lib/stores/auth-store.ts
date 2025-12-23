@@ -6,10 +6,12 @@ interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  hasHydrated: boolean;
 
   // Actions
   setUser: (user: AuthUser | null) => void;
   setLoading: (loading: boolean) => void;
+  setHasHydrated: (hydrated: boolean) => void;
   logout: () => void;
 
   // Permissions
@@ -24,6 +26,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       isLoading: true,
+      hasHydrated: false,
 
       setUser: (user) =>
         set({
@@ -33,6 +36,8 @@ export const useAuthStore = create<AuthState>()(
         }),
 
       setLoading: (loading) => set({ isLoading: loading }),
+
+      setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
 
       logout: () =>
         set({
@@ -78,6 +83,10 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       partialize: (state) => ({ user: state.user }),
+      onRehydrateStorage: () => (state) => {
+        // Called when rehydration completes
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useOrganizationCheck } from '@/lib/hooks/use-organization-check';
+import { useAuthStore } from '@/lib/stores/auth-store';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -12,16 +13,17 @@ export default function DashboardLayout({
 }) {
   const { isAuthenticated, isLoading } = useAuth();
   const { isLoading: isOrgCheckLoading, needsOnboarding } = useOrganizationCheck();
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (hasHydrated && !isLoading && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, hasHydrated, router]);
 
-  // Show loading while checking authentication or organization
-  if (isLoading || isOrgCheckLoading) {
+  // Show loading while store is hydrating, checking authentication, or organization
+  if (!hasHydrated || isLoading || isOrgCheckLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

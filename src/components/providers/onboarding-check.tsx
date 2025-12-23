@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { useAuthStore } from '@/lib/stores/auth-store';
 
 /**
  * OnboardingCheck component
@@ -14,11 +15,12 @@ export function OnboardingCheck({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isLoading } = useAuth();
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Skip checks while loading user data
-    if (isLoading) {
+    // Skip checks while store is hydrating or loading user data
+    if (!hasHydrated || isLoading) {
       setIsChecking(true);
       return;
     }
@@ -48,10 +50,10 @@ export function OnboardingCheck({ children }: { children: React.ReactNode }) {
     // User has organization, allow access
     console.log('[OnboardingCheck] Organization found. Access granted.');
     setIsChecking(false);
-  }, [user, isLoading, pathname, router]);
+  }, [user, isLoading, hasHydrated, pathname, router]);
 
-  // Show loading state while checking organization
-  if (isChecking || isLoading) {
+  // Show loading state while hydrating or checking organization
+  if (!hasHydrated || isChecking || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

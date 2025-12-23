@@ -15,7 +15,7 @@ export function usePaymentPages(filters?: {
 
   return useQuery({
     queryKey: ['payment-pages', vendorSlug, filters],
-    queryFn: () => vendorApi.getPaymentPages(vendorSlug, filters),
+    queryFn: () => vendorApi.getPaymentPages(vendorSlug!, filters),
     enabled: !!vendorSlug,
   });
 }
@@ -25,7 +25,7 @@ export function usePaymentPage(id: string) {
 
   return useQuery({
     queryKey: ['payment-page', vendorSlug, id],
-    queryFn: () => vendorApi.getPaymentPage(vendorSlug, id),
+    queryFn: () => vendorApi.getPaymentPage(vendorSlug!, id),
     enabled: !!vendorSlug && !!id,
   });
 }
@@ -36,7 +36,7 @@ export function useCreatePaymentPage() {
 
   return useMutation({
     mutationFn: (data: CreatePaymentPageInput) =>
-      vendorApi.createPaymentPage(vendorSlug, data),
+      vendorApi.createPaymentPage(vendorSlug!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-pages', vendorSlug] });
       showSuccess('Payment page created successfully!');
@@ -53,7 +53,7 @@ export function useUpdatePaymentPage(id: string) {
 
   return useMutation({
     mutationFn: (data: UpdatePaymentPageInput) =>
-      vendorApi.updatePaymentPage(vendorSlug, id, data),
+      vendorApi.updatePaymentPage(vendorSlug!, id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-pages', vendorSlug] });
       queryClient.invalidateQueries({ queryKey: ['payment-page', vendorSlug, id] });
@@ -70,7 +70,7 @@ export function useDeletePaymentPage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => vendorApi.deletePaymentPage(vendorSlug, id),
+    mutationFn: (id: string) => vendorApi.deletePaymentPage(vendorSlug!, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-pages', vendorSlug] });
       showSuccess('Payment page deleted successfully!');
@@ -86,7 +86,7 @@ export function useTogglePaymentPage() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => vendorApi.togglePaymentPage(vendorSlug, id),
+    mutationFn: (id: string) => vendorApi.togglePaymentPage(vendorSlug!, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payment-pages', vendorSlug] });
       showSuccess('Payment page status updated successfully!');
