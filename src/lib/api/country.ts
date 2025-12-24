@@ -1,14 +1,19 @@
 import { apiClient } from './client';
-import type { Country, RegionGroup } from '@/types/country';
+import type { Country, RegionGroup, CountryPaymentMethod, CurrencyInfo } from '@/types/country';
 
 /**
  * Country API Client
  * All methods call Next.js API routes (BFF pattern)
+ * Follows SOLID principles:
+ * - Single Responsibility: Only handles country-related API calls
+ * - Open/Closed: Extensible for new endpoints without modifying existing code
+ * - Dependency Inversion: Depends on apiClient abstraction
  */
 export const countryApi = {
   /**
    * Get all active countries
    * @param filters - Optional filters for region, can_send, can_receive
+   * @returns Array of countries matching the filter criteria
    */
   getAllCountries: async (filters?: {
     region?: string;
@@ -22,36 +27,35 @@ export const countryApi = {
 
   /**
    * Get specific country by code
-   * @param code - 2-letter country code (case-insensitive)
+   * @param code - ISO 3166-1 alpha-2 country code (e.g., "NG", "JM")
+   * @returns Single country object with full details
    */
   getCountryByCode: async (code: string) => {
-    return apiClient.get<Country>(`/countries/${code}`);
+    return apiClient.get<Country>(`/countries/${code.toUpperCase()}`);
   },
 
   /**
-   * Get payment methods for a specific country
-   * @param code - 2-letter country code
+   * Get payment methods available for a specific country
+   * @param code - ISO 3166-1 alpha-2 country code
+   * @returns Array of payment methods with configuration
    */
   getPaymentMethods: async (code: string) => {
-    return apiClient.get<Country>(`/countries/${code}/payment-methods`);
+    return apiClient.get<CountryPaymentMethod[]>(`/countries/${code.toUpperCase()}/payment-methods`);
   },
 
   /**
-   * Get all regions with their countries
+   * Get all regions with their countries (useful for grouped dropdowns)
+   * @returns Array of regions with their associated countries
    */
   getAllRegions: async () => {
     return apiClient.get<RegionGroup[]>('/countries/regions');
   },
 
   /**
-   * Get all currencies used across countries
+   * Get all supported currencies across the platform
+   * @returns Array of unique currencies with example countries
    */
   getAllCurrencies: async () => {
-    return apiClient.get<Array<{
-      code: string;
-      name: string;
-      symbol: string;
-      countries: string[];
-    }>>('/countries/currencies');
+    return apiClient.get<CurrencyInfo[]>('/countries/currencies');
   },
-};
+} as const;

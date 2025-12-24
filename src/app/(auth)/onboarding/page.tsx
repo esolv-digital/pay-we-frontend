@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { onboardingSchema, type OnboardingFormData } from '@/lib/utils/validators';
 import { useAuth } from '@/lib/hooks/use-auth';
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Globe, LogOut } from 'lucide-react';
+import { CountrySelect } from '@/components/forms/country-select';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -49,6 +50,7 @@ export default function OnboardingPage() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     watch,
   } = useForm<OnboardingFormData>({
@@ -198,23 +200,23 @@ export default function OnboardingPage() {
           )}
         </div>
 
-        {/* Country Code */}
+        {/* Country Selection */}
         <div>
-          <Label htmlFor="country_code">Country Code *</Label>
-          <Input
-            {...register('country_code')}
-            type="text"
-            id="country_code"
-            placeholder="NG"
-            maxLength={2}
-            className="mt-2 uppercase"
-            style={{ textTransform: 'uppercase' }}
+          <Controller
+            name="country_code"
+            control={control}
+            render={({ field }) => (
+              <CountrySelect
+                value={field.value}
+                onValueChange={field.onChange}
+                label="Country *"
+                placeholder="Select your country"
+                error={errors.country_code?.message}
+              />
+            )}
           />
-          {errors.country_code && (
-            <p className="text-red-600 text-sm mt-1">{errors.country_code.message}</p>
-          )}
           <p className="text-sm text-gray-500 mt-1">
-            ISO 3166-1 alpha-2 country code (e.g., NG for Nigeria, US for United States, GB for United Kingdom)
+            Select the country where your organization is registered or operates
           </p>
         </div>
 

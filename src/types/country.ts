@@ -1,71 +1,87 @@
 /**
  * Country type definitions
- * Maps to Laravel Country model
+ * Maps to Laravel Country model and /api/v1/countries API endpoints
  */
 
 export enum Region {
-  Africa = 'africa',
-  Caribbean = 'caribbean',
-  NorthAmerica = 'north_america',
-  SouthAmerica = 'south_america',
-  Europe = 'europe',
-  Asia = 'asia',
-  Oceania = 'oceania',
+  Africa = 'Africa',
+  Caribbean = 'Caribbean',
+  NorthAmerica = 'North America',
+  SouthAmerica = 'South America',
+  Europe = 'Europe',
+  Asia = 'Asia',
+  Oceania = 'Oceania',
 }
 
 export enum PaymentMethod {
-  Bank = 'bank',
-  MobileMoney = 'mobile_money',
   Card = 'card',
-  Ussd = 'ussd',
   BankTransfer = 'bank_transfer',
+  MobileMoney = 'mobile_money',
+  Ussd = 'ussd',
   Qr = 'qr',
 }
 
+/**
+ * Country object from /api/v1/countries endpoint
+ * Matches backend response structure exactly
+ */
 export interface Country {
-  id: string;
-  code: string; // 2-letter ISO code (e.g., "NG", "GH")
+  id: number;
+  code: string; // ISO 3166-1 alpha-2 country code (e.g., "NG", "JM", "US")
   name: string;
-  region: Region;
-  currency_code: string; // 3-letter code (e.g., "NGN", "USD")
-  currency_name: string;
-  currency_symbol: string;
-  phone_prefix: string;
-  can_send: boolean;
-  can_receive: boolean;
+  currency_code: string; // ISO 4217 currency code (e.g., "NGN", "USD")
+  currency_symbol: string; // Currency symbol (e.g., "₦", "$")
+  region: string; // Geographic region (e.g., "Africa", "Caribbean")
+  phone_code: string; // International dialing code (e.g., "+234")
   is_active: boolean;
-  min_transaction_amount: number;
-  max_transaction_amount: number;
-  daily_transaction_limit: number | null;
-  monthly_transaction_limit: number | null;
-  payment_methods: CountryPaymentMethod[];
+  can_send: boolean; // Whether country can initiate payments
+  can_receive: boolean; // Whether country can receive payments
+  platform_fee_percentage: string; // Platform fee for transactions
+  min_transaction_amount: string; // Minimum allowed transaction amount
+  max_transaction_amount: string; // Maximum allowed transaction amount
+  payment_methods: CountryPaymentMethod[]; // Available payment methods (may be empty array)
   created_at: string;
   updated_at: string;
-}
-
-export interface CountryPaymentMethod {
-  id: string;
-  country_id: string;
-  payment_method: PaymentMethod;
-  is_active: boolean;
-  is_default: boolean;
-  display_order: number;
-  metadata: Record<string, unknown> | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RegionGroup {
-  region: Region;
-  countries: Country[];
 }
 
 /**
- * Currency info from countries endpoint
+ * Payment method object for a specific country
+ * From /api/v1/countries/{code}/payment-methods endpoint
  */
-export interface CurrencyInfo {
+export interface CountryPaymentMethod {
+  id: number;
+  payment_method: PaymentMethod; // Method identifier (e.g., "card", "bank_transfer")
+  is_active: boolean; // Whether method is currently available
+  is_default: boolean; // Whether this is the default payment method
+  display_order: number; // Order to display methods (lower = higher priority)
+  additional_fee_percentage: string; // Extra fee for this payment method
+  metadata: Record<string, unknown> | null; // Additional configuration (varies by payment method)
+}
+
+/**
+ * Region group from /api/v1/countries/regions endpoint
+ */
+export interface RegionGroup {
+  region: string;
+  countries: CountryBasic[];
+}
+
+/**
+ * Basic country info within region groups
+ */
+export interface CountryBasic {
   code: string;
   name: string;
-  symbol: string;
-  countries: string[];
+  currency_code: string;
+  currency_symbol: string;
+}
+
+/**
+ * Currency info from /api/v1/countries/currencies endpoint
+ */
+export interface CurrencyInfo {
+  code: string; // ISO 4217 currency code
+  symbol: string; // Currency symbol
+  example_country: string; // Example country name
+  example_country_code: string; // Example country code
 }

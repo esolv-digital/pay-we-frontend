@@ -150,36 +150,24 @@ export const AMOUNT_TYPE_LABELS = {
   [AMOUNT_TYPES.DONATION]: 'Donation',
 } as const;
 
-// Currency Codes
-export const CURRENCIES = {
-  USD: 'USD',
-  EUR: 'EUR',
-  GBP: 'GBP',
-  NGN: 'NGN',
-  GHS: 'GHS',
-  KES: 'KES',
-  ZAR: 'ZAR',
-  TTD: 'TTD',
-  JMD: 'JMD',
-  BBD: 'BBD',
-  GYD: 'GYD',
-} as const;
+/**
+ * DEPRECATED: Hard-coded currencies and countries
+ *
+ * ⚠️ WARNING: Do not use these constants for new code!
+ *
+ * Currency and country data should be fetched dynamically from the backend API.
+ * Use the following instead:
+ * - For countries: use `countryApi.getAllCountries()` from '@/lib/api/country'
+ * - For currencies: use `countryApi.getAllCurrencies()` from '@/lib/api/country'
+ * - For payment methods: use `countryApi.getPaymentMethods(countryCode)` from '@/lib/api/country'
+ *
+ * See /backend/COUNTRY_API.md for full API documentation.
+ *
+ * These constants are kept temporarily for backward compatibility with existing code
+ * that references Wipay-specific functionality. They will be removed in a future version.
+ */
 
-export const CURRENCY_LABELS = {
-  [CURRENCIES.USD]: 'US Dollar',
-  [CURRENCIES.EUR]: 'Euro',
-  [CURRENCIES.GBP]: 'British Pound',
-  [CURRENCIES.NGN]: 'Nigerian Naira',
-  [CURRENCIES.GHS]: 'Ghanaian Cedi',
-  [CURRENCIES.KES]: 'Kenyan Shilling',
-  [CURRENCIES.ZAR]: 'South African Rand',
-  [CURRENCIES.TTD]: 'Trinidad & Tobago Dollar',
-  [CURRENCIES.JMD]: 'Jamaican Dollar',
-  [CURRENCIES.BBD]: 'Barbados Dollar',
-  [CURRENCIES.GYD]: 'Guyanese Dollar',
-} as const;
-
-// Country Codes (Wipay Supported Countries)
+// DEPRECATED: Use countryApi.getPaymentMethods() instead
 export const WIPAY_COUNTRIES = {
   TT: 'TT', // Trinidad & Tobago
   JM: 'JM', // Jamaica
@@ -187,6 +175,7 @@ export const WIPAY_COUNTRIES = {
   GY: 'GY', // Guyana
 } as const;
 
+// DEPRECATED: Use country data from API instead
 export const WIPAY_COUNTRY_LABELS = {
   [WIPAY_COUNTRIES.TT]: 'Trinidad & Tobago',
   [WIPAY_COUNTRIES.JM]: 'Jamaica',
@@ -194,7 +183,7 @@ export const WIPAY_COUNTRY_LABELS = {
   [WIPAY_COUNTRIES.GY]: 'Guyana',
 } as const;
 
-// Currency to Country Mapping (for Wipay)
+// DEPRECATED: Use country.currency_code from API instead
 export const WIPAY_CURRENCY_COUNTRY_MAP = {
   TTD: 'TT',
   JMD: 'JM',

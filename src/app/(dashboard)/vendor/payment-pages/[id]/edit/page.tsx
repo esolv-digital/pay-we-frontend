@@ -11,7 +11,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { paymentPageSchema, type PaymentPageFormData } from '@/lib/utils/validators';
 import { usePaymentPage, useUpdatePaymentPage } from '@/lib/hooks/use-payment-pages';
@@ -22,6 +22,7 @@ import { PaymentPagePreview } from '@/components/payment/payment-page-preview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Settings, ArrowLeft } from 'lucide-react';
 import type { PaymentPageCustomization, PaymentPage } from '@/types';
+import { CurrencySelect } from '@/components/forms/currency-select';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -44,6 +45,7 @@ export default function EditPaymentPagePage({ params }: PageProps) {
   const {
     register,
     handleSubmit,
+    control,
     watch,
     reset,
     formState: { errors },
@@ -303,21 +305,21 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency *
-                  </label>
-                  <select
-                    {...register('currency_code')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="EUR">EUR - Euro</option>
-                    <option value="GBP">GBP - British Pound</option>
-                    <option value="NGN">NGN - Nigerian Naira</option>
-                  </select>
-                  {errors.currency_code && (
-                    <p className="text-red-600 text-sm mt-1">{errors.currency_code.message}</p>
-                  )}
+                  <Controller
+                    name="currency_code"
+                    control={control}
+                    render={({ field }) => (
+                      <CurrencySelect
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        label="Currency *"
+                        placeholder="Select currency"
+                        error={errors.currency_code?.message}
+                        restrictToOrganization={true}
+                        autoSetDefault={false}
+                      />
+                    )}
+                  />
                 </div>
 
                 <div className="space-y-3">

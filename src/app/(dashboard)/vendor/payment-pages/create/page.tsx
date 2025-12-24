@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { paymentPageSchema, type PaymentPageFormData } from '@/lib/utils/validators';
 import { useCreatePaymentPage } from '@/lib/hooks/use-payment-pages';
@@ -12,9 +12,14 @@ import { PaymentPagePreview } from '@/components/payment/payment-page-preview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Settings } from 'lucide-react';
 import type { PaymentPageCustomization, PaymentPage } from '@/types';
+import { CurrencySelect } from '@/components/forms/currency-select';
+import { useAuth } from '@/lib/hooks/use-auth';
+import { useCountry } from '@/lib/hooks/use-countries';
 
 export default function CreatePaymentPagePage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const organization = user?.organizations?.[0];
   const { mutate: createPage, isPending } = useCreatePaymentPage();
   const [customization, setCustomization] = useState<PaymentPageCustomization>({
     primary_color: '#3b82f6',
@@ -24,9 +29,13 @@ export default function CreatePaymentPagePage() {
     theme: 'light',
   });
 
+  // Fetch organization's country to get default currency
+  const { data: organizationCountry } = useCountry(organization?.country_code || '');
+
   const {
     register,
     handleSubmit,
+    control,
     watch,
     setValue,
     formState: { errors },
@@ -34,12 +43,19 @@ export default function CreatePaymentPagePage() {
     resolver: zodResolver(paymentPageSchema),
     defaultValues: {
       amount_type: 'fixed',
-      currency_code: 'USD',
+      currency_code: organizationCountry?.currency_code || 'USD',
       collect_customer_info: true,
       collect_shipping_address: false,
       allow_quantity: false,
     },
   });
+
+  // Auto-set currency when organization country loads
+  useEffect(() => {
+    if (organizationCountry?.currency_code) {
+      setValue('currency_code', organizationCountry.currency_code);
+    }
+  }, [organizationCountry, setValue]);
 
   const formValues = watch();
   const amountType = watch('amount_type');
@@ -253,21 +269,21 @@ export default function CreatePaymentPagePage() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Currency *
-                  </label>
-                  <select
-                    {...register('currency_code')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="EUR">EUR - Euro</option>
-                    <option value="GBP">GBP - British Pound</option>
-                    <option value="NGN">NGN - Nigerian Naira</option>
-                  </select>
-                  {errors.currency_code && (
-                    <p className="text-red-600 text-sm mt-1">{errors.currency_code.message}</p>
-                  )}
+                  <Controller
+                    name="currency_code"
+                    control={control}
+                    render={({ field }) => (
+                      <CurrencySelect
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        label="Currency *"
+                        placeholder="Select currency"
+                        error={errors.currency_code?.message}
+                        restrictToOrganization={true}
+                        autoSetDefault={true}
+                      />
+                    )}
+                  />
                 </div>
 
                 <div className="space-y-3">
