@@ -54,17 +54,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!body.customer_email) {
-      return NextResponse.json(
-        {
-          success: false,
-          status: 'error',
-          message: 'customer_email is required',
-          errors: { customer_email: ['The customer_email field is required.'] },
-        },
-        { status: 400 }
-      );
-    }
+    // Note: customer_email validation is handled by Laravel backend
+    // Some payment gateways (Wipay, Paystack) don't require customer details
 
     // Call Laravel API to initiate payment
     const laravelClient = createLaravelClient();
