@@ -5,6 +5,10 @@ import type {
   UpdatePaymentPageInput,
   Transaction,
   TransactionFilters,
+  TransactionListResponse,
+  VendorTransactionMetricsResponse,
+  ExportSummaryResponse,
+  ExportFormat,
   Vendor,
   PaginatedResponse,
 } from '@/types';
@@ -59,15 +63,91 @@ export const vendorApi = {
     return apiClient.post(`/vendors/${vendorSlug}/payment-pages/${id}/toggle-status`);
   },
 
-  // Transactions
+  // Transactions - Comprehensive API
+  /**
+   * Get vendor transactions with advanced filtering, sorting, and pagination
+   * @param vendorSlug - The vendor slug
+   * @param filters - Optional filters (status, date range, amount, gateway, etc.)
+   * @returns Paginated list of transactions with metadata
+   */
   getTransactions: async (vendorSlug: string, filters?: TransactionFilters) => {
-    return apiClient.get<Transaction[]>(`/vendors/${vendorSlug}/transactions`, {
+    return apiClient.get<TransactionListResponse>(`/vendors/${vendorSlug}/transactions`, {
       params: filters,
     });
   },
 
-  getTransaction: async (vendorSlug: string, id: string) => {
-    return apiClient.get<Transaction>(`/vendors/${vendorSlug}/transactions/${id}`);
+  /**
+   * Get a single transaction by ID
+   * @param transactionId - The transaction ID
+   * @returns Transaction details
+   */
+  getTransaction: async (transactionId: string) => {
+    return apiClient.get<Transaction>(`/transactions/${transactionId}`);
+  },
+
+  /**
+   * Get aggregated transaction metrics for a vendor
+   * @param vendorSlug - The vendor slug
+   * @param filters - Optional filters to apply to metrics calculation
+   * @returns Transaction metrics and breakdown by gateway/currency
+   */
+  getTransactionMetrics: async (vendorSlug: string, filters?: TransactionFilters) => {
+    return apiClient.get<VendorTransactionMetricsResponse>(
+      `/vendors/${vendorSlug}/transactions/metrics`,
+      {
+        params: filters,
+      }
+    );
+  },
+
+  /**
+   * Get export summary before performing actual export
+   * @param vendorSlug - The vendor slug
+   * @param filters - Optional filters to apply to export
+   * @returns Summary including total records, file size estimate, and metrics
+   */
+  getExportSummary: async (vendorSlug: string, filters?: TransactionFilters) => {
+    return apiClient.get<ExportSummaryResponse>(
+      `/vendors/${vendorSlug}/transactions/export/summary`,
+      {
+        params: filters,
+      }
+    );
+  },
+
+  /**
+   * Export transactions to CSV or Excel
+   * @param vendorSlug - The vendor slug
+   * @param filters - Optional filters to apply to export
+   * @param format - Export format (csv or excel)
+   * @returns Download URL or triggers browser download
+   */
+  exportTransactions: async (
+    vendorSlug: string,
+    filters?: TransactionFilters,
+    format: ExportFormat = 'csv'
+  ) => {
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            value.forEach((v) => params.append(`${key}[]`, String(v)));
+          } else {
+            params.append(key, String(value));
+          }
+        }
+      });
+    }
+    params.append('export_format', format);
+
+    const queryString = params.toString();
+    const url = `/vendors/${vendorSlug}/transactions/export${queryString ? `?${queryString}` : ''}`;
+
+    // Trigger download by navigating to the URL
+    // The Next.js API route will handle the actual file download
+    window.location.href = url;
   },
 
   // Vendor Profile

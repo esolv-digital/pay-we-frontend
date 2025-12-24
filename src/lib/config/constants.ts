@@ -33,32 +33,59 @@ export const PAYMENT_METHOD_LABELS = {
 // Transaction Statuses
 export const TRANSACTION_STATUSES = {
   PENDING: 'pending',
-  PROCESSING: 'processing',
+  APPROVED: 'approved',
   COMPLETED: 'completed',
-  SUCCESS: 'success',
   FAILED: 'failed',
-  REFUNDED: 'refunded',
   CANCELLED: 'cancelled',
+  REFUNDED: 'refunded',
+  CHARGEBACK: 'chargeback',
+  EXPIRED: 'expired',
+  PROCESSING: 'processing',
+  ON_HOLD: 'on_hold',
+  EXCHANGE: 'exchange',
+  TRANSFER: 'transfer',
+  PAID: 'paid',
+  REFUND: 'refund',
+  GIFT: 'gift',
+  SUCCESS: 'success', // Legacy - maps to completed
 } as const;
 
 export const TRANSACTION_STATUS_LABELS = {
   [TRANSACTION_STATUSES.PENDING]: 'Pending',
-  [TRANSACTION_STATUSES.PROCESSING]: 'Processing',
+  [TRANSACTION_STATUSES.APPROVED]: 'Approved',
   [TRANSACTION_STATUSES.COMPLETED]: 'Completed',
-  [TRANSACTION_STATUSES.SUCCESS]: 'Success',
   [TRANSACTION_STATUSES.FAILED]: 'Failed',
-  [TRANSACTION_STATUSES.REFUNDED]: 'Refunded',
   [TRANSACTION_STATUSES.CANCELLED]: 'Cancelled',
+  [TRANSACTION_STATUSES.REFUNDED]: 'Refunded',
+  [TRANSACTION_STATUSES.CHARGEBACK]: 'Chargeback',
+  [TRANSACTION_STATUSES.EXPIRED]: 'Expired',
+  [TRANSACTION_STATUSES.PROCESSING]: 'Processing',
+  [TRANSACTION_STATUSES.ON_HOLD]: 'On Hold',
+  [TRANSACTION_STATUSES.EXCHANGE]: 'Exchange',
+  [TRANSACTION_STATUSES.TRANSFER]: 'Transfer',
+  [TRANSACTION_STATUSES.PAID]: 'Paid',
+  [TRANSACTION_STATUSES.REFUND]: 'Refund',
+  [TRANSACTION_STATUSES.GIFT]: 'Gift',
+  [TRANSACTION_STATUSES.SUCCESS]: 'Success',
 } as const;
 
 export const TRANSACTION_STATUS_COLORS = {
   [TRANSACTION_STATUSES.PENDING]: 'bg-yellow-100 text-yellow-800',
-  [TRANSACTION_STATUSES.PROCESSING]: 'bg-blue-100 text-blue-800',
+  [TRANSACTION_STATUSES.APPROVED]: 'bg-green-100 text-green-800',
   [TRANSACTION_STATUSES.COMPLETED]: 'bg-green-100 text-green-800',
-  [TRANSACTION_STATUSES.SUCCESS]: 'bg-green-100 text-green-800',
   [TRANSACTION_STATUSES.FAILED]: 'bg-red-100 text-red-800',
-  [TRANSACTION_STATUSES.REFUNDED]: 'bg-gray-100 text-gray-800',
   [TRANSACTION_STATUSES.CANCELLED]: 'bg-gray-100 text-gray-800',
+  [TRANSACTION_STATUSES.REFUNDED]: 'bg-purple-100 text-purple-800',
+  [TRANSACTION_STATUSES.CHARGEBACK]: 'bg-red-100 text-red-800',
+  [TRANSACTION_STATUSES.EXPIRED]: 'bg-gray-100 text-gray-800',
+  [TRANSACTION_STATUSES.PROCESSING]: 'bg-blue-100 text-blue-800',
+  [TRANSACTION_STATUSES.ON_HOLD]: 'bg-orange-100 text-orange-800',
+  [TRANSACTION_STATUSES.EXCHANGE]: 'bg-indigo-100 text-indigo-800',
+  [TRANSACTION_STATUSES.TRANSFER]: 'bg-indigo-100 text-indigo-800',
+  [TRANSACTION_STATUSES.PAID]: 'bg-green-100 text-green-800',
+  [TRANSACTION_STATUSES.REFUND]: 'bg-purple-100 text-purple-800',
+  [TRANSACTION_STATUSES.GIFT]: 'bg-pink-100 text-pink-800',
+  [TRANSACTION_STATUSES.SUCCESS]: 'bg-green-100 text-green-800',
 } as const;
 
 // User Statuses
