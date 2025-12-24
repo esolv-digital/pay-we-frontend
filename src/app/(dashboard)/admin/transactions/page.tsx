@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function AdminTransactionsPage() {
-  const { data: transactions, isLoading } = useTransactions();
+  const { data, isLoading } = useTransactions();
+  const transactions = data?.transactions || [];
 
   if (isLoading) {
     return (
@@ -98,7 +99,7 @@ export default function AdminTransactionsPage() {
           </tbody>
         </table>
 
-        {!transactions || transactions.length === 0 && (
+        {transactions.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">No transactions found</p>
           </div>
