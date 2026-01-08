@@ -120,23 +120,18 @@ export interface AdminKYCFilters {
 }
 
 /**
- * Pagination metadata
- */
-export interface PaginationMeta {
-  current_page: number;
-  total: number;
-  per_page: number;
-  last_page: number;
-  from: number;
-  to: number;
-}
-
-/**
  * Admin KYC List Response
  */
 export interface AdminKYCListResponse {
   kyc_documents: AdminKYCDocument[];
-  meta: PaginationMeta;
+  meta: {
+    current_page: number;
+    total: number;
+    per_page: number;
+    last_page: number;
+    from: number;
+    to: number;
+  };
   filters: AdminKYCFilters;
 }
 
@@ -211,9 +206,9 @@ export interface KYCActionResponse {
 }
 
 /**
- * Export format options
+ * Export format options for KYC data
  */
-export type ExportFormat = 'csv' | 'xlsx' | 'pdf';
+export type KYCExportFormat = 'csv' | 'xlsx' | 'pdf';
 
 /**
  * Valid status transitions mapping for REGULAR ADMINS

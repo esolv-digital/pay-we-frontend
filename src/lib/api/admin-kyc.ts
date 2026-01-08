@@ -20,7 +20,7 @@ import type {
   KYCApproveRequest,
   KYCRejectRequest,
   KYCActionResponse,
-  ExportFormat,
+  KYCExportFormat,
 } from '@/types/kyc';
 
 /**
@@ -244,7 +244,7 @@ export const adminKycApi = {
    * });
    */
   export: async (
-    format: ExportFormat = 'csv',
+    format: KYCExportFormat = 'csv',
     filters?: AdminKYCFilters
   ): Promise<Blob> => {
     const params = {
@@ -281,7 +281,7 @@ export const adminKycApi = {
    */
   downloadExport: (
     blob: Blob,
-    format: ExportFormat,
+    format: KYCExportFormat,
     filename?: string
   ): void => {
     const url = window.URL.createObjectURL(blob);

@@ -97,6 +97,13 @@ export const useAuthStore = create<AuthState>()(
         if (user.is_super_admin) return true;
 
         const roles = Array.isArray(role) ? role : [role];
+
+        // For admin users, check admin.platform_roles
+        if (user.admin?.platform_roles) {
+          return user.admin.platform_roles.some((r) => roles.includes(r.name));
+        }
+
+        // For vendor users, check user.roles
         return !!(user.roles && user.roles.some((r) => roles.includes(r.name)));
       },
 

@@ -18,7 +18,7 @@ import type {
   AdminKYCFilters,
   KYCApproveRequest,
   KYCRejectRequest,
-  ExportFormat,
+  KYCExportFormat,
 } from '@/types/kyc';
 import { toast } from 'sonner';
 
@@ -365,7 +365,7 @@ export function useExportKYC(options?: {
       filters,
       filename,
     }: {
-      format: ExportFormat;
+      format: KYCExportFormat;
       filters?: AdminKYCFilters;
       filename?: string;
     }) => {

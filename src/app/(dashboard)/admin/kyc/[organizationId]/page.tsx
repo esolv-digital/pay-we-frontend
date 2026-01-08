@@ -42,7 +42,6 @@ import type {
 } from '@/types/kyc';
 import {
   STATUS_LABELS,
-  STATUS_COLORS,
   getAvailableStatuses,
   requiresReason,
   canModifyKYC,
@@ -413,7 +412,7 @@ export default function KYCReviewPage() {
                 onClick={handleConfirmStatusChange}
                 disabled={
                   isUpdating ||
-                  (selectedStatus && requiresReason(selectedStatus) && !reason.trim())
+                  Boolean(selectedStatus && requiresReason(selectedStatus) && !reason.trim())
                 }
               >
                 {isUpdating ? 'Updating...' : 'Confirm Update'}

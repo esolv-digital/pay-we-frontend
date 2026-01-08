@@ -17,12 +17,16 @@ export const ADMIN_ROUTES = {
   TRANSACTION_DETAILS: (id: string) => `/admin/transactions/${id}`,
   KYC: '/admin/kyc',
   KYC_DETAILS: (id: string) => `/admin/kyc/${id}`,
+  KYB: '/admin/kyb',
+  KYB_DETAILS: (id: string) => `/admin/kyb/${id}`,
   USERS: '/admin/users',
   USER_DETAILS: (id: string) => `/admin/users/${id}`,
   ORGANIZATIONS: '/admin/organizations',
   ORGANIZATION_DETAILS: (id: string) => `/admin/organizations/${id}`,
   ROLES: '/admin/roles',
   ROLE_DETAILS: (id: string) => `/admin/roles/${id}`,
+  LOGS: '/admin/logs',
+  REPORTS: '/admin/reports',
   SETTINGS: '/admin/settings',
 } as const;
 

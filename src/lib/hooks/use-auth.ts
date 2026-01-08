@@ -36,8 +36,7 @@ export function useAuth() {
     // Only fetch if:
     // 1. Not on auth routes (login/register)
     // 2. Store has hydrated (to avoid race conditions)
-    // 3. No user in store (need to fetch)
-    enabled: !isAuthRoute && hasHydrated && !user,
+    enabled: !isAuthRoute && hasHydrated,
     // Refetch on mount to ensure fresh data after navigation
     refetchOnMount: true,
     // Consider data stale after 30 seconds
@@ -50,17 +49,8 @@ export function useAuth() {
     // Get the latest data from React Query cache
     const cachedUser = queryClient.getQueryData<AuthUser>(['auth', 'me']);
 
-    console.log('[useAuth] Syncing cache to store:', {
-      hasCachedUser: !!cachedUser,
-      hasStoreUser: !!user,
-      cacheOrgsCount: cachedUser?.organizations?.length || 0,
-      storeOrgsCount: user?.organizations?.length || 0,
-      needsSync: JSON.stringify(cachedUser) !== JSON.stringify(user)
-    });
-
     // If cache has data and it's different from store, update store
     if (cachedUser && JSON.stringify(cachedUser) !== JSON.stringify(user)) {
-      console.log('[useAuth] Updating store with cached data');
       setUser(cachedUser);
     }
   }, [currentUser, user, setUser, queryClient]);
@@ -93,9 +83,12 @@ export function useAuth() {
 
   // Helper function to redirect after successful auth
   const redirectAfterAuth = (user: AuthUser, defaultContext?: 'admin' | 'vendor') => {
+    const currentPath = window.location.pathname;
+
     console.log('[redirectAfterAuth] Determining redirect:', {
       userId: user.id,
       email: user.email,
+      currentPath,
       defaultContext,
       isAdministrator: isAdministrator(user),
       hasOrganizations: user.organizations && user.organizations.length > 0,
@@ -108,27 +101,24 @@ export function useAuth() {
       return;
     }
 
-    // Priority 1: Use default_context from login response if provided (backend decides based on user access)
+    // Determine target dashboard
+    let targetDashboard: string;
+
+    // Priority 1: Use default_context from login response if provided
     if (defaultContext) {
-      if (defaultContext === 'admin') {
-        console.log('[redirectAfterAuth] Redirecting to admin dashboard (from default_context)');
-        router.push('/admin/dashboard');
-      } else {
-        console.log('[redirectAfterAuth] Redirecting to vendor dashboard (from default_context)');
-        router.push('/vendor/dashboard');
-      }
-      return;
+      targetDashboard = defaultContext === 'admin' ? '/admin/dashboard' : '/vendor/dashboard';
+    } else {
+      // Priority 2: Fall back to checking user's access
+      const userIsAdministrator = isAdministrator(user);
+      targetDashboard = userIsAdministrator ? '/admin/dashboard' : '/vendor/dashboard';
     }
 
-    // Priority 2: Fall back to checking user's access if no default_context provided
-    const userIsAdministrator = isAdministrator(user);
-
-    if (userIsAdministrator) {
-      console.log('[redirectAfterAuth] Redirecting to admin dashboard (from user access check)');
-      router.push('/admin/dashboard');
+    // Only redirect if not already on the correct dashboard
+    if (!currentPath.startsWith(targetDashboard.replace('/dashboard', ''))) {
+      console.log(`[redirectAfterAuth] Redirecting to ${targetDashboard}`);
+      router.push(targetDashboard);
     } else {
-      console.log('[redirectAfterAuth] Redirecting to vendor dashboard (from user access check)');
-      router.push('/vendor/dashboard');
+      console.log(`[redirectAfterAuth] Already on correct dashboard (${currentPath}), skipping redirect`);
     }
   };
 

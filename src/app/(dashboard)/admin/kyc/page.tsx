@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import type { AdminKYCFilters, KYCStatus, ExportFormat } from '@/types/kyc';
+import type { AdminKYCFilters, KYCStatus, KYCExportFormat } from '@/types/kyc';
 import { format } from 'date-fns';
 
 const KYC_STATUSES: { label: string; value: KYCStatus | '' }[] = [
@@ -69,7 +69,7 @@ export default function AdminKYCPage() {
     }));
   };
 
-  const handleExport = (format: ExportFormat) => {
+  const handleExport = (format: KYCExportFormat) => {
     exportKYC({ format, filters });
   };
 
