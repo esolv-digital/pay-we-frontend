@@ -1,5 +1,16 @@
 import { apiClient } from './client';
-import type { AuthUser, LoginCredentials, RegisterData, OnboardingData, AuthResponse } from '@/types';
+import type {
+  AuthUser,
+  LoginCredentials,
+  RegisterData,
+  OnboardingData,
+  AuthResponse,
+  GetContextsResponse,
+  SwitchContextRequest,
+  SwitchContextResponse,
+  VerifyPasswordRequest,
+  VerifyPasswordResponse,
+} from '@/types';
 
 export const authApi = {
   // Register
@@ -44,5 +55,21 @@ export const authApi = {
   // Revoke Google OAuth
   revokeGoogle: async () => {
     return apiClient.post<{ message: string }>('/auth/google/revoke');
+  },
+
+  // Context Management
+  // Get available contexts
+  getContexts: async () => {
+    return apiClient.get<GetContextsResponse>('/auth/contexts');
+  },
+
+  // Switch context (admin/vendor)
+  switchContext: async (data: SwitchContextRequest) => {
+    return apiClient.post<SwitchContextResponse>('/auth/switch-context', data);
+  },
+
+  // Verify password before context switch
+  verifySwitch: async (data: VerifyPasswordRequest) => {
+    return apiClient.post<VerifyPasswordResponse>('/auth/verify-switch', data);
   },
 };

@@ -17,13 +17,18 @@ export async function POST(request: NextRequest) {
         user: unknown;
         access_token: string;
         token_type: string;
+        contexts?: {
+          admin: boolean;
+          vendor: boolean;
+        };
+        default_context?: 'admin' | 'vendor';
       };
     }>('/auth/login', {
       email,
       password,
     });
 
-    const { user, access_token, token_type } = response.data;
+    const { user, access_token, token_type, contexts, default_context } = response.data;
 
     // Set HTTP-only cookie (expires in 30 days by default)
     const cookieStore = await cookies();
@@ -46,6 +51,8 @@ export async function POST(request: NextRequest) {
         user,
         access_token,
         token_type,
+        contexts,
+        default_context,
       },
     });
   } catch (error: unknown) {

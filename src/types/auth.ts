@@ -29,6 +29,32 @@ export interface AuthResponse {
   access_token: string;
   token_type: string;
   requires_onboarding?: boolean;
+  contexts?: UserContexts;
+  default_context?: ContextType;
+}
+
+export type ContextType = 'admin' | 'vendor';
+
+export interface UserContexts {
+  admin: boolean;
+  vendor: boolean;
+}
+
+export interface AdminDetails {
+  is_super_admin: boolean;
+  is_platform_admin: boolean;
+  platform_roles: import('./permissions').Role[];
+  platform_permissions: import('./permissions').PermissionWithSource[];
+}
+
+export interface OrganizationMembership {
+  id: string;
+  organization_id: string;
+  organization_name: string;
+  role: string;
+  status: 'active' | 'inactive' | 'suspended';
+  permissions: string[];
+  joined_at: string;
 }
 
 export interface AuthUser {
@@ -50,6 +76,13 @@ export interface AuthUser {
   organizations?: Organization[];
   roles?: Role[];
   permissions?: string[];
+
+  // Admin and context details
+  admin?: AdminDetails;
+  organization_memberships?: OrganizationMembership[];
+  has_admin_access?: boolean;
+  has_vendor_access?: boolean;
+  vendors?: OrganizationVendor[];
 
   // Computed property
   full_name?: string;
@@ -101,4 +134,43 @@ export interface OrganizationVendor {
 export interface Role {
   id?: string;
   name: string;
+}
+
+// Role assignment request
+export interface AssignRolesRequest {
+  user_id: number;
+  roles: string[]; // Array of role names
+}
+
+// Permission assignment request
+export interface AssignPermissionsRequest {
+  user_id: number;
+  permissions: string[]; // Array of permission names
+}
+
+// Context switching types
+export interface SwitchContextRequest {
+  context_type: ContextType;
+  password?: string;
+  require_verification?: boolean;
+}
+
+export interface SwitchContextResponse {
+  user: AuthUser;
+  access_token: string;
+  token_type: string;
+  context: ContextType;
+}
+
+export interface VerifyPasswordRequest {
+  password: string;
+}
+
+export interface VerifyPasswordResponse {
+  verified: boolean;
+}
+
+export interface GetContextsResponse {
+  contexts: UserContexts;
+  default_context: ContextType;
 }

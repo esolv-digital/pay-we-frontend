@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { VENDOR_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useKYCStatus } from '@/lib/hooks/use-kyc-status';
+import { ContextSwitcher } from '@/components/context-switcher';
 
 const baseNavigation = [
   { name: 'Dashboard', href: VENDOR_ROUTES.DASHBOARD, icon: '📊' },
@@ -57,7 +58,8 @@ export function VendorSidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-800">
+      <div className="p-4 border-t border-gray-800 space-y-2">
+        <ContextSwitcher />
         <button
           type="button"
           onClick={() => logout()}

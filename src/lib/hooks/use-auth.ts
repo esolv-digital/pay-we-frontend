@@ -4,12 +4,25 @@ import { useEffect } from 'react';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { showApiError, showSuccess } from '@/lib/utils/error-handler';
-import type { AuthUser } from '@/types';
+import type { AuthUser, SwitchContextRequest } from '@/types';
 
 export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, setUser, logout: clearAuth, hasRole, hasPermission, hasOrganizationPermission, hasHydrated } = useAuthStore();
+  const {
+    user,
+    setUser,
+    logout: clearAuth,
+    hasRole,
+    hasPermission,
+    hasOrganizationPermission,
+    hasHydrated,
+    currentContext,
+    availableContexts,
+    setContext,
+    canSwitchToContext,
+    hasMultipleContexts,
+  } = useAuthStore();
 
   // Fetch current user - skip only on login/register, but fetch on all other routes
   const isAuthRoute = typeof window !== 'undefined' &&
@@ -59,15 +72,15 @@ export function useAuth() {
   };
 
   // Helper function to redirect after successful auth
-  const redirectAfterAuth = (user: AuthUser) => {
+  const redirectAfterAuth = (user: AuthUser, defaultContext?: 'admin' | 'vendor') => {
     // Check if user needs to create an organization
     if (needsOnboarding(user)) {
       router.push('/onboarding');
       return;
     }
 
-    // User has organization, redirect to dashboard
-    if (user.is_super_admin) {
+    // Use default_context from login response if provided, otherwise fall back to role-based logic
+    if (defaultContext === 'admin' || (!defaultContext && user.is_super_admin)) {
       router.push('/admin/dashboard');
     } else {
       router.push('/vendor/dashboard');
@@ -125,6 +138,15 @@ export function useAuth() {
       queryClient.setQueryData(['auth', 'me'], freshUser);
       setUser(freshUser);
 
+      // Store context information from login response
+      if (data.contexts && data.default_context) {
+        setContext(data.default_context, data.contexts);
+        console.log('[Login] Context set:', {
+          currentContext: data.default_context,
+          availableContexts: data.contexts,
+        });
+      }
+
       console.log('[Login] Fresh user data loaded:', {
         userId: freshUser.id,
         email: freshUser.email,
@@ -134,7 +156,7 @@ export function useAuth() {
       showSuccess('Welcome back!');
 
       // Check if user has organization and redirect
-      redirectAfterAuth(freshUser);
+      redirectAfterAuth(freshUser, data.default_context);
     },
     onError: (error) => {
       showApiError(error);
@@ -198,6 +220,66 @@ export function useAuth() {
     },
   });
 
+  // Get available contexts mutation
+  const getContextsMutation = useMutation({
+    mutationFn: authApi.getContexts,
+    onSuccess: (data) => {
+      // Update store with available contexts
+      if (data.contexts && data.default_context) {
+        setContext(data.default_context, data.contexts);
+      }
+    },
+    onError: (error) => {
+      showApiError(error);
+    },
+  });
+
+  // Switch context mutation
+  const switchContextMutation = useMutation({
+    mutationFn: (request: SwitchContextRequest) => authApi.switchContext(request),
+    onSuccess: async (data) => {
+      console.log('[SwitchContext] Context switched successfully');
+
+      // Force fetch fresh user data to ensure we have the latest state
+      const freshUser = await queryClient.fetchQuery({
+        queryKey: ['auth', 'me'],
+        queryFn: authApi.me,
+        staleTime: 0, // Force fresh data
+      });
+
+      // Update both React Query cache and Zustand store with fresh data
+      queryClient.setQueryData(['auth', 'me'], freshUser);
+      setUser(freshUser);
+
+      // Update current context in store
+      setContext(data.context);
+
+      console.log('[SwitchContext] User data refreshed and context updated:', {
+        newContext: data.context,
+      });
+
+      showSuccess(`Switched to ${data.context} dashboard`);
+
+      // Redirect to appropriate dashboard
+      if (data.context === 'admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/vendor/dashboard');
+      }
+    },
+    onError: (error) => {
+      showApiError(error);
+    },
+  });
+
+  // Verify password before switch mutation
+  const verifyPasswordMutation = useMutation({
+    mutationFn: authApi.verifySwitch,
+    onError: (error) => {
+      showApiError(error);
+    },
+  });
+
   // Always prefer the most recent data from React Query cache
   const cachedUser = queryClient.getQueryData<AuthUser>(['auth', 'me']);
   const latestUser = cachedUser || user || currentUser;
@@ -228,6 +310,18 @@ export function useAuth() {
 
     // Logout
     logout: logoutMutation.mutate,
+
+    // Context Management
+    currentContext,
+    availableContexts,
+    canSwitchToContext,
+    hasMultipleContexts: hasMultipleContexts(),
+    getContexts: getContextsMutation.mutate,
+    isGetContextsPending: getContextsMutation.isPending,
+    switchContext: switchContextMutation.mutate,
+    isSwitchContextPending: switchContextMutation.isPending,
+    verifyPassword: verifyPasswordMutation.mutateAsync, // Use mutateAsync for awaitable result
+    isVerifyPasswordPending: verifyPasswordMutation.isPending,
 
     // Permissions (from auth store)
     hasRole,

@@ -21,6 +21,8 @@ export const ADMIN_ROUTES = {
   USER_DETAILS: (id: string) => `/admin/users/${id}`,
   ORGANIZATIONS: '/admin/organizations',
   ORGANIZATION_DETAILS: (id: string) => `/admin/organizations/${id}`,
+  ROLES: '/admin/roles',
+  ROLE_DETAILS: (id: string) => `/admin/roles/${id}`,
   SETTINGS: '/admin/settings',
 } as const;
 
