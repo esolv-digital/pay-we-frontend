@@ -48,6 +48,15 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
+    // Update user context cookie for middleware access control
+    cookieStore.set('user_context', context, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge,
+      path: '/',
+    });
+
     // Return response
     return NextResponse.json({
       success: true,
@@ -92,6 +101,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
       response.cookies.delete('access_token');
+      response.cookies.delete('user_context');
       return response;
     }
 

@@ -65,24 +65,69 @@ export function useAuth() {
     }
   }, [currentUser, user, setUser, queryClient]);
 
+  // Helper function to check if user is an administrator
+  const isAdministrator = (user: AuthUser) => {
+    // Check multiple ways a user can be an administrator:
+    // 1. Root level is_super_admin flag
+    // 2. has_admin_access flag
+    // 3. admin object exists (with is_super_admin or is_platform_admin)
+    return (
+      user.is_super_admin ||
+      user.has_admin_access ||
+      !!user.admin?.is_super_admin ||
+      !!user.admin?.is_platform_admin ||
+      !!user.admin
+    );
+  };
+
   // Helper function to check if user needs onboarding
   const needsOnboarding = (user: AuthUser) => {
-    // Check if user has any organizations
+    // Administrators don't need onboarding (they don't need vendor organizations)
+    if (isAdministrator(user)) {
+      return false;
+    }
+
+    // Only vendor users need organizations for onboarding
     return !user.organizations || user.organizations.length === 0;
   };
 
   // Helper function to redirect after successful auth
   const redirectAfterAuth = (user: AuthUser, defaultContext?: 'admin' | 'vendor') => {
-    // Check if user needs to create an organization
+    console.log('[redirectAfterAuth] Determining redirect:', {
+      userId: user.id,
+      email: user.email,
+      defaultContext,
+      isAdministrator: isAdministrator(user),
+      hasOrganizations: user.organizations && user.organizations.length > 0,
+    });
+
+    // Check if user needs to create an organization (vendors only)
     if (needsOnboarding(user)) {
+      console.log('[redirectAfterAuth] User needs onboarding, redirecting to /onboarding');
       router.push('/onboarding');
       return;
     }
 
-    // Use default_context from login response if provided, otherwise fall back to role-based logic
-    if (defaultContext === 'admin' || (!defaultContext && user.is_super_admin)) {
+    // Priority 1: Use default_context from login response if provided (backend decides based on user access)
+    if (defaultContext) {
+      if (defaultContext === 'admin') {
+        console.log('[redirectAfterAuth] Redirecting to admin dashboard (from default_context)');
+        router.push('/admin/dashboard');
+      } else {
+        console.log('[redirectAfterAuth] Redirecting to vendor dashboard (from default_context)');
+        router.push('/vendor/dashboard');
+      }
+      return;
+    }
+
+    // Priority 2: Fall back to checking user's access if no default_context provided
+    const userIsAdministrator = isAdministrator(user);
+
+    if (userIsAdministrator) {
+      console.log('[redirectAfterAuth] Redirecting to admin dashboard (from user access check)');
       router.push('/admin/dashboard');
     } else {
+      console.log('[redirectAfterAuth] Redirecting to vendor dashboard (from user access check)');
       router.push('/vendor/dashboard');
     }
   };
@@ -125,13 +170,36 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: async (data) => {
-      console.log('[Login] Login successful, fetching fresh user data...');
+      console.log('[Login] Login successful, response data:', {
+        hasDefaultContext: !!data.default_context,
+        defaultContext: data.default_context,
+        hasContexts: !!data.contexts,
+        contexts: data.contexts,
+        userFromLogin: {
+          id: data.user?.id,
+          has_admin_access: data.user?.has_admin_access,
+          has_vendor_access: data.user?.has_vendor_access,
+          admin: data.user?.admin,
+        },
+      });
+
+      console.log('[Login] Fetching fresh user data from /auth/me...');
 
       // Force fetch fresh user data to ensure we have the latest state
       const freshUser = await queryClient.fetchQuery({
         queryKey: ['auth', 'me'],
         queryFn: authApi.me,
         staleTime: 0, // Force fresh data
+      });
+
+      console.log('[Login] Fresh user data from /auth/me:', {
+        userId: freshUser.id,
+        email: freshUser.email,
+        has_admin_access: freshUser.has_admin_access,
+        has_vendor_access: freshUser.has_vendor_access,
+        is_super_admin: freshUser.is_super_admin,
+        admin: freshUser.admin,
+        organizationsCount: freshUser.organizations?.length || 0,
       });
 
       // Update both React Query cache and Zustand store with fresh data
@@ -146,12 +214,6 @@ export function useAuth() {
           availableContexts: data.contexts,
         });
       }
-
-      console.log('[Login] Fresh user data loaded:', {
-        userId: freshUser.id,
-        email: freshUser.email,
-        organizationsCount: freshUser.organizations?.length || 0,
-      });
 
       showSuccess('Welcome back!');
 

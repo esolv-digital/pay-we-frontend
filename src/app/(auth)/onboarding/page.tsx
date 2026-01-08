@@ -17,7 +17,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { user, isLoading, completeOnboarding, isOnboardingPending, logout } = useAuth();
 
-  // Redirect to dashboard if user already has an organization
+  // Redirect to dashboard if user already has an organization or is an administrator
   useEffect(() => {
     console.log('[Onboarding Page] User state changed:', {
       isLoading,
@@ -26,6 +26,7 @@ export default function OnboardingPage() {
       email: user?.email,
       organizationsCount: user?.organizations?.length || 0,
       organizations: user?.organizations,
+      isAdmin: user?.is_super_admin || user?.has_admin_access || !!user?.admin,
     });
 
     // Skip check if still loading user data
@@ -34,14 +35,25 @@ export default function OnboardingPage() {
       return;
     }
 
+    if (!user) {
+      console.log('[Onboarding Page] No user, skipping check');
+      return;
+    }
+
+    // Check if user is an administrator
+    const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
+
+    // Administrators should never access onboarding - redirect to admin dashboard
+    if (isAdministrator) {
+      console.log('[Onboarding Page] User is administrator, redirecting to admin dashboard...');
+      router.push('/admin/dashboard');
+      return;
+    }
+
     // If user has organizations, redirect to appropriate dashboard
-    if (user && user.organizations && user.organizations.length > 0) {
+    if (user.organizations && user.organizations.length > 0) {
       console.log('[Onboarding Page] User has organizations, redirecting to dashboard...');
-      if (user.is_super_admin) {
-        router.push('/admin/dashboard');
-      } else {
-        router.push('/vendor/dashboard');
-      }
+      router.push('/vendor/dashboard');
     } else {
       console.log('[Onboarding Page] User needs to complete onboarding');
     }
@@ -77,6 +89,21 @@ export default function OnboardingPage() {
         <div className="flex flex-col items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user is an administrator
+  const isAdministrator = user?.is_super_admin || user?.has_admin_access || !!user?.admin?.is_super_admin || !!user?.admin?.is_platform_admin || !!user?.admin;
+
+  // Administrators should never see onboarding form
+  if (isAdministrator) {
+    return (
+      <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Redirecting to admin dashboard...</p>
         </div>
       </div>
     );

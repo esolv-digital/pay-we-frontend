@@ -37,7 +37,17 @@ export function OnboardingCheck({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Check if user has organizations
+    // Check if user is an administrator
+    const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
+
+    // Administrators don't need onboarding (they don't need vendor organizations)
+    if (isAdministrator) {
+      console.log('[OnboardingCheck] User is an administrator. Skipping onboarding check.');
+      setIsChecking(false);
+      return;
+    }
+
+    // Check if user has organizations (only for non-admin users)
     const hasOrganization = user.organizations && user.organizations.length > 0;
 
     // If user doesn't have organization, redirect to onboarding
@@ -66,8 +76,11 @@ export function OnboardingCheck({ children }: { children: React.ReactNode }) {
 
   // Check one more time before rendering - extra safety
   if (user && !pathname.startsWith('/onboarding')) {
+    const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
     const hasOrganization = user.organizations && user.organizations.length > 0;
-    if (!hasOrganization) {
+
+    // Only redirect if not an administrator and no organization
+    if (!isAdministrator && !hasOrganization) {
       return null; // Don't render anything while redirecting
     }
   }

@@ -28,7 +28,16 @@ export function useOrganizationCheck() {
     // Don't redirect if already on onboarding page
     if (pathname === '/onboarding') return;
 
-    // Check if user has any organizations
+    // Check if user is an administrator
+    const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
+
+    // Administrators don't need onboarding (they don't need vendor organizations)
+    if (isAdministrator) {
+      console.log('User is an administrator. Skipping onboarding check.');
+      return;
+    }
+
+    // Check if user has any organizations (only for non-admin users)
     const hasOrganization = user.organizations && user.organizations.length > 0;
 
     // If user doesn't have an organization, redirect to onboarding
@@ -38,12 +47,15 @@ export function useOrganizationCheck() {
     }
   }, [user, isLoading, isAuthenticated, pathname, router]);
 
+  // Check if user is an administrator
+  const isAdministrator = user?.is_super_admin || user?.has_admin_access || !!user?.admin?.is_super_admin || !!user?.admin?.is_platform_admin || !!user?.admin;
+
   // Return organization check status
   const hasOrganization = user?.organizations && user.organizations.length > 0;
 
   return {
     hasOrganization,
     isLoading,
-    needsOnboarding: !hasOrganization && isAuthenticated,
+    needsOnboarding: !isAdministrator && !hasOrganization && isAuthenticated,
   };
 }

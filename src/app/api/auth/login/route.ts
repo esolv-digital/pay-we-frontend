@@ -42,6 +42,18 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
+    // Set user context cookie for middleware access control
+    // This allows middleware to enforce context-based route protection
+    if (default_context) {
+      cookieStore.set('user_context', default_context, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge,
+        path: '/',
+      });
+    }
+
     // Return response matching frontend expectation
     return NextResponse.json({
       success: true,

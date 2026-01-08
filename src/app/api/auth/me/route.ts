@@ -43,8 +43,9 @@ export async function GET() {
         { status: 401 }
       );
 
-      // Clear the access token cookie
+      // Clear all auth cookies
       response.cookies.delete('access_token');
+      response.cookies.delete('user_context');
 
       return response;
     }

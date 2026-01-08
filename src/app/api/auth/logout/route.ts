@@ -16,6 +16,7 @@ export async function POST() {
     // Clear cookies
     cookieStore.delete('access_token');
     cookieStore.delete('token_expires_at');
+    cookieStore.delete('user_context');
 
     return NextResponse.json({
       data: { message: 'Logged out successfully' },
@@ -25,6 +26,7 @@ export async function POST() {
     const cookieStore = await cookies();
     cookieStore.delete('access_token');
     cookieStore.delete('token_expires_at');
+    cookieStore.delete('user_context');
 
     return NextResponse.json({
       data: { message: 'Logged out' },

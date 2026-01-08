@@ -29,6 +29,18 @@ export async function GET() {
       };
     }>('/auth/contexts');
 
+    // Update user context cookie to keep it in sync
+    if (response.data.default_context) {
+      const maxAge = 60 * 60 * 24 * 30; // 30 days in seconds
+      cookieStore.set('user_context', response.data.default_context, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge,
+        path: '/',
+      });
+    }
+
     return NextResponse.json({
       success: true,
       status: 'success',
@@ -56,6 +68,7 @@ export async function GET() {
         { status: 401 }
       );
       response.cookies.delete('access_token');
+      response.cookies.delete('user_context');
       return response;
     }
 
