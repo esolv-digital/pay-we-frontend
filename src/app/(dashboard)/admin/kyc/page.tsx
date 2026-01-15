@@ -54,7 +54,7 @@ export default function AdminKYCPage() {
     sort_direction: 'desc',
   });
 
-  const { data, isLoading } = useAdminKYCList(filters);
+  const { data, isLoading, error, isError } = useAdminKYCList(filters);
   const { mutate: exportKYC, isPending: isExporting } = useExportKYC();
 
   const handleSearch = (search: string) => {
@@ -158,7 +158,18 @@ export default function AdminKYCPage() {
         </Card>
 
         {/* KYC List */}
-        {isLoading ? (
+        {isError ? (
+          <Card className="p-12 text-center">
+            <span className="text-6xl mb-4 block">⚠️</span>
+            <h2 className="text-2xl font-semibold mb-2 text-red-600">Error Loading KYC Documents</h2>
+            <p className="text-gray-600 mb-4">
+              {error instanceof Error ? error.message : 'Failed to load KYC documents. Please try again.'}
+            </p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Retry
+            </Button>
+          </Card>
+        ) : isLoading ? (
           <div className="grid grid-cols-1 gap-4">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="p-6">

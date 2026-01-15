@@ -37,6 +37,11 @@ export interface PaginationMeta {
   total: number;
 }
 
+export interface PaginationParams {
+  page?: number;
+  per_page?: number;
+}
+
 export interface ApiError {
   error: string;
   message: string;

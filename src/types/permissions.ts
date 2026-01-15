@@ -114,6 +114,20 @@ export const PERMISSIONS = {
   ASSIGN_ROLES: 'Assign Roles',
   VIEW_PERMISSIONS: 'View Permissions',
   ASSIGN_PERMISSIONS: 'Assign Permissions',
+
+  // Admin - User Management
+  ADMIN_VIEW_USERS: 'Admin View Users',
+  ADMIN_MANAGE_USERS: 'Admin Manage Users',
+
+  // Admin - Organization Management
+  ADMIN_VIEW_ORGANIZATIONS: 'Admin View Organizations',
+  ADMIN_MANAGE_ORGANIZATIONS: 'Admin Manage Organizations',
+
+  // Admin - Activity Logs
+  ADMIN_VIEW_LOGS: 'Admin View Logs',
+
+  // Admin - Reports
+  ADMIN_VIEW_REVENUE_REPORTS: 'Admin View Revenue Reports',
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

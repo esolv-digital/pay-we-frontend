@@ -12,70 +12,53 @@
 
 import { useState } from 'react';
 import { PermissionGuard } from '@/components/permissions';
-import { PERMISSIONS } from '@/types/permissions';
+import { PERMISSIONS, type Role } from '@/types/permissions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-
-type Role = {
-  id: string;
-  name: string;
-  display_name: string;
-  description: string;
-  user_count: number;
-  permissions: string[];
-  is_system: boolean;
-};
+import { useRoles, useRoleStatistics } from '@/lib/hooks/use-roles-permissions';
 
 export default function AdminRolesPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Mock roles data - replace with actual API call
-  const roles: Role[] = [
-    {
-      id: '1',
-      name: 'super_admin',
-      display_name: 'Super Admin',
-      description: 'Full system access with all permissions',
-      user_count: 2,
-      permissions: ['*'],
-      is_system: true,
-    },
-    {
-      id: '2',
-      name: 'platform_admin',
-      display_name: 'Platform Admin',
-      description: 'Administrative access to platform management',
-      user_count: 5,
-      permissions: ['manage_users', 'manage_organizations', 'view_transactions', 'view_kyc'],
-      is_system: true,
-    },
-    {
-      id: '3',
-      name: 'vendor_admin',
-      display_name: 'Vendor Admin',
-      description: 'Full access to vendor organization',
-      user_count: 23,
-      permissions: ['manage_organization', 'create_payment_pages', 'view_transactions'],
-      is_system: true,
-    },
-    {
-      id: '4',
-      name: 'vendor_user',
-      display_name: 'Vendor User',
-      description: 'Basic vendor access',
-      user_count: 157,
-      permissions: ['view_organization', 'view_transactions'],
-      is_system: true,
-    },
-  ];
+  // Fetch roles from API with permissions
+  const { data: rolesData } = useRoles({
+    with_permissions: true,
+  });
+
+  // Fetch role statistics
+  const { data: statsData } = useRoleStatistics();
+
+  const roles: Role[] = rolesData?.data?.roles || [];
 
   const stats = [
-    { label: 'Total Roles', value: roles.length.toString(), icon: '🔐', color: 'bg-blue-50' },
-    { label: 'System Roles', value: roles.filter(r => r.is_system).length.toString(), icon: '⚙️', color: 'bg-purple-50' },
-    { label: 'Custom Roles', value: roles.filter(r => !r.is_system).length.toString(), icon: '✨', color: 'bg-green-50' },
-    { label: 'Total Users', value: roles.reduce((acc, r) => acc + r.user_count, 0).toString(), icon: '👥', color: 'bg-yellow-50' },
+    {
+      label: 'Total Roles',
+      value: statsData?.total_roles?.toString() || roles.length.toString(),
+      icon: '🔐',
+      color: 'bg-blue-50'
+    },
+    {
+      label: 'System Roles',
+      value: statsData?.system_roles?.toString() || roles.filter((r: Role) => r.is_system).length.toString(),
+      icon: '⚙️',
+      color: 'bg-purple-50'
+    },
+    {
+      label: 'Custom Roles',
+      value: statsData?.custom_roles?.toString() || roles.filter((r: Role) => !r.is_system).length.toString(),
+      icon: '✨',
+      color: 'bg-green-50'
+    },
+    {
+      label: 'Total Users',
+      value: statsData?.roles_with_users
+        ? statsData.roles_with_users.reduce((sum: number, role: { users_count: number }) => sum + role.users_count, 0).toString()
+        : '0',
+      icon: '👥',
+      color: 'bg-yellow-50'
+    },
   ];
 
   const permissionCategories = [
@@ -105,9 +88,9 @@ export default function AdminRolesPage() {
     },
   ];
 
-  const filteredRoles = roles.filter(role =>
-    role.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    role.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRoles = roles.filter((role: Role) =>
+    role.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    role.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -183,7 +166,7 @@ export default function AdminRolesPage() {
                           All Permissions
                         </Badge>
                       ) : (
-                        role.permissions.map((perm) => (
+                        role.permissions.map((perm: string) => (
                           <Badge key={perm} variant="outline" className="text-xs">
                             {perm.replace(/_/g, ' ')}
                           </Badge>
