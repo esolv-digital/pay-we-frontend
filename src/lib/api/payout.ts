@@ -10,6 +10,9 @@ import type {
   RequestPayoutRequest,
   PayoutFilters,
   VendorBalance,
+  DisbursementStatistics,
+  RecentSettlement,
+  AutoPayoutToggleResponse,
   PaginatedResponse,
 } from '@/types';
 
@@ -109,6 +112,34 @@ export const payoutApi = {
    */
   getBalance: async (vendorSlug: string): Promise<VendorBalance> => {
     return apiClient.get<VendorBalance>(`/vendors/${vendorSlug}/payouts/balance`);
+  },
+
+  /**
+   * Get disbursement statistics (detailed balance and payout info)
+   * GET /vendors/{vendor}/payouts/statistics
+   */
+  getStatistics: async (vendorSlug: string): Promise<DisbursementStatistics> => {
+    return apiClient.get<DisbursementStatistics>(`/vendors/${vendorSlug}/payouts/statistics`);
+  },
+
+  /**
+   * Get recent settlements/payouts
+   * GET /vendors/{vendor}/payouts/recent
+   */
+  getRecentSettlements: async (vendorSlug: string, limit: number = 10): Promise<RecentSettlement[]> => {
+    return apiClient.get<RecentSettlement[]>(`/vendors/${vendorSlug}/payouts/recent`, {
+      params: { limit },
+    });
+  },
+
+  /**
+   * Toggle auto-payout setting
+   * POST /vendors/{vendor}/payouts/auto-payout
+   */
+  toggleAutoPayout: async (vendorSlug: string, enabled: boolean): Promise<AutoPayoutToggleResponse> => {
+    return apiClient.post<AutoPayoutToggleResponse>(`/vendors/${vendorSlug}/payouts/auto-payout`, {
+      enabled,
+    });
   },
 
   /**

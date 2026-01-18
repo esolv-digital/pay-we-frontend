@@ -152,7 +152,7 @@ export const adminReportsApi = {
       `/admin/reports/revenue?${params.toString()}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -195,6 +195,6 @@ export const adminReportsApi = {
       }
     );
 
-    return response.data;
+    return (response as Blob);
   },
 };

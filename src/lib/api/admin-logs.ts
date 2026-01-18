@@ -209,7 +209,7 @@ export const adminLogsApi = {
       `/admin/logs?${params.toString()}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -228,7 +228,7 @@ export const adminLogsApi = {
       `/admin/logs/${id}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -247,7 +247,7 @@ export const adminLogsApi = {
       '/admin/logs/statistics'
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -300,6 +300,6 @@ export const adminLogsApi = {
       responseType: 'blob',
     });
 
-    return response.data;
+    return (response as Blob);
   },
 };

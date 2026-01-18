@@ -195,7 +195,20 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
 
   const amountValue = watch('amount') || 0;
   const quantityValue = watch('quantity') || 1;
-  const totalAmount = amountValue * quantityValue;
+
+  // Calculate fee and display amounts based on fee_mode
+  const feePercentage = Number(paymentPage.platform_fee_percentage) || 0;
+  const baseAmount = paymentPage.amount_type === 'fixed'
+    ? Number(paymentPage.fixed_amount) || 0
+    : amountValue;
+
+  // If fee_mode is 'included', customer pays base + fee
+  // If fee_mode is 'excluded', customer pays just the base amount
+  const feeAmount = paymentPage.fee_mode === 'included' && feePercentage > 0
+    ? baseAmount * (feePercentage / 100)
+    : 0;
+  const displayAmount = baseAmount + feeAmount;
+  const totalAmount = displayAmount * quantityValue;
 
   if (transactionCreated) {
     return (
@@ -270,8 +283,31 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                 {paymentPage.amount_type === 'fixed' ? (
                   <>
                     <input type="hidden" {...register('amount', { valueAsNumber: true })} value={Number(paymentPage.fixed_amount)} />
-                    <div className="text-4xl font-bold text-center py-4" style={{ color: primary_color }}>
-                      {formatCurrency(Number(paymentPage.fixed_amount) || 0, paymentPage.currency_code)}
+                    <div className="text-center py-4">
+                      <div className="text-4xl font-bold" style={{ color: primary_color }}>
+                        {formatCurrency(displayAmount, paymentPage.currency_code)}
+                      </div>
+                      {/* Fee breakdown for transparency */}
+                      {feePercentage > 0 && (
+                        <div className="mt-3 p-3 rounded-lg text-sm" style={{ backgroundColor: isDark ? '#374151' : '#f3f4f6' }}>
+                          <div className="flex justify-between mb-1" style={{ color: defaultMutedText }}>
+                            <span>Item price:</span>
+                            <span>{formatCurrency(baseAmount, paymentPage.currency_code)}</span>
+                          </div>
+                          <div className="flex justify-between mb-1" style={{ color: defaultMutedText }}>
+                            <span>Service fee ({feePercentage}%):</span>
+                            {paymentPage.fee_mode === 'included' ? (
+                              <span>{formatCurrency(feeAmount, paymentPage.currency_code)}</span>
+                            ) : (
+                              <span className="text-green-600">Covered by vendor</span>
+                            )}
+                          </div>
+                          <div className="flex justify-between font-medium border-t pt-2 mt-2" style={{ color: defaultText, borderColor: isDark ? '#4b5563' : '#e5e7eb' }}>
+                            <span>You pay:</span>
+                            <span>{formatCurrency(displayAmount, paymentPage.currency_code)}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </>
                 ) : (
@@ -297,6 +333,27 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                     />
                     {errors.amount && (
                       <p className="text-sm text-red-600 mt-1">{errors.amount.message}</p>
+                    )}
+                    {/* Fee breakdown for flexible/donation amounts - show for transparency */}
+                    {feePercentage > 0 && amountValue > 0 && (
+                      <div className="mt-3 p-3 rounded-lg text-sm" style={{ backgroundColor: isDark ? '#374151' : '#f3f4f6' }}>
+                        <div className="flex justify-between mb-1" style={{ color: defaultMutedText }}>
+                          <span>Amount:</span>
+                          <span>{formatCurrency(amountValue, paymentPage.currency_code)}</span>
+                        </div>
+                        <div className="flex justify-between mb-1" style={{ color: defaultMutedText }}>
+                          <span>Service fee ({feePercentage}%):</span>
+                          {paymentPage.fee_mode === 'included' ? (
+                            <span>{formatCurrency(feeAmount, paymentPage.currency_code)}</span>
+                          ) : (
+                            <span className="text-green-600">Covered by vendor</span>
+                          )}
+                        </div>
+                        <div className="flex justify-between font-medium border-t pt-2 mt-2" style={{ color: defaultText, borderColor: isDark ? '#4b5563' : '#e5e7eb' }}>
+                          <span>You pay:</span>
+                          <span>{formatCurrency(displayAmount, paymentPage.currency_code)}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
@@ -330,9 +387,14 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                     />
                   </div>
                   {quantityValue > 1 && (
-                    <p className="text-sm" style={{ color: defaultMutedText }}>
-                      Total: {formatCurrency(totalAmount, paymentPage.currency_code)}
-                    </p>
+                    <div className="text-sm" style={{ color: defaultMutedText }}>
+                      <p>Total: {formatCurrency(totalAmount, paymentPage.currency_code)}</p>
+                      {paymentPage.fee_mode === 'included' && feePercentage > 0 && (
+                        <p className="text-xs">
+                          (includes {formatCurrency(feeAmount * quantityValue, paymentPage.currency_code)} service fee)
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               )}

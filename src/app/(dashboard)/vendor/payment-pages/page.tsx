@@ -114,9 +114,25 @@ export default function PaymentPagesPage() {
                 )}
 
                 <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="text-gray-500">Type:</span>
-                    <span className="ml-2 font-medium capitalize">{page.amount_type}</span>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-gray-500">Type:</span>
+                      <span className="ml-2 font-medium capitalize">{page.amount_type}</span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 text-xs font-medium rounded ${
+                        page.fee_mode === 'included'
+                          ? 'bg-purple-100 text-purple-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                      title={
+                        page.fee_mode === 'included'
+                          ? 'Customer pays the service fee'
+                          : 'Fee deducted from your earnings'
+                      }
+                    >
+                      {page.fee_mode === 'included' ? 'Customer pays fee' : 'Vendor pays fee'}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-500">Created:</span>

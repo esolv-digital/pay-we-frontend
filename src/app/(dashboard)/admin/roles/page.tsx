@@ -12,7 +12,7 @@
 
 import { useState } from 'react';
 import { PermissionGuard } from '@/components/permissions';
-import { PERMISSIONS, type Role } from '@/types/permissions';
+import { Permission, PERMISSIONS, type Role } from '@/types/permissions';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +30,7 @@ export default function AdminRolesPage() {
   // Fetch role statistics
   const { data: statsData } = useRoleStatistics();
 
-  const roles: Role[] = rolesData?.data?.roles || [];
+  const roles: Role[] = rolesData?.roles || [];
 
   const stats = [
     {
@@ -89,7 +89,7 @@ export default function AdminRolesPage() {
   ];
 
   const filteredRoles = roles.filter((role: Role) =>
-    role.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    role.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     role.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -147,13 +147,13 @@ export default function AdminRolesPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-xl font-semibold text-gray-900">
-                      {role.display_name}
+                      {role.name}
                     </h3>
                     {role.is_system && (
                       <Badge className="bg-blue-100 text-blue-800">System Role</Badge>
                     )}
                     <Badge className="bg-gray-100 text-gray-800">
-                      {role.user_count} {role.user_count === 1 ? 'user' : 'users'}
+                      {role.users_count} {role.users_count === 1 ? 'user' : 'users'}
                     </Badge>
                   </div>
                   <p className="text-gray-600 mb-4">{role.description}</p>
@@ -161,14 +161,10 @@ export default function AdminRolesPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-700 mb-2">Permissions:</p>
                     <div className="flex flex-wrap gap-2">
-                      {role.permissions.includes('*') ? (
-                        <Badge className="bg-purple-100 text-purple-800">
-                          All Permissions
-                        </Badge>
-                      ) : (
-                        role.permissions.map((perm: string) => (
-                          <Badge key={perm} variant="outline" className="text-xs">
-                            {perm.replace(/_/g, ' ')}
+                      {(
+                        role.permissions?.map((perm: Permission) => (
+                          <Badge key={perm.id} variant="outline" className="text-xs">
+                            {perm.name}
                           </Badge>
                         ))
                       )}

@@ -38,11 +38,13 @@ export interface PermissionWithSource extends Permission {
 export interface Role {
   id: number;
   name: string;
+  description?: string;
   guard_name: 'api';
   permissions?: Permission[];
   created_at?: string;
   updated_at?: string;
   users_count?: number;
+  is_system?: boolean;
 }
 
 /**

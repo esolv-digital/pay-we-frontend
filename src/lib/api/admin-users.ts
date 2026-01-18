@@ -195,7 +195,7 @@ export const adminUsersApi = {
       `/admin/users?${params.toString()}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -214,7 +214,7 @@ export const adminUsersApi = {
       `/admin/users/${id}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -241,7 +241,7 @@ export const adminUsersApi = {
       data
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -268,7 +268,7 @@ export const adminUsersApi = {
       data
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -287,7 +287,7 @@ export const adminUsersApi = {
       `/admin/users/${id}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -311,7 +311,7 @@ export const adminUsersApi = {
       { reason }
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -330,7 +330,7 @@ export const adminUsersApi = {
       `/admin/users/${id}/activate`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -357,7 +357,7 @@ export const adminUsersApi = {
       }
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -376,7 +376,7 @@ export const adminUsersApi = {
       '/admin/users/statistics'
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -395,7 +395,7 @@ export const adminUsersApi = {
       `/admin/users/${id}/resend-verification`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -414,6 +414,6 @@ export const adminUsersApi = {
       `/admin/users/${id}/reset-password`
     );
 
-    return response.data;
+    return response;
   },
 };

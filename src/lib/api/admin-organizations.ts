@@ -189,7 +189,7 @@ export const adminOrganizationsApi = {
       `/admin/organizations?${params.toString()}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -208,7 +208,7 @@ export const adminOrganizationsApi = {
       `/admin/organizations/${id}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -232,7 +232,7 @@ export const adminOrganizationsApi = {
       { reason }
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -251,7 +251,7 @@ export const adminOrganizationsApi = {
       `/admin/organizations/${id}/activate`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -270,6 +270,6 @@ export const adminOrganizationsApi = {
       ApiResponse<OrganizationStatistics>
     >('/admin/organizations/statistics');
 
-    return response.data;
+    return response;
   },
 };

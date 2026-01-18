@@ -128,5 +128,66 @@ export interface VendorBalance {
   formatted_balance: string;
 }
 
+/**
+ * Disbursement Statistics - Detailed balance and payout info
+ * GET /api/v1/vendors/{vendor}/payouts/statistics
+ */
+export interface DisbursementStatistics {
+  currency: string;
+  available_balance: number;
+  pending_payouts: number;
+  withdrawable_balance: number;
+  unsettled_amount: number;
+  unsettled_transaction_count: number;
+  completed_this_month: number;
+  total_completed: number;
+  auto_payout_enabled: boolean;
+  has_default_payout_account: boolean;
+  default_payout_account: {
+    id: string;
+    display_name: string;
+    provider_name: string;
+    account_identifier_masked: string;
+  } | null;
+  minimum_payout_amount: number;
+}
+
+/**
+ * Recent Settlement Item
+ */
+export interface RecentSettlement {
+  id: string;
+  reference: string;
+  gross_amount: number;
+  fees: number;
+  net_amount: number;
+  currency: string;
+  status: PayoutStatus;
+  payout_method: PayoutAccountType;
+  payout_account: string;
+  transaction_count: number;
+  is_automatic: boolean;
+  created_at: string;
+  processed_at?: string;
+  completed_at?: string;
+  failed_at?: string;
+  failure_reason?: string;
+}
+
+/**
+ * Auto-Payout Toggle Request
+ */
+export interface AutoPayoutToggleRequest {
+  enabled: boolean;
+}
+
+/**
+ * Auto-Payout Toggle Response
+ */
+export interface AutoPayoutToggleResponse {
+  auto_payout_enabled: boolean;
+  message: string;
+}
+
 // Legacy type aliases for backward compatibility
 export type MobileMoneyProvider = MobileMoneyNetwork;

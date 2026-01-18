@@ -270,7 +270,7 @@ export const adminTransactionsApi = {
       `/admin/transactions?${params.toString()}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -289,7 +289,7 @@ export const adminTransactionsApi = {
       `/admin/transactions/${id}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -349,7 +349,7 @@ export const adminTransactionsApi = {
       `/admin/transactions/metrics?${params.toString()}`
     );
 
-    return response.data;
+    return response;
   },
 
   /**
@@ -432,6 +432,6 @@ export const adminTransactionsApi = {
       }
     );
 
-    return response.data;
+    return (response as Blob);
   },
 };
