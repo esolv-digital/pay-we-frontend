@@ -21,6 +21,9 @@ export interface CustomField {
   placeholder?: string;
 }
 
+// Fee handling mode for payment pages
+export type FeeMode = 'excluded' | 'included';
+
 export interface PaymentPage {
   id: string;
   vendor_id: string;
@@ -45,9 +48,15 @@ export interface PaymentPage {
     customization?: PaymentPageCustomization;
     [key: string]: string | number | boolean | null | PaymentPageCustomization | undefined;
   };
-  // NEW FIELDS
-  allowed_countries?: string[] | null; // Array of country codes
-  allowed_payment_methods?: string[] | null; // Array of payment methods
+  // Fee handling
+  fee_mode: FeeMode; // 'excluded' = deduct from amount, 'included' = add to amount
+  // Calculated fee breakdown (from backend)
+  platform_fee_percentage?: number;
+  gateway_fee_percentage?: number;
+  flat_fee_amount?: number;
+  // Country/payment method restrictions
+  allowed_countries?: string[] | null;
+  allowed_payment_methods?: string[] | null;
   created_at: string;
   updated_at: string;
   vendor?: Vendor;
@@ -72,7 +81,9 @@ export interface CreatePaymentPageInput {
     customization?: PaymentPageCustomization;
     [key: string]: string | number | boolean | null | PaymentPageCustomization | undefined;
   };
-  // NEW FIELDS
+  // Fee handling - 'excluded' = deduct from amount, 'included' = add to amount
+  fee_mode?: FeeMode;
+  // Country/payment method restrictions
   allowed_countries?: string[] | null;
   allowed_payment_methods?: string[] | null;
 }

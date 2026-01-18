@@ -47,6 +47,7 @@ export default function CreatePaymentPagePage() {
       collect_customer_info: true,
       collect_shipping_address: false,
       allow_quantity: false,
+      fee_mode: 'excluded', // Default: deduct fee from amount
     },
   });
 
@@ -86,6 +87,8 @@ export default function CreatePaymentPagePage() {
     createPage(
       {
         ...data,
+        // Include fee_mode if platform has fees configured
+        fee_mode: data.fee_mode || 'excluded',
         metadata: {
           customization,
         }
@@ -285,6 +288,61 @@ export default function CreatePaymentPagePage() {
                     )}
                   />
                 </div>
+
+                {/* Fee Handling Mode */}
+                {organizationCountry?.platform_fee_percentage && Number(organizationCountry.platform_fee_percentage) > 0 && (
+                  <div className="border rounded-lg p-4 bg-gray-50">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Service Fee Handling
+                    </label>
+                    <p className="text-xs text-gray-500 mb-4">
+                      Platform fee: {organizationCountry.platform_fee_percentage}%
+                    </p>
+                    <div className="space-y-3">
+                      <label className="flex items-start gap-3 p-3 border rounded-lg bg-white cursor-pointer hover:border-blue-300 transition-colors">
+                        <input
+                          {...register('fee_mode')}
+                          type="radio"
+                          value="excluded"
+                          className="mt-1 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div className="flex-1">
+                          <span className="font-medium text-gray-900">Deduct fee from amount</span>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Customer pays the amount you set. Fee is deducted from your earnings.
+                          </p>
+                          {formValues.fixed_amount && formValues.fixed_amount > 0 && (
+                            <p className="text-xs text-blue-600 mt-2">
+                              Example: Customer pays {formValues.currency_code} {formValues.fixed_amount.toFixed(2)},
+                              you receive {formValues.currency_code} {(formValues.fixed_amount * (1 - Number(organizationCountry.platform_fee_percentage) / 100)).toFixed(2)}
+                            </p>
+                          )}
+                        </div>
+                      </label>
+
+                      <label className="flex items-start gap-3 p-3 border rounded-lg bg-white cursor-pointer hover:border-blue-300 transition-colors">
+                        <input
+                          {...register('fee_mode')}
+                          type="radio"
+                          value="included"
+                          className="mt-1 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div className="flex-1">
+                          <span className="font-medium text-gray-900">Add fee to amount</span>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Fee is added on top. Customer pays more, you receive the full amount.
+                          </p>
+                          {formValues.fixed_amount && formValues.fixed_amount > 0 && (
+                            <p className="text-xs text-green-600 mt-2">
+                              Example: Customer pays {formValues.currency_code} {(formValues.fixed_amount * (1 + Number(organizationCountry.platform_fee_percentage) / 100)).toFixed(2)},
+                              you receive {formValues.currency_code} {formValues.fixed_amount.toFixed(2)}
+                            </p>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-3">
                   <label className="flex items-center">

@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createLaravelClient } from '@/lib/api/laravel-client';
 import { cookies } from 'next/headers';
 
-export async function POST(
+/**
+ * GET /api/vendors/[vendor_slug]/payouts
+ * List payouts with filtering and pagination
+ */
+export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ organization: string }> }
+  context: { params: Promise<{ vendor_slug: string }> }
 ) {
   try {
-    const { organization } = await context.params;
+    const { vendor_slug } = await context.params;
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access_token')?.value;
 
@@ -23,26 +27,107 @@ export async function POST(
       );
     }
 
-    // Get form data
-    const formData = await request.formData();
+    // Get query parameters for filtering
+    const searchParams = request.nextUrl.searchParams;
+    const queryParams = new URLSearchParams();
 
-    // Add organization_id to formData for Laravel validation
-    formData.append('organization_id', organization);
+    // Add all query parameters from the request
+    searchParams.forEach((value, key) => {
+      queryParams.append(key, value);
+    });
 
-    // Forward to Laravel API
+    const queryString = queryParams.toString();
+    const apiUrl = `/vendors/${vendor_slug}/payouts${queryString ? `?${queryString}` : ''}`;
+
+    // Call Laravel API
     const laravelClient = createLaravelClient(accessToken);
-    const apiUrl = `/organizations/${organization}/kyc/submit`;
-    console.log('Posting to Laravel:', apiUrl);
-    const response = await laravelClient.post(apiUrl, formData);
+    const response = await laravelClient.get(apiUrl);
 
     return NextResponse.json(response);
   } catch (error: unknown) {
-    console.error('KYC submission error:', error);
-    // Log the full response data from Laravel for debugging
-    const axiosError = error as { response?: { data?: unknown; status?: number } };
-    if (axiosError.response?.data) {
-      console.error('Laravel response data:', JSON.stringify(axiosError.response.data, null, 2));
+    console.error('Get payouts error:', error);
+    const apiError = error as {
+      response?: {
+        data?: {
+          message?: string;
+        };
+        status?: number;
+      };
+      code?: string;
+    };
+
+    if (apiError.code === 'ECONNREFUSED') {
+      return NextResponse.json(
+        {
+          success: false,
+          status: 'error',
+          message: 'Cannot connect to backend API',
+          errors: {},
+        },
+        { status: 503 }
+      );
     }
+
+    if (apiError.response?.status === 401) {
+      const response = NextResponse.json(
+        {
+          success: false,
+          status: 'error',
+          message: 'Unauthorized',
+          errors: {},
+        },
+        { status: 401 }
+      );
+      response.cookies.delete('access_token');
+      return response;
+    }
+
+    return NextResponse.json(
+      {
+        success: false,
+        status: 'error',
+        message: apiError.response?.data?.message || 'Failed to fetch payouts',
+        errors: {},
+      },
+      { status: apiError.response?.status || 500 }
+    );
+  }
+}
+
+/**
+ * POST /api/vendors/[vendor_slug]/payouts
+ * Request a new payout (disbursement)
+ */
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<{ vendor_slug: string }> }
+) {
+  try {
+    const { vendor_slug } = await context.params;
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access_token')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          status: 'error',
+          message: 'Unauthorized',
+          errors: {},
+        },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+
+    // Call Laravel API
+    const laravelClient = createLaravelClient(accessToken);
+    const response = await laravelClient.post(`/vendors/${vendor_slug}/payouts`, body);
+
+    return NextResponse.json(response);
+  } catch (error: unknown) {
+    console.error('Request payout error:', error);
     const apiError = error as {
       response?: {
         data?: {
@@ -70,72 +155,8 @@ export async function POST(
       {
         success: false,
         status: 'error',
-        message: apiError.response?.data?.message || 'Failed to submit KYC document',
+        message: apiError.response?.data?.message || 'Failed to request payout',
         errors: apiError.response?.data?.errors || {},
-      },
-      { status: apiError.response?.status || 500 }
-    );
-  }
-}
-
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ organization: string }> }
-) {
-  try {
-    const { organization } = await context.params;
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access_token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json(
-        {
-          success: false,
-          status: 'error',
-          message: 'Unauthorized',
-          errors: {},
-        },
-        { status: 401 }
-      );
-    }
-
-    // Call Laravel API
-    const laravelClient = createLaravelClient(accessToken);
-    const response = await laravelClient.get(
-      `/organizations/${organization}/kyc/documents`
-    );
-
-    return NextResponse.json(response);
-  } catch (error: unknown) {
-    console.error('Get KYC documents error:', error);
-    const apiError = error as {
-      response?: {
-        data?: {
-          message?: string;
-        };
-        status?: number;
-      };
-      code?: string;
-    };
-
-    if (apiError.code === 'ECONNREFUSED') {
-      return NextResponse.json(
-        {
-          success: false,
-          status: 'error',
-          message: 'Cannot connect to backend API',
-          errors: {},
-        },
-        { status: 503 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        success: false,
-        status: 'error',
-        message: apiError.response?.data?.message || 'Failed to fetch KYC documents',
-        errors: {},
       },
       { status: apiError.response?.status || 500 }
     );
