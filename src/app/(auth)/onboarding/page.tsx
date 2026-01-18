@@ -40,18 +40,18 @@ export default function OnboardingPage() {
       return;
     }
 
-    // Check if user is an administrator
-    const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
+    // // Check if user is an administrator
+    // const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
 
-    // Administrators should never access onboarding - redirect to admin dashboard
-    if (isAdministrator) {
-      console.log('[Onboarding Page] User is administrator, redirecting to admin dashboard...');
-      router.push('/admin/dashboard');
-      return;
-    }
+    // // Administrators should never access onboarding - redirect to admin dashboard
+    // if (isAdministrator) {
+    //   console.log('[Onboarding Page] User is administrator, redirecting to admin dashboard...');
+    //   router.push('/admin/dashboard');
+    //   return;
+    // }
 
     // If user has organizations, redirect to appropriate dashboard
-    if (user.organizations && user.organizations.length > 0) {
+    if (user.organizations && user.organizations.length > 1) {
       console.log('[Onboarding Page] User has organizations, redirecting to dashboard...');
       router.push('/vendor/dashboard');
     } else {
@@ -110,7 +110,7 @@ export default function OnboardingPage() {
   // }
 
   // If user already has organization, don't render the form (redirect is happening)
-  if (user && user.organizations && user.organizations.length > 0) {
+  if (user && user.organizations && user.organizations.length > 1) {
     return (
       <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
         <div className="flex flex-col items-center justify-center py-12">
