@@ -95,19 +95,19 @@ export default function OnboardingPage() {
   }
 
   // Check if user is an administrator
-  const isAdministrator = user?.is_super_admin || user?.has_admin_access || !!user?.admin?.is_super_admin || !!user?.admin?.is_platform_admin || !!user?.admin;
+  // const isAdministrator = user?.is_super_admin || user?.has_admin_access || !!user?.admin?.is_super_admin || !!user?.admin?.is_platform_admin || !!user?.admin;
 
-  // Administrators should never see onboarding form
-  if (isAdministrator) {
-    return (
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Redirecting to admin dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  // // Administrators should never see onboarding form
+  // if (isAdministrator) {
+  //   return (
+  //     <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+  //       <div className="flex flex-col items-center justify-center py-12">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  //         <p className="mt-4 text-gray-600">Redirecting to admin dashboard...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // If user already has organization, don't render the form (redirect is happening)
   if (user && user.organizations && user.organizations.length > 0) {

@@ -52,34 +52,34 @@ export async function middleware(request: NextRequest) {
 
   // Enforce context-based route protection
   // Admin users cannot access vendor routes and vice versa
-  // if (token && userContext && isDashboardRoute) {
-  //   if (userContext === 'admin' && isVendorRoute) {
-  //     // Admin trying to access vendor route - redirect to admin dashboard
-  //     console.log(`[Middleware] Admin user trying to access vendor route: ${pathname}, redirecting to admin dashboard`);
-  //     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-  //   }
+  if (token && userContext && isDashboardRoute) {
+    if (userContext === 'admin' && isVendorRoute) {
+      // Admin trying to access vendor route - redirect to admin dashboard
+      console.log(`[Middleware] Admin user trying to access vendor route: ${pathname}, redirecting to admin dashboard`);
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
 
-  //   if (userContext === 'vendor' && isAdminRoute) {
-  //     // Vendor trying to access admin route - redirect to vendor dashboard
-  //     console.log(`[Middleware] Vendor user trying to access admin route: ${pathname}, redirecting to vendor dashboard`);
-  //     return NextResponse.redirect(new URL('/vendor/dashboard', request.url));
-  //   }
-  // }
+    if (userContext === 'vendor' && isAdminRoute) {
+      // Vendor trying to access admin route - redirect to vendor dashboard
+      console.log(`[Middleware] Vendor user trying to access admin route: ${pathname}, redirecting to vendor dashboard`);
+      return NextResponse.redirect(new URL('/vendor/dashboard', request.url));
+    }
+  }
 
-  // // If authenticated and trying to access login/register page
-  // // Let the login page handle the redirect based on user context
-  // // (Admin users should go to /admin/dashboard, vendors to /vendor/dashboard)
-  // // So we DON'T redirect here - let the client-side login handler decide
+  // If authenticated and trying to access login/register page
+  // Let the login page handle the redirect based on user context
+  // (Admin users should go to /admin/dashboard, vendors to /vendor/dashboard)
+  // So we DON'T redirect here - let the client-side login handler decide
 
-  // // Only redirect from home page based on user context
-  // if (token && pathname === '/') {
-  //   if (userContext === 'admin') {
-  //     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-  //   } else {
-  //     // Default to vendor dashboard if no context or vendor context
-  //     return NextResponse.redirect(new URL('/vendor/dashboard', request.url));
-  //   }
-  // }
+  // Only redirect from home page based on user context
+  if (token && pathname === '/') {
+    if (userContext === 'admin') {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    } else {
+      // Default to vendor dashboard if no context or vendor context
+      return NextResponse.redirect(new URL('/vendor/dashboard', request.url));
+    }
+  }
 
   return NextResponse.next();
 }
