@@ -103,9 +103,13 @@ export interface Payout {
   description?: string;
   status: PayoutStatus;
   status_label: string;
+  is_automatic: boolean;        // Whether this was an auto-payout or manual request
+  transaction_count: number;    // Number of transactions included in this payout
   created_at: string;
   processed_at?: string;
   completed_at?: string;
+  failed_at?: string;
+  failure_reason?: string;
 }
 
 export interface RequestPayoutRequest {

@@ -345,9 +345,16 @@ export default function VendorDisbursementsPage() {
                               </span>
                             </td>
                             <td className="py-3">
-                              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                                {payout.payout_method === 'bank' ? 'Bank' : 'Mobile'}
-                              </span>
+                              <div className="flex items-center gap-1">
+                                {payout.is_automatic && (
+                                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                                    Auto
+                                  </span>
+                                )}
+                                <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                  {payout.payout_method === 'bank' ? 'Bank' : 'Mobile'}
+                                </span>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -378,6 +385,7 @@ export default function VendorDisbursementsPage() {
         <RequestPayoutDialog
           availableBalance={stats?.withdrawable_balance || 0}
           currency={currency}
+          minimumPayoutAmount={stats?.minimum_payout_amount}
           onClose={() => setShowRequestPayout(false)}
         />
       )}

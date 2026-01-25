@@ -22,13 +22,13 @@ export default function AdminLayout({
     );
   }
 
-  // Multiple ways to check if user is admin - comprehensive check
+  // Check if user is admin - use explicit flags, NOT !!user.admin
+  // Empty admin objects {} would incorrectly return true for vendors
   const isAdmin =
-    user.is_super_admin ||
-    user.has_admin_access ||
-    !!user.admin?.is_super_admin ||
-    !!user.admin?.is_platform_admin ||
-    !!user.admin || // If admin object exists at all
+    user.has_admin_access === true ||
+    user.is_super_admin === true ||
+    user.admin?.is_super_admin === true ||
+    user.admin?.is_platform_admin === true ||
     hasRole(['super_admin', 'platform_admin']);
 
   // If not admin, show access denied

@@ -48,6 +48,7 @@ export default function EditPaymentPagePage({ params }: PageProps) {
     control,
     watch,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<PaymentPageFormData>({
     resolver: zodResolver(paymentPageSchema),
@@ -68,7 +69,7 @@ export default function EditPaymentPagePage({ params }: PageProps) {
         collect_customer_info: paymentPage.collect_customer_info,
         collect_shipping_address: paymentPage.collect_shipping_address,
         allow_quantity: paymentPage.allow_quantity,
-        fee_mode: paymentPage.fee_mode || 'excluded',
+        include_fees_in_amount: paymentPage.include_fees_in_amount ?? false,
       });
 
       // Load customization from metadata
@@ -337,11 +338,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                     )}
                   </p>
                   <div className="space-y-3">
-                    <label className={`flex items-start gap-3 p-3 border-2 rounded-lg bg-white cursor-pointer transition-colors ${formValues.fee_mode === 'excluded' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}>
+                    <label className={`flex items-start gap-3 p-3 border-2 rounded-lg bg-white cursor-pointer transition-colors ${!formValues.include_fees_in_amount ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}`}>
                       <input
-                        {...register('fee_mode')}
                         type="radio"
-                        value="excluded"
+                        checked={!formValues.include_fees_in_amount}
+                        onChange={() => setValue('include_fees_in_amount', false)}
                         className="mt-1 text-blue-600 focus:ring-blue-500"
                       />
                       <div className="flex-1">
@@ -352,11 +353,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                       </div>
                     </label>
 
-                    <label className={`flex items-start gap-3 p-3 border-2 rounded-lg bg-white cursor-pointer transition-colors ${formValues.fee_mode === 'included' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'}`}>
+                    <label className={`flex items-start gap-3 p-3 border-2 rounded-lg bg-white cursor-pointer transition-colors ${formValues.include_fees_in_amount ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'}`}>
                       <input
-                        {...register('fee_mode')}
                         type="radio"
-                        value="included"
+                        checked={formValues.include_fees_in_amount === true}
+                        onChange={() => setValue('include_fees_in_amount', true)}
                         className="mt-1 text-green-600 focus:ring-green-500"
                       />
                       <div className="flex-1">
@@ -369,54 +370,63 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                   </div>
 
                   {/* Fee Calculation Preview */}
-                  {formValues.fixed_amount && formValues.fixed_amount > 0 && paymentPage?.platform_fee_percentage && Number(paymentPage.platform_fee_percentage) > 0 && (
-                    <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg">
-                      <h4 className="text-sm font-medium text-gray-700 mb-3">Payment Breakdown Preview</h4>
-                      {formValues.fee_mode === 'excluded' ? (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Amount you set:</span>
-                            <span className="font-medium">{formValues.currency_code} {formValues.fixed_amount.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Platform fee ({paymentPage.platform_fee_percentage}%):</span>
-                            <span className="text-red-600">- {formValues.currency_code} {(formValues.fixed_amount * Number(paymentPage.platform_fee_percentage) / 100).toFixed(2)}</span>
-                          </div>
-                          <div className="border-t pt-2 mt-2">
+                  {(() => {
+                    const rawAmount = formValues.fixed_amount;
+                    const feePercentage = paymentPage?.platform_fee_percentage;
+                    if (typeof rawAmount !== 'number' || !Number.isFinite(rawAmount) || rawAmount <= 0 || !feePercentage || Number(feePercentage) <= 0) {
+                      return null;
+                    }
+                    const amount = rawAmount;
+                    const feeAmount = amount * Number(feePercentage) / 100;
+                    return (
+                      <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg">
+                        <h4 className="text-sm font-medium text-gray-700 mb-3">Payment Breakdown Preview</h4>
+                        {!formValues.include_fees_in_amount ? (
+                          <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-700 font-medium">Customer pays:</span>
-                              <span className="font-bold text-gray-900">{formValues.currency_code} {formValues.fixed_amount.toFixed(2)}</span>
+                              <span className="text-gray-600">Amount you set:</span>
+                              <span className="font-medium">{formValues.currency_code} {amount.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between text-sm mt-1">
-                              <span className="text-gray-700 font-medium">You receive:</span>
-                              <span className="font-bold text-blue-600">{formValues.currency_code} {(formValues.fixed_amount * (1 - Number(paymentPage.platform_fee_percentage) / 100)).toFixed(2)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Amount you set:</span>
-                            <span className="font-medium">{formValues.currency_code} {formValues.fixed_amount.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Platform fee ({paymentPage.platform_fee_percentage}%):</span>
-                            <span className="text-gray-500">+ {formValues.currency_code} {(formValues.fixed_amount * Number(paymentPage.platform_fee_percentage) / 100).toFixed(2)}</span>
-                          </div>
-                          <div className="border-t pt-2 mt-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-700 font-medium">Customer pays:</span>
-                              <span className="font-bold text-gray-900">{formValues.currency_code} {(formValues.fixed_amount * (1 + Number(paymentPage.platform_fee_percentage) / 100)).toFixed(2)}</span>
+                              <span className="text-gray-600">Platform fee ({feePercentage}%):</span>
+                              <span className="text-red-600">- {formValues.currency_code} {feeAmount.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between text-sm mt-1">
-                              <span className="text-gray-700 font-medium">You receive:</span>
-                              <span className="font-bold text-green-600">{formValues.currency_code} {formValues.fixed_amount.toFixed(2)}</span>
+                            <div className="border-t pt-2 mt-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-700 font-medium">Customer pays:</span>
+                                <span className="font-bold text-gray-900">{formValues.currency_code} {amount.toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between text-sm mt-1">
+                                <span className="text-gray-700 font-medium">You receive:</span>
+                                <span className="font-bold text-blue-600">{formValues.currency_code} {(amount - feeAmount).toFixed(2)}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">Amount you set:</span>
+                              <span className="font-medium">{formValues.currency_code} {amount.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">Platform fee ({feePercentage}%):</span>
+                              <span className="text-gray-500">+ {formValues.currency_code} {feeAmount.toFixed(2)}</span>
+                            </div>
+                            <div className="border-t pt-2 mt-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-700 font-medium">Customer pays:</span>
+                                <span className="font-bold text-gray-900">{formValues.currency_code} {(amount + feeAmount).toFixed(2)}</span>
+                              </div>
+                              <div className="flex justify-between text-sm mt-1">
+                                <span className="text-gray-700 font-medium">You receive:</span>
+                                <span className="font-bold text-green-600">{formValues.currency_code} {amount.toFixed(2)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="space-y-3">

@@ -57,16 +57,17 @@ export function useAuth() {
 
   // Helper function to check if user is an administrator
   const isAdministrator = (user: AuthUser) => {
-    // Check multiple ways a user can be an administrator:
-    // 1. Root level is_super_admin flag
-    // 2. has_admin_access flag
-    // 3. admin object exists (with is_super_admin or is_platform_admin)
+    // Check explicit admin flags from backend - DO NOT rely on !!user.admin
+    // because empty admin objects {} will return true
+    // Priority order:
+    // 1. Explicit has_admin_access flag from backend (most reliable)
+    // 2. Root level is_super_admin flag
+    // 3. admin object with actual admin properties set to true
     return (
-      user.is_super_admin ||
-      user.has_admin_access ||
-      !!user.admin?.is_super_admin ||
-      !!user.admin?.is_platform_admin ||
-      !!user.admin
+      user.has_admin_access === true ||
+      user.is_super_admin === true ||
+      user.admin?.is_super_admin === true ||
+      user.admin?.is_platform_admin === true
     );
   };
 
@@ -90,8 +91,13 @@ export function useAuth() {
       email: user.email,
       currentPath,
       defaultContext,
+      has_admin_access: user.has_admin_access,
+      has_vendor_access: user.has_vendor_access,
+      is_super_admin: user.is_super_admin,
+      admin: user.admin,
       isAdministrator: isAdministrator(user),
       hasOrganizations: user.organizations && user.organizations.length > 0,
+      organizationsCount: user.organizations?.length || 0,
     });
 
     // Check if user needs to create an organization (vendors only)
@@ -108,9 +114,19 @@ export function useAuth() {
     if (defaultContext) {
       targetDashboard = defaultContext === 'admin' ? '/admin/dashboard' : '/vendor/dashboard';
     } else {
-      // Priority 2: Fall back to checking user's access
-      const userIsAdministrator = isAdministrator(user);
-      targetDashboard = userIsAdministrator ? '/admin/dashboard' : '/vendor/dashboard';
+      // Priority 2: Check explicit access flags from backend
+      // Default to vendor if has_vendor_access is true OR if no admin access
+      // This ensures fresh users (who are vendors by default) go to vendor dashboard
+      const hasVendorAccess = user.has_vendor_access === true;
+      const hasAdminAccess = isAdministrator(user);
+
+      // If user has vendor access, prioritize vendor dashboard (default for new users)
+      // Only go to admin if user explicitly has admin access AND no vendor access
+      if (hasVendorAccess || !hasAdminAccess) {
+        targetDashboard = '/vendor/dashboard';
+      } else {
+        targetDashboard = '/admin/dashboard';
+      }
     }
 
     // Only redirect if not already on the correct dashboard

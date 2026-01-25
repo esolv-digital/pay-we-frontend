@@ -41,7 +41,11 @@ export function PayoutHistoryTable() {
     <div className="space-y-4">
       {/* Filters */}
       <div className="flex items-center gap-4">
+        <label htmlFor="status-filter" className="text-sm font-medium text-gray-700">
+          Status
+        </label>
         <select
+          id="status-filter"
           value={statusFilter}
           onChange={(e) => {
             setStatusFilter(e.target.value as PayoutStatus | '');
@@ -73,6 +77,7 @@ export function PayoutHistoryTable() {
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Account</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Amount</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Status</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Type</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Date</th>
                 </tr>
               </thead>
@@ -116,6 +121,18 @@ export function PayoutHistoryTable() {
                         )}>
                           {payout.status_label || statusStyle.label}
                         </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <span className={cn(
+                            'px-2 py-1 text-xs font-medium rounded-full',
+                            payout.is_automatic
+                              ? 'bg-purple-100 text-purple-800'
+                              : 'bg-gray-100 text-gray-800'
+                          )}>
+                            {payout.is_automatic ? 'Auto' : 'Manual'}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
                         <p>{new Date(payout.created_at).toLocaleDateString()}</p>

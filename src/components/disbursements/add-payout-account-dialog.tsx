@@ -89,7 +89,7 @@ export function AddPayoutAccountDialog({ onClose }: AddPayoutAccountDialogProps)
       const isValid = await form.trigger(['provider_code', 'phone_number']);
       if (!isValid) return;
 
-      // Verify mobile money account with backend
+      // Verify mobile money account with backend (same as bank - API returns account name)
       verifyAccount.mutate(
         {
           account_type: 'mobile_money',
@@ -99,7 +99,7 @@ export function AddPayoutAccountDialog({ onClose }: AddPayoutAccountDialogProps)
         {
           onSuccess: (data) => {
             setVerifiedData({
-              account_name: data.account_name || 'Mobile Money Account',
+              account_name: data.account_name,
               provider_name: selectedProvider?.name || 'Unknown Network',
             });
             setStep('confirm');

@@ -21,9 +21,6 @@ export interface CustomField {
   placeholder?: string;
 }
 
-// Fee handling mode for payment pages
-export type FeeMode = 'excluded' | 'included';
-
 export interface PaymentPage {
   id: string;
   vendor_id: string;
@@ -48,12 +45,14 @@ export interface PaymentPage {
     customization?: PaymentPageCustomization;
     [key: string]: string | number | boolean | null | PaymentPageCustomization | undefined;
   };
-  // Fee handling
-  fee_mode: FeeMode; // 'excluded' = deduct from amount, 'included' = add to amount
-  // Calculated fee breakdown (from backend)
-  platform_fee_percentage?: number;
-  gateway_fee_percentage?: number;
-  flat_fee_amount?: number;
+  // Fee handling - backend uses boolean field
+  include_fees_in_amount: boolean; // true = customer pays fees (added to amount), false = vendor pays (deducted)
+  // Fee breakdown from backend (based on country/gateway/organization settings)
+  platform_fee_percentage?: number; // Percentage fee (e.g., 1.5 for 1.5%)
+  gateway_fee_percentage?: number;  // Gateway percentage fee
+  flat_fee_amount?: number;         // Flat fee amount (e.g., 0.50 for $0.50)
+  // Computed total fee percentage for display (optional - backend may provide)
+  total_fee_percentage?: number;
   // Country/payment method restrictions
   allowed_countries?: string[] | null;
   allowed_payment_methods?: string[] | null;
@@ -81,8 +80,8 @@ export interface CreatePaymentPageInput {
     customization?: PaymentPageCustomization;
     [key: string]: string | number | boolean | null | PaymentPageCustomization | undefined;
   };
-  // Fee handling - 'excluded' = deduct from amount, 'included' = add to amount
-  fee_mode?: FeeMode;
+  // Fee handling - true = customer pays fees (added to amount), false = vendor pays (deducted)
+  include_fees_in_amount?: boolean;
   // Country/payment method restrictions
   allowed_countries?: string[] | null;
   allowed_payment_methods?: string[] | null;

@@ -121,17 +121,17 @@ export default function PaymentPagesPage() {
                     </div>
                     <span
                       className={`px-2 py-0.5 text-xs font-medium rounded ${
-                        page.fee_mode === 'included'
+                        page.include_fees_in_amount
                           ? 'bg-purple-100 text-purple-700'
                           : 'bg-gray-100 text-gray-600'
                       }`}
                       title={
-                        page.fee_mode === 'included'
+                        page.include_fees_in_amount
                           ? 'Customer pays the service fee'
                           : 'Fee deducted from your earnings'
                       }
                     >
-                      {page.fee_mode === 'included' ? 'Customer pays fee' : 'Vendor pays fee'}
+                      {page.include_fees_in_amount ? 'Customer pays fee' : 'Vendor pays fee'}
                     </span>
                   </div>
                   <div>

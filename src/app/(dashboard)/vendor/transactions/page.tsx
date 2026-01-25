@@ -238,12 +238,17 @@ export default function VendorTransactionsPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All Statuses</option>
+              <option value="successful">Successful</option>
               <option value="completed">Completed</option>
               <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
               <option value="processing">Processing</option>
+              <option value="initiated">Initiated</option>
+              <option value="failed">Failed</option>
               <option value="refunded">Refunded</option>
+              <option value="chargeback">Disputed</option>
+              <option value="on_hold">Under Review</option>
               <option value="cancelled">Cancelled</option>
+              <option value="expired">Expired</option>
             </select>
           </div>
 

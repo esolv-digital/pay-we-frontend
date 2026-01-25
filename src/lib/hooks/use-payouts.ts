@@ -141,6 +141,7 @@ export function useCreatePayoutAccount() {
       payoutApi.createPayoutAccount(vendorSlug!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payout-accounts', vendorSlug] });
+      queryClient.invalidateQueries({ queryKey: ['disbursement-statistics', vendorSlug] });
       showSuccess('Payout account added successfully!');
     },
     onError: (error) => {
@@ -161,6 +162,7 @@ export function useUpdatePayoutAccount() {
       payoutApi.updatePayoutAccount(vendorSlug!, accountId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payout-accounts', vendorSlug] });
+      queryClient.invalidateQueries({ queryKey: ['disbursement-statistics', vendorSlug] });
       showSuccess('Payout account updated successfully!');
     },
     onError: (error) => {
@@ -181,6 +183,7 @@ export function useDeletePayoutAccount() {
       payoutApi.deletePayoutAccount(vendorSlug!, accountId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payout-accounts', vendorSlug] });
+      queryClient.invalidateQueries({ queryKey: ['disbursement-statistics', vendorSlug] });
       showSuccess('Payout account removed successfully!');
     },
     onError: (error) => {
@@ -201,6 +204,7 @@ export function useSetDefaultPayoutAccount() {
       payoutApi.updatePayoutAccount(vendorSlug!, accountId, { is_default: true }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payout-accounts', vendorSlug] });
+      queryClient.invalidateQueries({ queryKey: ['disbursement-statistics', vendorSlug] });
       showSuccess('Default payout account updated!');
     },
     onError: (error) => {
@@ -227,6 +231,8 @@ export function useRequestPayout() {
       queryClient.invalidateQueries({ queryKey: ['payouts', vendorSlug] });
       queryClient.invalidateQueries({ queryKey: ['vendor-balance', vendorSlug] });
       queryClient.invalidateQueries({ queryKey: ['vendor-dashboard', vendorSlug] });
+      queryClient.invalidateQueries({ queryKey: ['disbursement-statistics', vendorSlug] });
+      queryClient.invalidateQueries({ queryKey: ['recent-settlements', vendorSlug] });
       showSuccess('Payout request submitted successfully!');
     },
     onError: (error) => {

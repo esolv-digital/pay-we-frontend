@@ -62,7 +62,7 @@ function PaymentVerificationContent() {
     let destination;
     let countdown = 10; // Default 10 seconds
 
-    if (result.status === 'success') {
+    if (result.status === 'paid') {
       // On success, always redirect to homepage
       // User can manually click store URL button if they want
       destination = {
@@ -139,7 +139,7 @@ function PaymentVerificationContent() {
           setIsVerifying(false);
 
           // Start redirect countdown on success or failure
-          if (result.status === 'success' || result.status === 'failed') {
+          if (result.status === 'paid' || result.status === 'failed') {
             startRedirectCountdown(result);
           }
         }
@@ -287,7 +287,7 @@ function PaymentVerificationContent() {
   }
 
   // Payment verified successfully - Thank You Page
-  if (verificationResult?.status === 'success' && verificationResult.transaction) {
+  if (verificationResult?.status === 'paid' && verificationResult.transaction) {
     const transaction = verificationResult.transaction;
     const paymentPage = transaction.payment_page;
     const storeUrl = paymentPage?.metadata?.customization?.store_url;

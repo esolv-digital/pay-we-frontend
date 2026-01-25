@@ -196,18 +196,28 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
   const amountValue = watch('amount') || 0;
   const quantityValue = watch('quantity') || 1;
 
-  // Calculate fee and display amounts based on fee_mode
-  const feePercentage = Number(paymentPage.platform_fee_percentage) || 0;
+  // Calculate fees based on backend fee structure
+  // Fees can be: percentage (platform + gateway) and/or flat fee
+  const platformFeePercentage = Number(paymentPage.platform_fee_percentage) || 0;
+  const gatewayFeePercentage = Number(paymentPage.gateway_fee_percentage) || 0;
+  const flatFeeAmount = Number(paymentPage.flat_fee_amount) || 0;
+  const totalFeePercentage = platformFeePercentage + gatewayFeePercentage;
+
+  // Check if there are any fees configured
+  const hasFees = totalFeePercentage > 0 || flatFeeAmount > 0;
+
   const baseAmount = paymentPage.amount_type === 'fixed'
     ? Number(paymentPage.fixed_amount) || 0
     : amountValue;
 
-  // If fee_mode is 'included', customer pays base + fee
-  // If fee_mode is 'excluded', customer pays just the base amount
-  const feeAmount = paymentPage.fee_mode === 'included' && feePercentage > 0
-    ? baseAmount * (feePercentage / 100)
+  // Calculate fee amount based on fee structure
+  // If include_fees_in_amount is true, customer pays base + fees
+  // If include_fees_in_amount is false, customer pays just the base amount (vendor absorbs fees)
+  const percentageFee = totalFeePercentage > 0 ? baseAmount * (totalFeePercentage / 100) : 0;
+  const totalFeeAmount = paymentPage.include_fees_in_amount && hasFees
+    ? percentageFee + flatFeeAmount
     : 0;
-  const displayAmount = baseAmount + feeAmount;
+  const displayAmount = baseAmount + totalFeeAmount;
   const totalAmount = displayAmount * quantityValue;
 
   if (transactionCreated) {
@@ -288,16 +298,22 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                         {formatCurrency(displayAmount, paymentPage.currency_code)}
                       </div>
                       {/* Fee breakdown for transparency */}
-                      {feePercentage > 0 && (
+                      {hasFees && (
                         <div className="mt-3 p-3 rounded-lg text-sm" style={{ backgroundColor: isDark ? '#374151' : '#f3f4f6' }}>
                           <div className="flex justify-between mb-1" style={{ color: defaultMutedText }}>
                             <span>Item price:</span>
                             <span>{formatCurrency(baseAmount, paymentPage.currency_code)}</span>
                           </div>
                           <div className="flex justify-between mb-1" style={{ color: defaultMutedText }}>
-                            <span>Service fee ({feePercentage}%):</span>
-                            {paymentPage.fee_mode === 'included' ? (
-                              <span>{formatCurrency(feeAmount, paymentPage.currency_code)}</span>
+                            <span>
+                              Service fee
+                              {totalFeePercentage > 0 && ` (${totalFeePercentage}%)`}
+                              {flatFeeAmount > 0 && totalFeePercentage > 0 && ' + '}
+                              {flatFeeAmount > 0 && `${formatCurrency(flatFeeAmount, paymentPage.currency_code)} flat`}
+                              :
+                            </span>
+                            {paymentPage.include_fees_in_amount ? (
+                              <span>{formatCurrency(totalFeeAmount, paymentPage.currency_code)}</span>
                             ) : (
                               <span className="text-green-600">Covered by vendor</span>
                             )}
@@ -335,16 +351,22 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                       <p className="text-sm text-red-600 mt-1">{errors.amount.message}</p>
                     )}
                     {/* Fee breakdown for flexible/donation amounts - show for transparency */}
-                    {feePercentage > 0 && amountValue > 0 && (
+                    {hasFees && amountValue > 0 && (
                       <div className="mt-3 p-3 rounded-lg text-sm" style={{ backgroundColor: isDark ? '#374151' : '#f3f4f6' }}>
                         <div className="flex justify-between mb-1" style={{ color: defaultMutedText }}>
                           <span>Amount:</span>
                           <span>{formatCurrency(amountValue, paymentPage.currency_code)}</span>
                         </div>
                         <div className="flex justify-between mb-1" style={{ color: defaultMutedText }}>
-                          <span>Service fee ({feePercentage}%):</span>
-                          {paymentPage.fee_mode === 'included' ? (
-                            <span>{formatCurrency(feeAmount, paymentPage.currency_code)}</span>
+                          <span>
+                            Service fee
+                            {totalFeePercentage > 0 && ` (${totalFeePercentage}%)`}
+                            {flatFeeAmount > 0 && totalFeePercentage > 0 && ' + '}
+                            {flatFeeAmount > 0 && `${formatCurrency(flatFeeAmount, paymentPage.currency_code)} flat`}
+                            :
+                          </span>
+                          {paymentPage.include_fees_in_amount ? (
+                            <span>{formatCurrency(totalFeeAmount, paymentPage.currency_code)}</span>
                           ) : (
                             <span className="text-green-600">Covered by vendor</span>
                           )}
@@ -389,9 +411,9 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                   {quantityValue > 1 && (
                     <div className="text-sm" style={{ color: defaultMutedText }}>
                       <p>Total: {formatCurrency(totalAmount, paymentPage.currency_code)}</p>
-                      {paymentPage.fee_mode === 'included' && feePercentage > 0 && (
+                      {paymentPage.include_fees_in_amount && hasFees && (
                         <p className="text-xs">
-                          (includes {formatCurrency(feeAmount * quantityValue, paymentPage.currency_code)} service fee)
+                          (includes {formatCurrency(totalFeeAmount * quantityValue, paymentPage.currency_code)} service fee)
                         </p>
                       )}
                     </div>

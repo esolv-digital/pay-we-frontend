@@ -43,6 +43,15 @@ export async function POST(request: NextRequest) {
       path: '/',
     });
 
+    // Set user context cookie - new registrations are always vendors by default
+    cookieStore.set('user_context', 'vendor', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge,
+      path: '/',
+    });
+
     // Return response matching frontend expectation
     return NextResponse.json({
       success: true,

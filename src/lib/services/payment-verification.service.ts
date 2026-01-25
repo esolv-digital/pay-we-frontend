@@ -14,8 +14,9 @@ export interface PaymentVerificationConfig {
 
 /**
  * Payment Verification Status
+ * Uses backend computed fields: is_paid, is_pending, is_failed
  */
-export type PaymentStatus = 'pending' | 'completed' | 'success' | 'failed' | 'cancelled' | 'incomplete' | 'error';
+export type PaymentStatus = 'pending' | 'paid' | 'failed';
 
 /**
  * Payment Verification Result
@@ -44,8 +45,8 @@ export class PaymentVerificationService {
   constructor(config?: Partial<PaymentVerificationConfig>) {
     // Default configuration
     this.config = {
-      maxAttempts: config?.maxAttempts ?? 30, // Poll for up to 30 attempts
-      initialDelayMs: config?.initialDelayMs ?? 2000, // Start with 2 seconds
+      maxAttempts: config?.maxAttempts ?? 10, // Poll for up to 30 attempts
+      initialDelayMs: config?.initialDelayMs ?? 5000, // Start with 2 seconds
       maxDelayMs: config?.maxDelayMs ?? 10000, // Max 10 seconds between attempts
       backoffMultiplier: config?.backoffMultiplier ?? 1.5, // Exponential backoff
     };
@@ -71,7 +72,7 @@ export class PaymentVerificationService {
 
       try {
         const transaction = await publicApi.verifyTransaction(reference);
-        const status = this.normalizeStatus(transaction.status);
+        const status = this.getStatusFromTransaction(transaction);
 
         // Call progress callback
         if (onProgress) {
@@ -134,7 +135,7 @@ export class PaymentVerificationService {
   async verifySingleAttempt(reference: string): Promise<PaymentVerificationResult> {
     try {
       const transaction = await publicApi.verifyTransaction(reference);
-      const status = this.normalizeStatus(transaction.status);
+      const status = this.getStatusFromTransaction(transaction);
 
       return {
         transaction,
@@ -153,25 +154,27 @@ export class PaymentVerificationService {
 
   /**
    * Check if status is terminal (no further polling needed)
+   * Uses backend computed fields for reliable status checking
    */
   private isTerminalStatus(status: PaymentStatus): boolean {
-    return status === 'completed' || status === 'success' || status === 'failed' || status === 'cancelled' || status === 'incomplete' || status === 'error';
+    return status === 'paid' || status === 'failed';
   }
 
   /**
-   * Normalize transaction status to standard PaymentStatus
+   * Get payment status from transaction using backend computed fields
+   * Uses is_paid, is_pending, is_failed from backend response
    */
-  private normalizeStatus(status: string): PaymentStatus {
-    const normalized = status.toLowerCase();
-
-    if (normalized === 'completed' || normalized === 'success') {
-      return 'success';
+  private getStatusFromTransaction(transaction: Transaction): PaymentStatus {
+    // Use backend computed fields for reliable status checking
+    if (transaction.is_paid) {
+      return 'paid';
     }
 
-    if (normalized === 'failed' || normalized === 'cancelled' || normalized === 'incomplete' || normalized === 'error') {
+    if (transaction.is_failed) {
       return 'failed';
     }
 
+    // Default to pending (is_pending covers: pending, initiated, processing)
     return 'pending';
   }
 

@@ -31,61 +31,50 @@ export const PAYMENT_METHOD_LABELS = {
 } as const;
 
 // Transaction Statuses
+// Flow: initiated → pending → processing → successful → completed
 export const TRANSACTION_STATUSES = {
-  PENDING: 'pending',
-  APPROVED: 'approved',
-  COMPLETED: 'completed',
-  FAILED: 'failed',
-  CANCELLED: 'cancelled',
-  REFUNDED: 'refunded',
-  CHARGEBACK: 'chargeback',
-  EXPIRED: 'expired',
-  PROCESSING: 'processing',
-  ON_HOLD: 'on_hold',
-  EXCHANGE: 'exchange',
-  TRANSFER: 'transfer',
-  PAID: 'paid',
-  REFUND: 'refund',
-  GIFT: 'gift',
-  SUCCESS: 'success', // Legacy - maps to completed
+  INITIATED: 'initiated',     // Transaction created, customer on payment page
+  PENDING: 'pending',         // Customer at payment gateway (Paystack)
+  PROCESSING: 'processing',   // Payment being processed by gateway
+  SUCCESSFUL: 'successful',   // Payment confirmed, instant payout triggered
+  COMPLETED: 'completed',     // Full lifecycle done (payout completed)
+  FAILED: 'failed',           // Payment failed
+  CANCELLED: 'cancelled',     // Payment cancelled
+  EXPIRED: 'expired',         // Payment link expired
+  REFUNDED: 'refunded',       // Money returned to customer
+  CHARGEBACK: 'chargeback',   // Customer disputed payment
+  REVERSED: 'reversed',       // Bank reversed the transaction
+  ON_HOLD: 'on_hold',         // Under investigation
 } as const;
 
 export const TRANSACTION_STATUS_LABELS = {
+  [TRANSACTION_STATUSES.INITIATED]: 'Initiated',
   [TRANSACTION_STATUSES.PENDING]: 'Pending',
-  [TRANSACTION_STATUSES.APPROVED]: 'Approved',
+  [TRANSACTION_STATUSES.PROCESSING]: 'Processing',
+  [TRANSACTION_STATUSES.SUCCESSFUL]: 'Successful',
   [TRANSACTION_STATUSES.COMPLETED]: 'Completed',
   [TRANSACTION_STATUSES.FAILED]: 'Failed',
   [TRANSACTION_STATUSES.CANCELLED]: 'Cancelled',
-  [TRANSACTION_STATUSES.REFUNDED]: 'Refunded',
-  [TRANSACTION_STATUSES.CHARGEBACK]: 'Chargeback',
   [TRANSACTION_STATUSES.EXPIRED]: 'Expired',
-  [TRANSACTION_STATUSES.PROCESSING]: 'Processing',
-  [TRANSACTION_STATUSES.ON_HOLD]: 'On Hold',
-  [TRANSACTION_STATUSES.EXCHANGE]: 'Exchange',
-  [TRANSACTION_STATUSES.TRANSFER]: 'Transfer',
-  [TRANSACTION_STATUSES.PAID]: 'Paid',
-  [TRANSACTION_STATUSES.REFUND]: 'Refund',
-  [TRANSACTION_STATUSES.GIFT]: 'Gift',
-  [TRANSACTION_STATUSES.SUCCESS]: 'Success',
+  [TRANSACTION_STATUSES.REFUNDED]: 'Refunded',
+  [TRANSACTION_STATUSES.CHARGEBACK]: 'Disputed',
+  [TRANSACTION_STATUSES.REVERSED]: 'Reversed',
+  [TRANSACTION_STATUSES.ON_HOLD]: 'Under Review',
 } as const;
 
 export const TRANSACTION_STATUS_COLORS = {
+  [TRANSACTION_STATUSES.INITIATED]: 'bg-gray-100 text-gray-800',
   [TRANSACTION_STATUSES.PENDING]: 'bg-yellow-100 text-yellow-800',
-  [TRANSACTION_STATUSES.APPROVED]: 'bg-green-100 text-green-800',
+  [TRANSACTION_STATUSES.PROCESSING]: 'bg-blue-100 text-blue-800',
+  [TRANSACTION_STATUSES.SUCCESSFUL]: 'bg-green-100 text-green-800',
   [TRANSACTION_STATUSES.COMPLETED]: 'bg-green-100 text-green-800',
   [TRANSACTION_STATUSES.FAILED]: 'bg-red-100 text-red-800',
   [TRANSACTION_STATUSES.CANCELLED]: 'bg-gray-100 text-gray-800',
+  [TRANSACTION_STATUSES.EXPIRED]: 'bg-gray-100 text-gray-800',
   [TRANSACTION_STATUSES.REFUNDED]: 'bg-purple-100 text-purple-800',
   [TRANSACTION_STATUSES.CHARGEBACK]: 'bg-red-100 text-red-800',
-  [TRANSACTION_STATUSES.EXPIRED]: 'bg-gray-100 text-gray-800',
-  [TRANSACTION_STATUSES.PROCESSING]: 'bg-blue-100 text-blue-800',
+  [TRANSACTION_STATUSES.REVERSED]: 'bg-orange-100 text-orange-800',
   [TRANSACTION_STATUSES.ON_HOLD]: 'bg-orange-100 text-orange-800',
-  [TRANSACTION_STATUSES.EXCHANGE]: 'bg-indigo-100 text-indigo-800',
-  [TRANSACTION_STATUSES.TRANSFER]: 'bg-indigo-100 text-indigo-800',
-  [TRANSACTION_STATUSES.PAID]: 'bg-green-100 text-green-800',
-  [TRANSACTION_STATUSES.REFUND]: 'bg-purple-100 text-purple-800',
-  [TRANSACTION_STATUSES.GIFT]: 'bg-pink-100 text-pink-800',
-  [TRANSACTION_STATUSES.SUCCESS]: 'bg-green-100 text-green-800',
 } as const;
 
 // User Statuses

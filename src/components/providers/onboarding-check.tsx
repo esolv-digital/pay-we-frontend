@@ -37,8 +37,13 @@ export function OnboardingCheck({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Check if user is an administrator
-    const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
+    // Check if user is an administrator - use explicit flags, NOT !!user.admin
+    // Empty admin objects {} would incorrectly return true for vendors
+    const isAdministrator =
+      user.has_admin_access === true ||
+      user.is_super_admin === true ||
+      user.admin?.is_super_admin === true ||
+      user.admin?.is_platform_admin === true;
 
     // Administrators don't need onboarding (they don't need vendor organizations)
     if (isAdministrator) {
@@ -76,7 +81,12 @@ export function OnboardingCheck({ children }: { children: React.ReactNode }) {
 
   // Check one more time before rendering - extra safety
   if (user && !pathname.startsWith('/onboarding')) {
-    const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
+    // Check if user is an administrator - use explicit flags, NOT !!user.admin
+    const isAdministrator =
+      user.has_admin_access === true ||
+      user.is_super_admin === true ||
+      user.admin?.is_super_admin === true ||
+      user.admin?.is_platform_admin === true;
     const hasOrganization = user.organizations && user.organizations.length > 0;
 
     // Only redirect if not an administrator and no organization

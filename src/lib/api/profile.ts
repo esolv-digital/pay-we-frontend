@@ -36,6 +36,7 @@ export const profileApi = {
     const formData = new FormData();
     formData.append('avatar', file);
 
+    // Use fetch directly for FormData (axios has issues with FormData in this setup)
     const response = await fetch('/api/profile/avatar', {
       method: 'POST',
       body: formData,
@@ -44,7 +45,14 @@ export const profileApi = {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to upload avatar');
+      const errorObj = new Error(error.message || 'Failed to upload avatar') as Error & {
+        response?: { data?: { message?: string }; status?: number };
+      };
+      errorObj.response = {
+        data: { message: error.message },
+        status: response.status,
+      };
+      throw errorObj;
     }
 
     const result = await response.json();

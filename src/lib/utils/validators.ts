@@ -50,8 +50,8 @@ export const paymentPageSchema = z.object({
   collect_shipping_address: z.boolean().optional(),
   allow_quantity: z.boolean().optional(),
   redirect_url: z.string().url().optional().or(z.literal('')),
-  // Fee handling mode: 'excluded' = deduct from amount, 'included' = add to amount
-  fee_mode: z.enum(['excluded', 'included']).optional(),
+  // Fee handling: true = customer pays fees (added to amount), false = vendor pays (deducted)
+  include_fees_in_amount: z.boolean().optional(),
 }).refine(
   (data) => {
     // Validate fixed_amount when amount_type is 'fixed'

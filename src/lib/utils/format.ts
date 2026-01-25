@@ -4,10 +4,12 @@ import { format as dateFnsFormat } from 'date-fns';
  * Format currency with proper symbol and decimals
  */
 export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
+  // Handle NaN, undefined, or invalid numbers
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currencyCode,
-  }).format(amount);
+  }).format(safeAmount);
 }
 
 /**

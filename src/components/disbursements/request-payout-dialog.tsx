@@ -11,17 +11,18 @@ import { cn } from '@/lib/utils';
 interface RequestPayoutDialogProps {
   availableBalance: number;
   currency: string;
+  minimumPayoutAmount?: number;
   onClose: () => void;
 }
 
-export function RequestPayoutDialog({ availableBalance, currency, onClose }: RequestPayoutDialogProps) {
+export function RequestPayoutDialog({ availableBalance, currency, minimumPayoutAmount, onClose }: RequestPayoutDialogProps) {
   const { data: accounts } = usePayoutAccounts();
   const requestPayout = useRequestPayout();
 
   const [step, setStep] = useState<'form' | 'confirm'>('form');
 
-  // Minimum payout amount (in smallest unit, e.g., pesewas)
-  const MIN_PAYOUT = 10000; // 100 GHS
+  // Use API-provided minimum or fallback to default (100 GHS = 10000 pesewas)
+  const MIN_PAYOUT = minimumPayoutAmount || 10000;
   const MAX_PAYOUT = availableBalance;
 
   const payoutSchema = z.object({

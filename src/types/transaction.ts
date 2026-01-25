@@ -2,22 +2,20 @@ import type { Vendor } from './vendor';
 import type { PaymentPage } from './payment-page';
 
 // Transaction Status Types
+// Matches backend: initiated → pending → processing → successful → completed
 export type TransactionStatus =
-  | 'pending'
-  | 'approved'
-  | 'completed'
-  | 'failed'
-  | 'cancelled'
-  | 'refunded'
-  | 'chargeback'
-  | 'expired'
-  | 'processing'
-  | 'on_hold'
-  | 'exchange'
-  | 'transfer'
-  | 'paid'
-  | 'refund'
-  | 'gift';
+  | 'initiated'    // Transaction created, customer on payment page
+  | 'pending'      // Customer at payment gateway (Paystack)
+  | 'processing'   // Payment being processed by gateway
+  | 'successful'   // Payment confirmed, instant payout triggered
+  | 'completed'    // Full lifecycle done (payout completed)
+  | 'failed'       // Payment failed
+  | 'cancelled'    // Payment cancelled
+  | 'expired'      // Payment link expired
+  | 'refunded'     // Money returned to customer
+  | 'chargeback'   // Customer disputed payment
+  | 'reversed'     // Bank reversed the transaction
+  | 'on_hold';     // Under investigation
 
 // Payment Gateway Types
 export type PaymentGateway = 'paystack' | 'wipay' | 'flutterwave';
@@ -96,11 +94,13 @@ export interface Transaction {
   vendor_id?: string;
   payment_page_id?: string;
 
-  // Computed fields
+  // Computed fields from backend
+  is_successful?: boolean;
   is_completed?: boolean;
+  is_paid?: boolean;
   is_pending?: boolean;
   is_failed?: boolean;
-  can_be_settled?: boolean;
+  can_be_paid_out?: boolean;
 
   // Payment Gateway Integration Fields
   authorization_url?: string;

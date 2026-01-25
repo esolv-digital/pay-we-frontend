@@ -26,7 +26,7 @@ export default function OnboardingPage() {
       email: user?.email,
       organizationsCount: user?.organizations?.length || 0,
       organizations: user?.organizations,
-      isAdmin: user?.is_super_admin || user?.has_admin_access || !!user?.admin,
+      isAdmin: user?.has_admin_access === true || user?.is_super_admin === true || user?.admin?.is_super_admin === true || user?.admin?.is_platform_admin === true,
     });
 
     // Skip check if still loading user data
@@ -51,7 +51,7 @@ export default function OnboardingPage() {
     // }
 
     // If user has organizations, redirect to appropriate dashboard
-    if (user.organizations && user.organizations.length > 1) {
+    if (user.organizations && user.organizations.length > 0) {
       console.log('[Onboarding Page] User has organizations, redirecting to dashboard...');
       router.push('/vendor/dashboard');
     } else {
@@ -110,7 +110,7 @@ export default function OnboardingPage() {
   // }
 
   // If user already has organization, don't render the form (redirect is happening)
-  if (user && user.organizations && user.organizations.length > 1) {
+  if (user && user.organizations && user.organizations.length > 0) {
     return (
       <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
         <div className="flex flex-col items-center justify-center py-12">
