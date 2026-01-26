@@ -7,7 +7,6 @@ import {
   useSendTestNotification,
 } from '@/lib/hooks/use-notifications';
 import type {
-  NotificationChannel,
   NotificationType,
   NotificationCategory,
   NotificationPreference,
@@ -20,11 +19,11 @@ import { cn } from '@/lib/utils';
 
 // Category order for display
 const CATEGORY_ORDER: NotificationCategory[] = [
-  'transactions',
+  'payments',
   'payouts',
   'balance',
   'account',
-  'kyc',
+  'refunds',
   'security',
 ];
 
@@ -61,17 +60,17 @@ function ToggleSwitch({
 }
 
 export function NotificationSettings() {
-  const { data: preferencesResponse, isLoading } = useNotificationPreferences();
+  const { data: preferences, isLoading } = useNotificationPreferences();
   const togglePreference = useToggleNotificationPreference();
   const sendTest = useSendTestNotification();
 
   const handleToggle = (
-    type: NotificationType,
-    channel: NotificationChannel,
+    notification_type: NotificationType,
+    channel: 'email' | 'sms' | 'whatsapp' | 'push',
     currentValue: boolean
   ) => {
     togglePreference.mutate({
-      type,
+      notification_type,
       channel,
       enabled: !currentValue,
     });
@@ -79,8 +78,7 @@ export function NotificationSettings() {
 
   // Group preferences by category
   const groupedPreferences = useMemo(() => {
-    if (!preferencesResponse?.preferences)
-      return new Map<NotificationCategory, NotificationPreference[]>();
+    if (!preferences) return new Map<NotificationCategory, NotificationPreference[]>();
 
     const grouped = new Map<NotificationCategory, NotificationPreference[]>();
 
@@ -88,8 +86,8 @@ export function NotificationSettings() {
     CATEGORY_ORDER.forEach((cat) => grouped.set(cat, []));
 
     // Group preferences
-    preferencesResponse.preferences.forEach((pref) => {
-      const typeInfo = NOTIFICATION_TYPE_INFO[pref.type];
+    preferences.forEach((pref) => {
+      const typeInfo = NOTIFICATION_TYPE_INFO[pref.notification_type];
       if (typeInfo) {
         const category = typeInfo.category;
         const existing = grouped.get(category) || [];
@@ -99,7 +97,7 @@ export function NotificationSettings() {
     });
 
     return grouped;
-  }, [preferencesResponse?.preferences]);
+  }, [preferences]);
 
   if (isLoading) {
     return (
@@ -113,7 +111,7 @@ export function NotificationSettings() {
     );
   }
 
-  if (!preferencesResponse) {
+  if (!preferences) {
     return (
       <div className="p-6 text-center text-gray-500">
         Unable to load notification preferences
@@ -131,24 +129,40 @@ export function NotificationSettings() {
       {/* Test Notification Buttons */}
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
         <h3 className="font-medium mb-3">Test Notifications</h3>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => sendTest.mutate('email')}
             disabled={sendTest.isPending}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm"
           >
-            <span className="text-xl">📧</span>
-            <span className="text-sm">Send Test Email</span>
+            <span>@</span>
+            <span>Test Email</span>
           </button>
           <button
             type="button"
             onClick={() => sendTest.mutate('sms')}
             disabled={sendTest.isPending}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm"
           >
-            <span className="text-xl">📱</span>
-            <span className="text-sm">Send Test SMS</span>
+            <span>SMS</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => sendTest.mutate('whatsapp')}
+            disabled={sendTest.isPending}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm"
+          >
+            <span className="text-green-600 font-medium">WA</span>
+            <span>Test WhatsApp</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => sendTest.mutate('push')}
+            disabled={sendTest.isPending}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm"
+          >
+            <span>Test Push</span>
           </button>
         </div>
       </div>
@@ -170,75 +184,96 @@ export function NotificationSettings() {
               </div>
 
               {/* Preferences Table */}
-              <table className="w-full">
-                <thead className="bg-gray-50/50">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                      Event
-                    </th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase w-20">
-                      Email
-                    </th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase w-20">
-                      SMS
-                    </th>
-                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase w-20">
-                      Push
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {prefs.map((pref) => {
-                    const typeInfo = NOTIFICATION_TYPE_INFO[pref.type];
-                    const isCritical = typeInfo?.critical || false;
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50/50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        Event
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase w-16">
+                        Email
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase w-16">
+                        SMS
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase w-20">
+                        WhatsApp
+                      </th>
+                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase w-16">
+                        Push
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {prefs.map((pref) => {
+                      const typeInfo = NOTIFICATION_TYPE_INFO[pref.notification_type];
+                      const isCritical = typeInfo?.critical || !pref.is_optional;
 
-                    return (
-                      <tr key={pref.type} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            {isCritical && (
-                              <span
-                                className="text-red-500 text-xs"
-                                title="Critical notification"
-                              >
-                                ●
-                              </span>
-                            )}
-                            <div>
-                              <p className="font-medium text-sm">{pref.label}</p>
-                              <p className="text-xs text-gray-500">{pref.description}</p>
+                      return (
+                        <tr key={pref.notification_type} className="hover:bg-gray-50">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              {isCritical && (
+                                <span
+                                  className="text-red-500 text-xs flex-shrink-0"
+                                  title="Critical notification (cannot be disabled)"
+                                >
+                                  *
+                                </span>
+                              )}
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm truncate">{pref.label}</p>
+                                <p className="text-xs text-gray-500 truncate">{pref.description}</p>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <ToggleSwitch
-                            checked={pref.email_enabled}
-                            onChange={() => handleToggle(pref.type, 'email', pref.email_enabled)}
-                            disabled={!pref.is_optional || togglePreference.isPending}
-                            label={`${pref.label} email notification`}
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <ToggleSwitch
-                            checked={pref.sms_enabled}
-                            onChange={() => handleToggle(pref.type, 'sms', pref.sms_enabled)}
-                            disabled={!pref.is_optional || togglePreference.isPending}
-                            label={`${pref.label} SMS notification`}
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <ToggleSwitch
-                            checked={pref.push_enabled}
-                            onChange={() => handleToggle(pref.type, 'push', pref.push_enabled)}
-                            disabled={!pref.is_optional || togglePreference.isPending}
-                            label={`${pref.label} push notification`}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <ToggleSwitch
+                              checked={pref.email_enabled}
+                              onChange={() =>
+                                handleToggle(pref.notification_type, 'email', pref.email_enabled)
+                              }
+                              disabled={!pref.is_optional || togglePreference.isPending}
+                              label={`${pref.label} email notification`}
+                            />
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <ToggleSwitch
+                              checked={pref.sms_enabled}
+                              onChange={() =>
+                                handleToggle(pref.notification_type, 'sms', pref.sms_enabled)
+                              }
+                              disabled={!pref.is_optional || togglePreference.isPending}
+                              label={`${pref.label} SMS notification`}
+                            />
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <ToggleSwitch
+                              checked={pref.whatsapp_enabled}
+                              onChange={() =>
+                                handleToggle(pref.notification_type, 'whatsapp', pref.whatsapp_enabled)
+                              }
+                              disabled={!pref.is_optional || togglePreference.isPending}
+                              label={`${pref.label} WhatsApp notification`}
+                            />
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <ToggleSwitch
+                              checked={pref.push_enabled}
+                              onChange={() =>
+                                handleToggle(pref.notification_type, 'push', pref.push_enabled)
+                              }
+                              disabled={!pref.is_optional || togglePreference.isPending}
+                              label={`${pref.label} push notification`}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           );
         })}
@@ -247,9 +282,9 @@ export function NotificationSettings() {
       {/* Info Note */}
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <p className="text-sm text-blue-800">
-          <span className="font-medium">Note:</span> Critical notifications
-          (marked with <span className="text-red-500">●</span>) cannot be disabled
-          to ensure account security and important updates reach you.
+          <span className="font-medium">Note:</span> Critical notifications (marked with{' '}
+          <span className="text-red-500 font-bold">*</span>) cannot be disabled to ensure
+          account security and important updates reach you.
         </p>
       </div>
     </div>

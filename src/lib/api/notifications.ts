@@ -1,58 +1,132 @@
 import { apiClient } from './client';
 import type {
-  NotificationPreferencesResponse,
+  NotificationPreference,
   UpdateNotificationPreferenceRequest,
   BulkUpdateNotificationPreferencesRequest,
-  TestNotificationRequest,
+  NotificationTypeInfo,
+  NotificationHistoryFilters,
+  NotificationHistoryResponse,
+  UserDevice,
+  TestNotificationResponse,
 } from '@/types';
 
 // ============================================================================
-// API CLIENT
+// VENDOR/USER NOTIFICATION API
 // ============================================================================
 
 export const notificationsApi = {
+  // ==========================================================================
+  // NOTIFICATION PREFERENCES
+  // ==========================================================================
+
   /**
-   * Get notification preferences
-   * GET /notifications/preferences
+   * Get all notification preferences
+   * GET /api/v1/notifications/preferences
    */
-  getPreferences: async (): Promise<NotificationPreferencesResponse> => {
-    return apiClient.get<NotificationPreferencesResponse>('/notifications/preferences');
+  getPreferences: async (): Promise<NotificationPreference[]> => {
+    return apiClient.get<NotificationPreference[]>('/notifications/preferences');
   },
 
   /**
    * Update a single notification preference
-   * PUT /notifications/preferences
+   * PUT /api/v1/notifications/preferences
    */
   updatePreference: async (
     data: UpdateNotificationPreferenceRequest
-  ): Promise<{ message: string }> => {
-    return apiClient.put<{ message: string }>('/notifications/preferences', data);
+  ): Promise<NotificationPreference> => {
+    return apiClient.put<NotificationPreference>('/notifications/preferences', data);
   },
 
   /**
    * Bulk update notification preferences
-   * POST /notifications/preferences/bulk
+   * POST /api/v1/notifications/preferences/bulk
    */
   bulkUpdatePreferences: async (
     data: BulkUpdateNotificationPreferencesRequest
-  ): Promise<{ message: string }> => {
-    return apiClient.post<{ message: string }>('/notifications/preferences/bulk', data);
+  ): Promise<void> => {
+    return apiClient.post<void>('/notifications/preferences/bulk', data);
   },
 
   /**
-   * Send test notification
-   * POST /notifications/test
+   * Get all notification types
+   * GET /api/v1/notifications/types
    */
-  sendTestNotification: async (
-    data: TestNotificationRequest
-  ): Promise<{ message: string }> => {
-    return apiClient.post<{ message: string }>('/notifications/test', data);
+  getNotificationTypes: async (): Promise<NotificationTypeInfo[]> => {
+    return apiClient.get<NotificationTypeInfo[]>('/notifications/types');
   },
 
-  // Legacy method name for backward compatibility
+  // ==========================================================================
+  // NOTIFICATION HISTORY
+  // ==========================================================================
+
+  /**
+   * Get notification history
+   * GET /api/v1/notifications/history
+   */
+  getHistory: async (filters?: NotificationHistoryFilters): Promise<NotificationHistoryResponse> => {
+    const params = new URLSearchParams();
+
+    if (filters?.channel) params.append('channel', filters.channel);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.notification_type) params.append('notification_type', filters.notification_type);
+    if (filters?.per_page) params.append('per_page', filters.per_page.toString());
+    if (filters?.page) params.append('page', filters.page.toString());
+
+    const queryString = params.toString();
+    const url = queryString ? `/notifications/history?${queryString}` : '/notifications/history';
+
+    return apiClient.get<NotificationHistoryResponse>(url);
+  },
+
+  // ==========================================================================
+  // DEVICE MANAGEMENT
+  // ==========================================================================
+
+  /**
+   * Get user devices
+   * GET /api/v1/notifications/devices
+   */
+  getDevices: async (): Promise<UserDevice[]> => {
+    return apiClient.get<UserDevice[]>('/notifications/devices');
+  },
+
+  /**
+   * Trust a device
+   * POST /api/v1/notifications/devices/{device}/trust
+   */
+  trustDevice: async (deviceId: string): Promise<UserDevice> => {
+    return apiClient.post<UserDevice>(`/notifications/devices/${deviceId}/trust`);
+  },
+
+  /**
+   * Remove a device
+   * DELETE /api/v1/notifications/devices/{device}
+   */
+  removeDevice: async (deviceId: string): Promise<void> => {
+    return apiClient.delete<void>(`/notifications/devices/${deviceId}`);
+  },
+
+  // ==========================================================================
+  // TEST NOTIFICATIONS
+  // ==========================================================================
+
+  /**
+   * Send test notification
+   * POST /api/v1/notifications/test
+   */
+  sendTestNotification: async (
+    channel: 'email' | 'sms' | 'whatsapp' | 'push'
+  ): Promise<TestNotificationResponse> => {
+    return apiClient.post<TestNotificationResponse>('/notifications/test', { channel });
+  },
+
+  // ==========================================================================
+  // LEGACY METHODS (backward compatibility)
+  // ==========================================================================
+
   updatePreferences: async (
     data: UpdateNotificationPreferenceRequest
-  ): Promise<{ message: string }> => {
+  ): Promise<NotificationPreference> => {
     return notificationsApi.updatePreference(data);
   },
 };
