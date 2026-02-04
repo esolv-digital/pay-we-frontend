@@ -8,17 +8,21 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { format, subDays } from 'date-fns';
 import {
-  useLoginAttempts,
-  useSuspiciousLoginAttempts,
-  useLoginStatistics,
-} from '@/lib/hooks/use-admin-notifications';
-import type { LoginAttemptFilters, SuspiciousReason } from '@/types';
+  useLoginAttemptsList,
+  useSuspiciousAttempts,
+  useLoginAttemptStatistics,
+} from '@/lib/hooks/use-admin-login-attempts';
+import type { LoginAttemptFilters, LoginAttempt } from '@/lib/api/admin-login-attempts';
+
+type SuspiciousReason = 'new_device' | 'new_country' | 'impossible_travel' | 'multiple_failures' | 'vpn_detected' | 'rapid_attempts';
 
 const SUSPICIOUS_REASON_LABELS: Record<SuspiciousReason, string> = {
   new_device: 'New Device',
   new_country: 'New Country',
   impossible_travel: 'Impossible Travel',
   multiple_failures: 'Multiple Failures',
+  vpn_detected: 'VPN Detected',
+  rapid_attempts: 'Rapid Attempts',
 };
 
 const SUSPICIOUS_REASON_COLORS: Record<SuspiciousReason, string> = {
@@ -26,6 +30,8 @@ const SUSPICIOUS_REASON_COLORS: Record<SuspiciousReason, string> = {
   new_country: 'bg-purple-100 text-purple-800',
   impossible_travel: 'bg-red-100 text-red-800',
   multiple_failures: 'bg-orange-100 text-orange-800',
+  vpn_detected: 'bg-gray-100 text-gray-800',
+  rapid_attempts: 'bg-pink-100 text-pink-800',
 };
 
 type ViewMode = 'all' | 'suspicious';
@@ -39,19 +45,22 @@ export default function AdminSecurityPage() {
     date_to: format(new Date(), 'yyyy-MM-dd'),
   });
 
-  const { data: allData, isLoading: allLoading } = useLoginAttempts(
-    viewMode === 'all' ? filters : undefined
+  const { data: allData, isLoading: allLoading } = useLoginAttemptsList(
+    viewMode === 'all' ? filters : {},
+    { enabled: viewMode === 'all' }
   );
-  const { data: suspiciousData, isLoading: suspiciousLoading } = useSuspiciousLoginAttempts(
-    viewMode === 'suspicious' ? undefined : undefined,
-    viewMode === 'suspicious' ? filters.per_page : undefined,
-    viewMode === 'suspicious' ? filters.page : undefined
+  const { data: suspiciousData, isLoading: suspiciousLoading } = useSuspiciousAttempts(
+    viewMode === 'suspicious' ? { per_page: filters.per_page, page: filters.page } : undefined,
+    { enabled: viewMode === 'suspicious' }
   );
-  const { data: stats } = useLoginStatistics(filters.date_from, filters.date_to);
+  const { data: stats } = useLoginAttemptStatistics({
+    date_from: filters.date_from,
+    date_to: filters.date_to,
+  });
 
   const data = viewMode === 'all' ? allData : suspiciousData;
   const isLoading = viewMode === 'all' ? allLoading : suspiciousLoading;
-  const attempts = data?.attempts || [];
+  const attempts = data?.data || [];
   const meta = data?.meta;
 
   const handleFilterChange = (key: keyof LoginAttemptFilters, value: string | boolean) => {
@@ -254,7 +263,7 @@ export default function AdminSecurityPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {attempts.map((attempt) => (
+                  {attempts.map((attempt: LoginAttempt) => (
                     <tr
                       key={attempt.id}
                       className={cn(
@@ -308,12 +317,12 @@ export default function AdminSecurityPage() {
                           {attempt.is_suspicious && (
                             <Badge className="bg-yellow-100 text-yellow-800">Suspicious</Badge>
                           )}
-                          {attempt.suspicious_reasons?.map((reason) => (
+                          {attempt.suspicious_reasons?.map((reason: string) => (
                             <Badge
                               key={reason}
-                              className={cn('text-xs', SUSPICIOUS_REASON_COLORS[reason])}
+                              className={cn('text-xs', SUSPICIOUS_REASON_COLORS[reason as SuspiciousReason] || 'bg-gray-100 text-gray-800')}
                             >
-                              {SUSPICIOUS_REASON_LABELS[reason]}
+                              {SUSPICIOUS_REASON_LABELS[reason as SuspiciousReason] || reason.replace(/_/g, ' ')}
                             </Badge>
                           ))}
                           {attempt.notification_sent && (

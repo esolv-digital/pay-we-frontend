@@ -7,20 +7,25 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import {
-  useMessagingProviders,
+  useMessagingProvidersList,
   useMessagingProviderStatistics,
   useToggleMessagingProvider,
   useResetProviderFailures,
   useDeleteMessagingProvider,
-} from '@/lib/hooks/use-admin-notifications';
+} from '@/lib/hooks/use-admin-messaging-providers';
 import type {
-  MessagingProviderChannel,
-  MessagingProviderFilters,
-} from '@/types';
-import { PROVIDER_HEALTH_STYLES } from '@/types/notification';
-import { CreateProviderDialog } from '@/components/admin/create-provider-dialog';
+  MessagingChannel,
+  ProviderFilters,
+  MessagingProvider,
+} from '@/lib/api/admin-messaging-providers';
 
-const CHANNEL_TABS: { id: MessagingProviderChannel | 'all'; label: string }[] = [
+const PROVIDER_HEALTH_STYLES = {
+  healthy: { bg: 'bg-green-100', text: 'text-green-800', label: 'Healthy' },
+  degraded: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Degraded' },
+  failing: { bg: 'bg-red-100', text: 'text-red-800', label: 'Failing' },
+};
+
+const CHANNEL_TABS: { id: MessagingChannel | 'all'; label: string }[] = [
   { id: 'all', label: 'All Channels' },
   { id: 'email', label: 'Email' },
   { id: 'sms', label: 'SMS' },
@@ -34,21 +39,21 @@ function getHealthStatus(provider: { is_healthy: boolean; failure_count: number 
 }
 
 export default function AdminMessagingProvidersPage() {
-  const [activeChannel, setActiveChannel] = useState<MessagingProviderChannel | 'all'>('all');
+  const [activeChannel, setActiveChannel] = useState<MessagingChannel | 'all'>('all');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const filters: MessagingProviderFilters = {
+  const filters: ProviderFilters = {
     channel: activeChannel === 'all' ? undefined : activeChannel,
     per_page: 50,
   };
 
-  const { data, isLoading, isError } = useMessagingProviders(filters);
+  const { data, isLoading, isError } = useMessagingProvidersList(filters);
   const { data: stats } = useMessagingProviderStatistics();
   const toggleProvider = useToggleMessagingProvider();
   const resetFailures = useResetProviderFailures();
   const deleteProvider = useDeleteMessagingProvider();
 
-  const providers = data?.providers || [];
+  const providers = data?.data || [];
 
   const handleDelete = (providerId: string, providerName: string) => {
     if (confirm(`Are you sure you want to delete "${providerName}"? This action cannot be undone.`)) {
@@ -184,7 +189,7 @@ export default function AdminMessagingProvidersPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {providers.map((provider) => {
+                {providers.map((provider: MessagingProvider) => {
                   const healthStatus = getHealthStatus(provider);
                   const healthStyle = PROVIDER_HEALTH_STYLES[healthStatus];
 
@@ -276,9 +281,15 @@ export default function AdminMessagingProvidersPage() {
         </Card>
       )}
 
-      {/* Create Provider Dialog */}
+      {/* Create Provider Dialog - TODO: Implement CreateProviderDialog component */}
       {showCreateDialog && (
-        <CreateProviderDialog onClose={() => setShowCreateDialog(false)} />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md p-6">
+            <h2 className="text-lg font-semibold mb-4">Add Provider</h2>
+            <p className="text-gray-500 mb-4">Provider creation form coming soon.</p>
+            <Button onClick={() => setShowCreateDialog(false)}>Close</Button>
+          </Card>
+        </div>
       )}
     </div>
   );

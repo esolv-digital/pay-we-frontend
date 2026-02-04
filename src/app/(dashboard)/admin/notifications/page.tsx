@@ -8,13 +8,30 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { format, subDays } from 'date-fns';
 import {
-  useAdminNotificationLogs,
+  useNotificationLogsList,
   useNotificationStatistics,
-} from '@/lib/hooks/use-admin-notifications';
-import type { AdminNotificationLogFilters, NotificationChannel, NotificationLogStatus } from '@/types';
-import { NOTIFICATION_STATUS_STYLES, CHANNEL_LABELS } from '@/types/notification';
+} from '@/lib/hooks/use-admin-notification-logs';
+import type {
+  NotificationLogFilters,
+  NotificationChannel,
+  NotificationStatus,
+  NotificationLog,
+} from '@/lib/api/admin-notification-logs';
 
-const STATUS_OPTIONS: { value: NotificationLogStatus | ''; label: string }[] = [
+const NOTIFICATION_STATUS_STYLES: Record<NotificationStatus, { bg: string; text: string; label: string }> = {
+  pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
+  sent: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Sent' },
+  delivered: { bg: 'bg-green-100', text: 'text-green-800', label: 'Delivered' },
+  failed: { bg: 'bg-red-100', text: 'text-red-800', label: 'Failed' },
+};
+
+const CHANNEL_LABELS: Record<NotificationChannel, string> = {
+  email: 'Email',
+  sms: 'SMS',
+  whatsapp: 'WhatsApp',
+};
+
+const STATUS_OPTIONS: { value: NotificationStatus | ''; label: string }[] = [
   { value: '', label: 'All Statuses' },
   { value: 'pending', label: 'Pending' },
   { value: 'sent', label: 'Sent' },
@@ -27,25 +44,27 @@ const CHANNEL_OPTIONS: { value: NotificationChannel | ''; label: string }[] = [
   { value: 'email', label: 'Email' },
   { value: 'sms', label: 'SMS' },
   { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'database', label: 'In-App' },
 ];
 
 export default function AdminNotificationLogsPage() {
-  const [filters, setFilters] = useState<AdminNotificationLogFilters>({
+  const [filters, setFilters] = useState<NotificationLogFilters>({
     page: 1,
     per_page: 20,
     date_from: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
     date_to: format(new Date(), 'yyyy-MM-dd'),
   });
 
-  const { data, isLoading, isError } = useAdminNotificationLogs(filters);
-  const { data: stats } = useNotificationStatistics(filters.date_from, filters.date_to);
+  const { data, isLoading, isError } = useNotificationLogsList(filters);
+  const { data: stats } = useNotificationStatistics({
+    date_from: filters.date_from,
+    date_to: filters.date_to,
+  });
 
-  const logs = data?.logs || [];
+  const logs = data?.data || [];
   const meta = data?.meta;
 
-  const handleFilterChange = (key: keyof AdminNotificationLogFilters, value: string) => {
-    setFilters((prev) => ({
+  const handleFilterChange = (key: keyof NotificationLogFilters, value: string) => {
+    setFilters((prev: NotificationLogFilters) => ({
       ...prev,
       [key]: value || undefined,
       page: key !== 'page' ? 1 : prev.page,
@@ -53,7 +72,7 @@ export default function AdminNotificationLogsPage() {
   };
 
   const handlePageChange = (newPage: number) => {
-    setFilters((prev) => ({ ...prev, page: newPage }));
+    setFilters((prev: NotificationLogFilters) => ({ ...prev, page: newPage }));
   };
 
   const statCards = [
@@ -126,6 +145,7 @@ export default function AdminNotificationLogsPage() {
               value={filters.channel || ''}
               onChange={(e) => handleFilterChange('channel', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Filter by channel"
             >
               {CHANNEL_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -140,6 +160,7 @@ export default function AdminNotificationLogsPage() {
               value={filters.status || ''}
               onChange={(e) => handleFilterChange('status', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Filter by status"
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -212,7 +233,7 @@ export default function AdminNotificationLogsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {logs.map((log) => {
+                  {logs.map((log: NotificationLog) => {
                     const statusStyle = NOTIFICATION_STATUS_STYLES[log.status];
 
                     return (

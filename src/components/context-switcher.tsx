@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/hooks/use-auth';
 import {
   DropdownMenu,
@@ -30,6 +30,7 @@ interface PasswordVerificationDialogProps {
   onConfirm: (password: string) => void;
   isPending: boolean;
   targetContext: ContextType;
+  resetKey: number;
 }
 
 function PasswordVerificationDialog({
@@ -38,8 +39,14 @@ function PasswordVerificationDialog({
   onConfirm,
   isPending,
   targetContext,
+  resetKey,
 }: PasswordVerificationDialogProps) {
   const [password, setPassword] = useState('');
+
+  // Reset password when resetKey changes (on error) or dialog closes
+  useEffect(() => {
+    setPassword('');
+  }, [resetKey, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,6 +121,8 @@ export function ContextSwitcher() {
 
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [targetContext, setTargetContext] = useState<ContextType | null>(null);
+  const [passwordResetKey, setPasswordResetKey] = useState(0);
+  const [switchingTo, setSwitchingTo] = useState<ContextType | null>(null);
 
   // Don't show switcher if user doesn't have multiple contexts
   if (!hasMultipleContexts) {
@@ -126,16 +135,26 @@ export function ContextSwitcher() {
       return;
     }
 
+    // Track which context we're switching to for loading indicator
+    setSwitchingTo(context);
+
     // For switching to admin, require password verification
     if (context === 'admin') {
       setTargetContext(context);
       setShowPasswordDialog(true);
     } else {
       // For switching to vendor, no password required
-      switchContext({
-        context_type: context,
-        require_verification: false,
-      });
+      switchContext(
+        {
+          context_type: context,
+          require_verification: false,
+        },
+        {
+          onSettled: () => {
+            setSwitchingTo(null);
+          },
+        }
+      );
     }
   };
 
@@ -151,13 +170,29 @@ export function ContextSwitcher() {
           onSuccess: () => {
             setShowPasswordDialog(false);
             setTargetContext(null);
+            setSwitchingTo(null);
+          },
+          onError: () => {
+            // Increment key to trigger password reset in dialog
+            setPasswordResetKey((prev) => prev + 1);
           },
         }
       );
     }
   };
 
-  const getContextIcon = (context: ContextType) => {
+  const handleDialogClose = (open: boolean) => {
+    setShowPasswordDialog(open);
+    if (!open) {
+      setTargetContext(null);
+      setSwitchingTo(null);
+    }
+  };
+
+  const getContextIcon = (context: ContextType, isLoading: boolean = false) => {
+    if (isLoading) {
+      return <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
+    }
     return context === 'admin' ? (
       <Shield className="mr-2 h-4 w-4" />
     ) : (
@@ -173,12 +208,20 @@ export function ContextSwitcher() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full justify-between">
+          <Button
+            variant="outline"
+            className="w-full justify-between"
+            disabled={isSwitchContextPending}
+          >
             <span className="flex items-center">
               {currentContext && getContextIcon(currentContext)}
               {currentContext && getContextLabel(currentContext)}
             </span>
-            <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+            {isSwitchContextPending ? (
+              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+            ) : (
+              <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="start">
@@ -191,10 +234,13 @@ export function ContextSwitcher() {
               disabled={currentContext === 'admin' || isSwitchContextPending}
               className="cursor-pointer"
             >
-              <Shield className="mr-2 h-4 w-4" />
+              {getContextIcon('admin', switchingTo === 'admin' && isSwitchContextPending)}
               <span>Admin Dashboard</span>
               {currentContext === 'admin' && (
                 <span className="ml-auto text-xs text-muted-foreground">(Current)</span>
+              )}
+              {switchingTo === 'admin' && isSwitchContextPending && (
+                <span className="ml-auto text-xs text-muted-foreground">Switching...</span>
               )}
             </DropdownMenuItem>
           )}
@@ -205,10 +251,13 @@ export function ContextSwitcher() {
               disabled={currentContext === 'vendor' || isSwitchContextPending}
               className="cursor-pointer"
             >
-              <Store className="mr-2 h-4 w-4" />
+              {getContextIcon('vendor', switchingTo === 'vendor' && isSwitchContextPending)}
               <span>Vendor Dashboard</span>
               {currentContext === 'vendor' && (
                 <span className="ml-auto text-xs text-muted-foreground">(Current)</span>
+              )}
+              {switchingTo === 'vendor' && isSwitchContextPending && (
+                <span className="ml-auto text-xs text-muted-foreground">Switching...</span>
               )}
             </DropdownMenuItem>
           )}
@@ -217,10 +266,11 @@ export function ContextSwitcher() {
 
       <PasswordVerificationDialog
         open={showPasswordDialog}
-        onOpenChange={setShowPasswordDialog}
+        onOpenChange={handleDialogClose}
         onConfirm={handlePasswordConfirm}
         isPending={isSwitchContextPending}
         targetContext={targetContext || 'admin'}
+        resetKey={passwordResetKey}
       />
     </>
   );
