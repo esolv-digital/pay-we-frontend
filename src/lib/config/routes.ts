@@ -40,6 +40,8 @@ export const VENDOR_ROUTES = {
   TRANSACTIONS: '/vendor/transactions',
   TRANSACTION_DETAILS: (id: string) => `/vendor/transactions/${id}`,
   DISBURSEMENTS: '/vendor/disbursements',
+  REPORTS: '/vendor/reports',
+  KYC: '/vendor/kyc',
   SETTINGS: '/vendor/settings',
 } as const;
 

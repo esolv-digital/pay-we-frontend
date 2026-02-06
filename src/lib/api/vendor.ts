@@ -15,6 +15,23 @@ import type {
 import type { PayoutMethod, FeeBearer } from '@/types/vendor';
 
 /**
+ * Transform transaction filters to match backend expectations
+ * Backend expects boolean values as 1/0, not true/false
+ */
+function transformTransactionFilters(filters?: TransactionFilters): Record<string, any> | undefined {
+  if (!filters) return undefined;
+
+  const transformed = { ...filters };
+
+  // Convert boolean 'settled' to 1/0 format
+  if (typeof transformed.settled === 'boolean') {
+    (transformed as any).settled = transformed.settled ? 1 : 0;
+  }
+
+  return transformed;
+}
+
+/**
  * Note: All vendor endpoints require a vendor_slug parameter.
  * The vendor slug should be obtained from the authenticated user's vendor profile.
  * These methods will be called by Next.js API routes which will inject the vendor_slug.
@@ -72,17 +89,18 @@ export const vendorApi = {
    */
   getTransactions: async (vendorSlug: string, filters?: TransactionFilters) => {
     return apiClient.get<TransactionListResponse>(`/vendors/${vendorSlug}/transactions`, {
-      params: filters,
+      params: transformTransactionFilters(filters),
     });
   },
 
   /**
-   * Get a single transaction by ID
+   * Get a single transaction by ID in vendor context
+   * @param vendorSlug - The vendor slug
    * @param transactionId - The transaction ID
    * @returns Transaction details
    */
-  getTransaction: async (transactionId: string) => {
-    return apiClient.get<Transaction>(`/transactions/${transactionId}`);
+  getTransaction: async (vendorSlug: string, transactionId: string) => {
+    return apiClient.get<Transaction>(`/vendors/${vendorSlug}/transactions/${transactionId}`);
   },
 
   /**
@@ -95,7 +113,7 @@ export const vendorApi = {
     return apiClient.get<VendorTransactionMetricsResponse>(
       `/vendors/${vendorSlug}/transactions/metrics`,
       {
-        params: filters,
+        params: transformTransactionFilters(filters),
       }
     );
   },
@@ -110,7 +128,7 @@ export const vendorApi = {
     return apiClient.get<ExportSummaryResponse>(
       `/vendors/${vendorSlug}/transactions/export/summary`,
       {
-        params: filters,
+        params: transformTransactionFilters(filters),
       }
     );
   },
@@ -127,10 +145,13 @@ export const vendorApi = {
     filters?: TransactionFilters,
     format: ExportFormat = 'csv'
   ) => {
+    // Transform filters to backend format (boolean → 1/0)
+    const transformedFilters = transformTransactionFilters(filters);
+
     // Build query parameters
     const params = new URLSearchParams();
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
+    if (transformedFilters) {
+      Object.entries(transformedFilters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
             value.forEach((v) => params.append(`${key}[]`, String(v)));
@@ -177,5 +198,33 @@ export const vendorApi = {
     custom_fee_amount?: number;
   }) => {
     return apiClient.patch<Vendor>(`/vendors/${vendorSlug}`, data);
+  },
+
+  /**
+   * Get disbursement statistics
+   * @param vendorSlug - The vendor slug
+   * @returns Disbursement statistics (total disbursed, pending, completed, failed, average amount)
+   */
+  getDisbursementStatistics: async (vendorSlug: string) => {
+    return apiClient.get<{
+      total_disbursed: number;
+      pending_disbursements: number;
+      completed_disbursements: number;
+      failed_disbursements: number;
+      average_disbursement_amount: number;
+    }>(`/vendors/${vendorSlug}/disbursements/statistics`);
+  },
+
+  /**
+   * Toggle automatic payout setting
+   * @param vendorSlug - The vendor slug
+   * @param enabled - Whether to enable or disable auto-payout
+   * @returns Updated auto-payout status
+   */
+  toggleAutoPayout: async (vendorSlug: string, enabled: boolean) => {
+    return apiClient.post<{
+      auto_payout_enabled: boolean;
+      message: string;
+    }>(`/vendors/${vendorSlug}/disbursements/toggle-auto-payout`, { enabled });
   },
 };

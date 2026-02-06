@@ -39,10 +39,12 @@ export function useTransactions(filters?: TransactionFilters) {
  * const { data: transaction, isLoading } = useTransaction('txn-123');
  */
 export function useTransaction(transactionId: string) {
+  const vendorSlug = useRequiredVendorSlug();
+
   return useQuery({
-    queryKey: ['transaction', transactionId],
-    queryFn: () => vendorApi.getTransaction(transactionId),
-    enabled: !!transactionId,
+    queryKey: ['transaction', vendorSlug, transactionId],
+    queryFn: () => vendorApi.getTransaction(vendorSlug!, transactionId),
+    enabled: !!vendorSlug && !!transactionId,
   });
 }
 

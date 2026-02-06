@@ -6,6 +6,7 @@ import { vendorApi } from '@/lib/api/vendor';
 import { formatCurrency } from '@/lib/utils/format';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/use-auth';
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
   completed: { bg: 'bg-green-100', text: 'text-green-800' },
@@ -18,11 +19,13 @@ const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
 
 export default function TransactionDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { user } = useAuth();
+  const vendorSlug = user?.organizations?.[0]?.vendors?.[0]?.slug;
 
   const { data: transaction, isLoading, error } = useQuery({
-    queryKey: ['transaction', id],
-    queryFn: () => vendorApi.getTransaction(id),
-    enabled: !!id,
+    queryKey: ['transaction', vendorSlug, id],
+    queryFn: () => vendorApi.getTransaction(vendorSlug!, id),
+    enabled: !!id && !!vendorSlug,
   });
 
   if (isLoading) {

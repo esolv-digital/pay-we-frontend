@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,45 +17,22 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { user, isLoading, completeOnboarding, isOnboardingPending, logout } = useAuth();
 
-  // Redirect to dashboard if user already has an organization or is an administrator
+  // Set to true the moment the user clicks "Complete Setup".  The useEffect
+  // below uses it to distinguish "org was just created → go to step 2" from
+  // "returning user who already has an org → go to dashboard".
+  const justSubmitted = useRef(false);
+
   useEffect(() => {
-    console.log('[Onboarding Page] User state changed:', {
-      isLoading,
-      hasUser: !!user,
-      userId: user?.id,
-      email: user?.email,
-      organizationsCount: user?.organizations?.length || 0,
-      organizations: user?.organizations,
-      isAdmin: user?.has_admin_access === true || user?.is_super_admin === true || user?.admin?.is_super_admin === true || user?.admin?.is_platform_admin === true,
-    });
+    if (isLoading || !user) return;
 
-    // Skip check if still loading user data
-    if (isLoading) {
-      console.log('[Onboarding Page] Still loading, skipping check');
-      return;
-    }
-
-    if (!user) {
-      console.log('[Onboarding Page] No user, skipping check');
-      return;
-    }
-
-    // // Check if user is an administrator
-    // const isAdministrator = user.is_super_admin || user.has_admin_access || !!user.admin?.is_super_admin || !!user.admin?.is_platform_admin || !!user.admin;
-
-    // // Administrators should never access onboarding - redirect to admin dashboard
-    // if (isAdministrator) {
-    //   console.log('[Onboarding Page] User is administrator, redirecting to admin dashboard...');
-    //   router.push('/admin/dashboard');
-    //   return;
-    // }
-
-    // If user has organizations, redirect to appropriate dashboard
     if (user.organizations && user.organizations.length > 0) {
-      console.log('[Onboarding Page] User has organizations, redirecting to dashboard...');
-      router.push('/vendor/dashboard');
-    } else {
-      console.log('[Onboarding Page] User needs to complete onboarding');
+      if (justSubmitted.current) {
+        // Organisation was just created — continue to profile review (step 2)
+        router.push('/onboarding/profile-review');
+      } else {
+        // Returning user — skip straight to dashboard
+        router.push('/vendor/dashboard');
+      }
     }
   }, [user, isLoading, router]);
 
@@ -75,6 +52,7 @@ export default function OnboardingPage() {
   const selectedType = watch('type');
 
   const onSubmit = (data: OnboardingFormData) => {
+    justSubmitted.current = true;
     completeOnboarding(data);
   };
 
@@ -94,22 +72,7 @@ export default function OnboardingPage() {
     );
   }
 
-  // Check if user is an administrator
-  // const isAdministrator = user?.is_super_admin || user?.has_admin_access || !!user?.admin?.is_super_admin || !!user?.admin?.is_platform_admin || !!user?.admin;
-
-  // // Administrators should never see onboarding form
-  // if (isAdministrator) {
-  //   return (
-  //     <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
-  //       <div className="flex flex-col items-center justify-center py-12">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-  //         <p className="mt-4 text-gray-600">Redirecting to admin dashboard...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // If user already has organization, don't render the form (redirect is happening)
+  // If user already has organisation the useEffect above is redirecting — show spinner
   if (user && user.organizations && user.organizations.length > 0) {
     return (
       <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">

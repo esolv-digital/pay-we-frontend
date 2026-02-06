@@ -11,6 +11,49 @@ export function uniqueId(prefix: string = 'test'): string {
 }
 
 // =============================================================================
+// USER & ORGANIZATION FACTORIES (used by vendor auth/onboarding specs)
+// =============================================================================
+
+export interface TestUser {
+  first_name: string;
+  last_name: string;
+  middle_name?: string;
+  email: string;
+  phone?: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export function createTestUser(overrides: Partial<TestUser> = {}): TestUser {
+  const id = uniqueId('user');
+  return {
+    first_name: 'Jane',
+    last_name: 'Doe',
+    middle_name: 'M',
+    email: `${id}@example.com`,
+    phone: randomPhone(),
+    password: 'SecurePassword123!',
+    password_confirmation: 'SecurePassword123!',
+    ...overrides,
+  };
+}
+
+export interface TestOrganization {
+  name: string;
+  type: 'individual' | 'corporate';
+  country_code: string;
+}
+
+export function createTestOrganization(overrides: Partial<TestOrganization> = {}): TestOrganization {
+  return {
+    name: `Test Org ${uniqueId('org')}`,
+    type: 'corporate',
+    country_code: 'GH',
+    ...overrides,
+  };
+}
+
+// =============================================================================
 // ROLES & PERMISSIONS TEST DATA
 // =============================================================================
 

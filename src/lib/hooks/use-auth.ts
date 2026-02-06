@@ -27,6 +27,7 @@ export function useAuth() {
   // Fetch current user - skip only on login/register, but fetch on all other routes
   const isAuthRoute = typeof window !== 'undefined' &&
     (window.location.pathname === '/login' ||
+     window.location.pathname.startsWith('/login/') ||
      window.location.pathname === '/register');
 
   const { data: currentUser, isLoading } = useQuery({
@@ -175,7 +176,13 @@ export function useAuth() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: async (data) => {
+    onSuccess: async (data, variables) => {
+      // 2FA required — hand off to the verify-2fa page before doing anything else
+      if (data.two_factor_required) {
+        router.push(`/login/verify-2fa?email=${encodeURIComponent(variables.email)}`);
+        return;
+      }
+
       console.log('[Login] Login successful, response data:', {
         hasDefaultContext: !!data.default_context,
         defaultContext: data.default_context,

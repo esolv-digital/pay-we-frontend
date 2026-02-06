@@ -9,6 +9,7 @@ import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmatio
 import { ShareButton } from '@/components/shared/share-button';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
 import { Button } from '@/components/ui/button';
+import { VENDOR_ROUTES } from '@/lib/config/routes';
 
 export default function PaymentPagesPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,7 +71,7 @@ export default function PaymentPagesPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Payment Pages</h1>
         <Link
-          href="/vendor/payment-pages/create"
+          href={VENDOR_ROUTES.PAYMENT_PAGE_CREATE}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Create New Page
@@ -85,7 +86,7 @@ export default function PaymentPagesPage() {
             Create your first payment page to start accepting payments
           </p>
           <Link
-            href="/vendor/payment-pages/create"
+            href={VENDOR_ROUTES.PAYMENT_PAGE_CREATE}
             className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Create Payment Page

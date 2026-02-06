@@ -1,0 +1,562 @@
+
+================================================================================
+[2026-02-05T13:35:35.737Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.fill: Timeout 10000ms exceeded.
+Call log:
+[2m  - waiting for locator('input[type="email"], input[name="email"]')[22m
+
+Stack:
+page.fill: Timeout 10000ms exceeded.
+Call log:
+[2m  - waiting for locator('input[type="email"], input[name="email"]')[22m
+
+    at LoginPage.fillCredentials (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/login.page.ts:32:21)
+    at LoginPage.login (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/login.page.ts:54:16)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:44:23
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:37:16.407Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForSelector: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('input[type="email"], input[name="email"]') to be visible[22m
+
+Stack:
+page.waitForSelector: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('input[type="email"], input[name="email"]') to be visible[22m
+
+    at LoginPage.goto (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/login.page.ts:27:21)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:41:7
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:54:16.983Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:54:17.026Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:54:17.064Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:54:17.106Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+Stack:
+page.waitForLoadState: Test timeout of 30000ms exceeded.
+    at PaymentPagePOM.waitForPageLoad (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/base.page.ts:34:21)
+    at PaymentPagePOM.gotoCreatePage (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/payment-page.page.ts:102:16)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:50:7
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:54:17.126Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:56:31.843Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:56:31.931Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:56:32.063Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+Stack:
+page.waitForLoadState: Test timeout of 30000ms exceeded.
+    at PaymentPagePOM.waitForPageLoad (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/base.page.ts:34:21)
+    at PaymentPagePOM.gotoCreatePage (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/payment-page.page.ts:102:16)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:50:7
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:56:32.103Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:57:00.484Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:57:56.385Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+Stack:
+page.waitForLoadState: Test timeout of 30000ms exceeded.
+    at PaymentPagePOM.waitForPageLoad (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/base.page.ts:34:21)
+    at PaymentPagePOM.gotoCreatePage (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/payment-page.page.ts:102:16)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:50:7
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:58:28.538Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:58:31.564Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:58:57.201Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+Stack:
+page.waitForLoadState: Test timeout of 30000ms exceeded.
+    at PaymentPagePOM.waitForPageLoad (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/base.page.ts:34:21)
+    at PaymentPagePOM.gotoCreatePage (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/payment-page.page.ts:102:16)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:50:7
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:59:00.966Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:59:17.221Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:59:29.526Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T13:59:37.079Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T14:00:01.953Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForLoadState: Test timeout of 30000ms exceeded.
+Stack:
+page.waitForLoadState: Test timeout of 30000ms exceeded.
+    at PaymentPagePOM.waitForPageLoad (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/base.page.ts:34:21)
+    at PaymentPagePOM.gotoCreatePage (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/payment-page.page.ts:102:16)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:50:7
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T14:00:03.365Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T14:00:15.506Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T14:00:35.012Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T14:00:36.742Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T14:00:52.282Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForLoadState: Test ended.
+Stack:
+page.waitForLoadState: Test ended.
+    at PaymentPagePOM.waitForPageLoad (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/base.page.ts:34:21)
+    at PaymentPagePOM.gotoCreatePage (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/payment-page.page.ts:102:16)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:50:7
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T14:00:55.290Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForURL: Test ended.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+Stack:
+page.waitForURL: Test ended.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:45:18
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================
+
+================================================================================
+[2026-02-05T14:00:56.194Z] Test Failure
+================================================================================
+Test: Fee Calculation Test Setup
+Error: page.waitForLoadState: Test ended.
+Stack:
+page.waitForLoadState: Test ended.
+    at LoginPage.goto (/Users/mac/Projects/esolv/paywe/frontend/tests/pages/login.page.ts:25:21)
+    at /Users/mac/Projects/esolv/paywe/frontend/tests/fee-calculation.spec.ts:41:7
+Context:
+{
+  "email": "john.doe+1@example.com",
+  "testFile": "fee-calculation.spec.ts"
+}
+================================================================================

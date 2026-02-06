@@ -29,6 +29,7 @@ export interface AuthResponse {
   access_token: string;
   token_type: string;
   requires_onboarding?: boolean;
+  two_factor_required?: boolean;
   contexts?: UserContexts;
   default_context?: ContextType;
 }

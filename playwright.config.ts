@@ -1,12 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import path from 'path';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
+ * Read environment variables from .env.testing file
+ * This configures E2E tests to use real API calls with test credentials
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, '.env.testing') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -45,8 +45,8 @@ export default defineConfig({
     // Screenshot on failure
     screenshot: 'only-on-failure',
 
-    // Video on failure
-    video: 'retain-on-failure',
+    // Video disabled (requires ffmpeg installation)
+    video: 'off',
 
     // Browser context options
     viewport: { width: 1280, height: 720 },
@@ -59,6 +59,13 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    {
+      name: 'brave',
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome', // Uses system Chrome/Chromium/Brave
+      },
+    },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },

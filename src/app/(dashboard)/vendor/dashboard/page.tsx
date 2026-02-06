@@ -5,6 +5,7 @@ import { vendorApi } from '@/lib/api/vendor';
 import { formatCurrency } from '@/lib/utils/format';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { VENDOR_ROUTES } from '@/lib/config/routes';
 
 export default function VendorDashboardPage() {
   const { user } = useAuth();
@@ -78,26 +79,26 @@ export default function VendorDashboardPage() {
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
-            href="/vendor/payment-pages/create"
+            href={VENDOR_ROUTES.PAYMENT_PAGE_CREATE}
             className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-center"
           >
             <span className="text-3xl block mb-2">➕</span>
             <span className="font-medium">Create Payment Page</span>
           </Link>
-          <a
-            href="/vendor/transactions"
+          <Link
+            href={VENDOR_ROUTES.TRANSACTIONS}
             className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-center"
           >
             <span className="text-3xl block mb-2">📊</span>
             <span className="font-medium">View Transactions</span>
-          </a>
-          <a
-            href="/vendor/disbursements"
+          </Link>
+          <Link
+            href={VENDOR_ROUTES.DISBURSEMENTS}
             className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-center"
           >
             <span className="text-3xl block mb-2">💸</span>
             <span className="font-medium">Request Payout</span>
-          </a>
+          </Link>
         </div>
       </div>
     </div>

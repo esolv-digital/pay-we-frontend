@@ -18,6 +18,8 @@ export {
 // Test data fixtures
 export {
   uniqueId,
+  createTestUser,
+  createTestOrganization,
   roleTestData,
   kycTestData,
   userTestData,
