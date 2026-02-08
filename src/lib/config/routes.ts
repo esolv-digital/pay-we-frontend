@@ -28,6 +28,19 @@ export const ADMIN_ROUTES = {
   LOGS: '/admin/logs',
   REPORTS: '/admin/reports',
   SETTINGS: '/admin/settings',
+  COUNTRIES: '/admin/countries',
+  COUNTRY_DETAILS: (id: string) => `/admin/countries/${id}`,
+  GATEWAYS: '/admin/gateways',
+  GATEWAY_DETAILS: (id: string) => `/admin/gateways/${id}`,
+  FEES: '/admin/fees',
+  VENDORS: '/admin/vendors',
+  VENDOR_DETAILS: (id: string) => `/admin/vendors/${id}`,
+  PAYMENT_PAGES: '/admin/payment-pages',
+  PAYMENT_PAGE_DETAILS: (id: string) => `/admin/payment-pages/${id}`,
+  DISBURSEMENTS: '/admin/disbursements',
+  DISBURSEMENT_DETAILS: (id: string) => `/admin/disbursements/${id}`,
+  PAYOUT_ACCOUNTS: '/admin/payout-accounts',
+  PAYOUT_ACCOUNT_DETAILS: (id: string) => `/admin/payout-accounts/${id}`,
 } as const;
 
 // Vendor Routes

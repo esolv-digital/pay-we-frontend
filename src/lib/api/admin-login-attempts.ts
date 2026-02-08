@@ -93,6 +93,8 @@ export interface LoginAttemptFilters {
   is_suspicious?: boolean;
   date_from?: string;
   date_to?: string;
+  sort_by?: 'created_at' | 'email' | 'ip_address' | 'country_code';
+  sort_direction?: 'asc' | 'desc';
   per_page?: number;
   page?: number;
 }

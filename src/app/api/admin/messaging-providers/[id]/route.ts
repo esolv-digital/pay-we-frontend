@@ -3,6 +3,55 @@ import { cookies } from 'next/headers';
 import { createLaravelClient } from '@/lib/api/laravel-client';
 
 /**
+ * GET /api/admin/messaging-providers/[id]
+ * Get a single messaging provider
+ */
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('access_token')?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'No token found' },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+    const laravelClient = createLaravelClient(token);
+    const response = await laravelClient.get<{ data: unknown }>(`/admin/messaging-providers/${id}`);
+
+    return NextResponse.json(response.data);
+  } catch (error: unknown) {
+    const apiError = error as {
+      response?: { data?: { message?: string }; status?: number };
+      code?: string;
+    };
+
+    console.error('[/api/admin/messaging-providers/[id]] GET Error:', apiError.response?.data?.message || 'Unknown error');
+
+    if (apiError.code === 'ECONNREFUSED') {
+      return NextResponse.json(
+        { error: 'Service Unavailable', message: 'Cannot connect to backend API' },
+        { status: 503 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch messaging provider',
+        message: apiError.response?.data?.message || 'An error occurred',
+      },
+      { status: apiError.response?.status || 500 }
+    );
+  }
+}
+
+/**
  * PUT /api/admin/messaging-providers/[id]
  * Update a messaging provider
  */

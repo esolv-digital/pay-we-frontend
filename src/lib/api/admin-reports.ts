@@ -98,11 +98,11 @@ export interface RevenueReport {
  */
 export interface RevenueReportFilters {
   period?: ReportPeriod;
-  from_date?: string; // ISO 8601 date (for custom period)
-  to_date?: string; // ISO 8601 date (for custom period)
+  date_from?: string; // ISO 8601 date (for custom period)
+  date_to?: string; // ISO 8601 date (for custom period)
+  group_by?: string;
   organization_id?: string;
   vendor_id?: string;
-  gateway?: string;
   currency?: string;
 }
 
@@ -137,15 +137,15 @@ export const adminReportsApi = {
     if (filters.period) params.append('period', filters.period);
 
     // Custom date range
-    if (filters.from_date) params.append('from_date', filters.from_date);
-    if (filters.to_date) params.append('to_date', filters.to_date);
+    if (filters.date_from) params.append('date_from', filters.date_from);
+    if (filters.date_to) params.append('date_to', filters.date_to);
 
     // Filters
+    if (filters.group_by) params.append('group_by', filters.group_by);
     if (filters.organization_id) {
       params.append('organization_id', filters.organization_id);
     }
     if (filters.vendor_id) params.append('vendor_id', filters.vendor_id);
-    if (filters.gateway) params.append('gateway', filters.gateway);
     if (filters.currency) params.append('currency', filters.currency);
 
     const response = await apiClient.get<ApiResponse<RevenueReport>>(
@@ -177,13 +177,13 @@ export const adminReportsApi = {
 
     // Apply filters
     if (filters.period) params.append('period', filters.period);
-    if (filters.from_date) params.append('from_date', filters.from_date);
-    if (filters.to_date) params.append('to_date', filters.to_date);
+    if (filters.date_from) params.append('date_from', filters.date_from);
+    if (filters.date_to) params.append('date_to', filters.date_to);
+    if (filters.group_by) params.append('group_by', filters.group_by);
     if (filters.organization_id) {
       params.append('organization_id', filters.organization_id);
     }
     if (filters.vendor_id) params.append('vendor_id', filters.vendor_id);
-    if (filters.gateway) params.append('gateway', filters.gateway);
     if (filters.currency) params.append('currency', filters.currency);
 
     params.append('format', format);

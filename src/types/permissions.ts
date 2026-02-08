@@ -130,6 +130,27 @@ export const PERMISSIONS = {
 
   // Admin - Reports
   ADMIN_VIEW_REVENUE_REPORTS: 'Admin View Revenue Reports',
+
+  // Admin - Vendors
+  ADMIN_VIEW_VENDORS: 'Admin View Vendors',
+  ADMIN_MANAGE_VENDORS: 'Admin Manage Vendors',
+
+  // Admin - Payment Pages
+  ADMIN_VIEW_PAYMENT_PAGES: 'Admin View Payment Pages',
+  ADMIN_MANAGE_PAYMENT_PAGES: 'Admin Manage Payment Pages',
+
+  // Admin - Disbursements
+  ADMIN_VIEW_DISBURSEMENTS: 'Admin View Disbursements',
+  ADMIN_MANAGE_DISBURSEMENTS: 'Admin Manage Disbursements',
+
+  // Admin - Payout Accounts
+  ADMIN_VIEW_PAYOUT_ACCOUNTS: 'Admin View Payout Accounts',
+  ADMIN_MANAGE_PAYOUT_ACCOUNTS: 'Admin Manage Payout Accounts',
+
+  // Admin - Platform Configuration
+  ADMIN_MANAGE_COUNTRIES: 'Admin Manage Countries',
+  ADMIN_MANAGE_GATEWAYS: 'Admin Manage Gateways',
+  ADMIN_MANAGE_FEES: 'Admin Manage Fees',
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

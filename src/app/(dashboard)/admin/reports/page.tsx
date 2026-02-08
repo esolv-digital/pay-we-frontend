@@ -103,7 +103,7 @@ export default function AdminReportsPage() {
       ...prev,
       period,
       // Clear custom dates if not custom period
-      ...(period !== 'custom' && { from_date: undefined, to_date: undefined }),
+      ...(period !== 'custom' && { date_from: undefined, date_to: undefined }),
     }));
   };
 
@@ -176,8 +176,8 @@ export default function AdminReportsPage() {
                     type="date"
                     aria-label="Report from date"
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    value={filters.from_date || ''}
-                    onChange={(e) => handleFilterChange('from_date', e.target.value)}
+                    value={filters.date_from || ''}
+                    onChange={(e) => handleFilterChange('date_from', e.target.value)}
                   />
                 </div>
                 <div>
@@ -186,8 +186,8 @@ export default function AdminReportsPage() {
                     type="date"
                     aria-label="Report to date"
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    value={filters.to_date || ''}
-                    onChange={(e) => handleFilterChange('to_date', e.target.value)}
+                    value={filters.date_to || ''}
+                    onChange={(e) => handleFilterChange('date_to', e.target.value)}
                   />
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function AdminReportsPage() {
               >
                 {showAdvancedFilters ? 'Hide' : 'Show'} Advanced Filters
               </button>
-              {(filters.organization_id || filters.vendor_id || filters.gateway) && (
+              {(filters.organization_id || filters.vendor_id) && (
                 <button
                   type="button"
                   onClick={handleClearFilters}
@@ -216,19 +216,22 @@ export default function AdminReportsPage() {
             {/* Advanced Filters */}
             {showAdvancedFilters && (
               <div className="grid grid-cols-1 gap-4 border-t pt-4 md:grid-cols-3">
-                {/* Gateway */}
+                {/* Group By */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Gateway</label>
+                  <label className="block text-sm font-medium text-gray-700">Group By</label>
                   <select
-                    aria-label="Filter by payment gateway"
+                    aria-label="Group report by"
                     className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    value={filters.gateway || ''}
-                    onChange={(e) => handleFilterChange('gateway', e.target.value)}
+                    value={filters.group_by || ''}
+                    onChange={(e) => handleFilterChange('group_by', e.target.value)}
                   >
-                    <option value="">All Gateways</option>
-                    <option value="paystack">Paystack</option>
-                    <option value="flutterwave">Flutterwave</option>
-                    <option value="stripe">Stripe</option>
+                    <option value="">Default</option>
+                    <option value="day">Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                    <option value="gateway">Gateway</option>
+                    <option value="organization">Organization</option>
+                    <option value="vendor">Vendor</option>
                   </select>
                 </div>
 

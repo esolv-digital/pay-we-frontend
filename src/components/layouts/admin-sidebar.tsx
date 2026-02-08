@@ -28,6 +28,20 @@ const navigation: Array<{
     permission: PERMISSIONS.VIEW_TRANSACTIONS,
     category: 'financial',
   },
+  {
+    name: 'Disbursements',
+    href: ADMIN_ROUTES.DISBURSEMENTS,
+    icon: '💸',
+    permission: PERMISSIONS.ADMIN_VIEW_DISBURSEMENTS,
+    category: 'financial',
+  },
+  {
+    name: 'Payout Accounts',
+    href: ADMIN_ROUTES.PAYOUT_ACCOUNTS,
+    icon: '🏦',
+    permission: PERMISSIONS.ADMIN_VIEW_PAYOUT_ACCOUNTS,
+    category: 'financial',
+  },
 
   // Compliance
   {
@@ -49,11 +63,48 @@ const navigation: Array<{
   { name: 'Users', href: ADMIN_ROUTES.USERS, icon: '👥', category: 'management' },
   { name: 'Organizations', href: ADMIN_ROUTES.ORGANIZATIONS, icon: '🏢', category: 'management' },
   {
+    name: 'Vendors',
+    href: ADMIN_ROUTES.VENDORS,
+    icon: '🏪',
+    permission: PERMISSIONS.ADMIN_VIEW_VENDORS,
+    category: 'management',
+  },
+  {
+    name: 'Payment Pages',
+    href: ADMIN_ROUTES.PAYMENT_PAGES,
+    icon: '📄',
+    permission: PERMISSIONS.ADMIN_VIEW_PAYMENT_PAGES,
+    category: 'management',
+  },
+  {
     name: 'Roles & Permissions',
     href: ADMIN_ROUTES.ROLES,
     icon: '🔐',
     permission: PERMISSIONS.VIEW_ROLES,
     category: 'management',
+  },
+
+  // Platform
+  {
+    name: 'Countries',
+    href: ADMIN_ROUTES.COUNTRIES,
+    icon: '🌍',
+    permission: PERMISSIONS.ADMIN_MANAGE_COUNTRIES,
+    category: 'platform',
+  },
+  {
+    name: 'Gateways',
+    href: ADMIN_ROUTES.GATEWAYS,
+    icon: '🔌',
+    permission: PERMISSIONS.ADMIN_MANAGE_GATEWAYS,
+    category: 'platform',
+  },
+  {
+    name: 'Fee Management',
+    href: ADMIN_ROUTES.FEES,
+    icon: '💰',
+    permission: PERMISSIONS.ADMIN_MANAGE_FEES,
+    category: 'platform',
   },
 
   // System
@@ -85,6 +136,7 @@ const categoryLabels = {
   financial: 'Financial',
   compliance: 'Compliance',
   management: 'Management',
+  platform: 'Platform',
   system: 'System',
 };
 
@@ -102,7 +154,7 @@ export function AdminSidebar() {
     return acc;
   }, {} as Record<string, typeof navigation>);
 
-  const categories = ['overview', 'financial', 'compliance', 'management', 'system'];
+  const categories = ['overview', 'financial', 'compliance', 'management', 'platform', 'system'];
 
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white w-64">

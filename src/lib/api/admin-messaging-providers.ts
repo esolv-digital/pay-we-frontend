@@ -81,6 +81,9 @@ export interface ProviderStatistics {
 export interface ProviderFilters {
   channel?: MessagingChannel;
   is_active?: boolean;
+  search?: string;
+  sort_by?: 'name' | 'channel' | 'priority' | 'created_at';
+  sort_direction?: 'asc' | 'desc';
   per_page?: number;
   page?: number;
 }

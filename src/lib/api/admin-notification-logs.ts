@@ -95,6 +95,8 @@ export interface NotificationLogFilters {
   provider?: string;
   date_from?: string;
   date_to?: string;
+  sort_by?: 'created_at' | 'channel' | 'status' | 'provider';
+  sort_direction?: 'asc' | 'desc';
   per_page?: number;
   page?: number;
 }
