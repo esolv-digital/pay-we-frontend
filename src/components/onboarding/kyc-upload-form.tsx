@@ -105,6 +105,7 @@ export function KYCUploadForm({ onSubmit, onSkip, isLoading }: KYCUploadFormProp
           id="document-type"
           value={documentType}
           onChange={(e) => setDocumentType(e.target.value)}
+          aria-label="Document type"
           className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
         >
@@ -137,6 +138,7 @@ export function KYCUploadForm({ onSubmit, onSkip, isLoading }: KYCUploadFormProp
             type="file"
             className="hidden"
             accept=".pdf,.jpg,.jpeg,.png"
+            aria-label="Upload KYC document"
             onChange={handleFileInputChange}
             disabled={isLoading}
           />
@@ -169,6 +171,7 @@ export function KYCUploadForm({ onSubmit, onSkip, isLoading }: KYCUploadFormProp
                   e.stopPropagation();
                   handleRemoveFile();
                 }}
+                aria-label="Remove selected file"
                 className="p-1 hover:bg-gray-200 rounded"
                 disabled={isLoading}
               >

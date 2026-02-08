@@ -204,6 +204,7 @@ export function SecuritySettings() {
                   <input
                     type="password"
                     placeholder="Password"
+                    aria-label="Password to disable 2FA"
                     value={disablePassword}
                     onChange={(e) => setDisablePassword(e.target.value)}
                     className="px-3 py-2 border border-gray-300 rounded-lg"
@@ -265,6 +266,7 @@ export function SecuritySettings() {
                   <input
                     type="text"
                     placeholder="Enter 6-digit code"
+                    aria-label="6-digit verification code"
                     value={verificationCode}
                     onChange={(e) => setVerificationCode(e.target.value)}
                     maxLength={6}

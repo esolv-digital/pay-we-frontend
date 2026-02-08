@@ -72,6 +72,7 @@ export function NotificationHistory() {
         <select
           value={channelFilter}
           onChange={(e) => handleChannelChange(e.target.value)}
+          aria-label="Filter by channel"
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {CHANNEL_OPTIONS.map((option) => (
@@ -84,6 +85,7 @@ export function NotificationHistory() {
         <select
           value={statusFilter}
           onChange={(e) => handleStatusChange(e.target.value)}
+          aria-label="Filter by status"
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {STATUS_OPTIONS.map((option) => (

@@ -134,6 +134,7 @@ export function VerificationInput({
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={index === 0 ? handlePaste : undefined}
                 disabled={isVerifying}
+                aria-label={`Digit ${index + 1} of 6`}
                 className="w-12 h-14 text-center text-2xl font-semibold border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                 autoComplete="off"
               />

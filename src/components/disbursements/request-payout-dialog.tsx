@@ -128,6 +128,7 @@ export function RequestPayoutDialog({ availableBalance, currency, minimumPayoutA
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close dialog"
             className="text-gray-400 hover:text-gray-600"
           >
             ✕
@@ -148,10 +149,11 @@ export function RequestPayoutDialog({ availableBalance, currency, minimumPayoutA
 
               {/* Account Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="payout_account_id" className="block text-sm font-medium text-gray-700 mb-1">
                   Payout Account
                 </label>
                 <select
+                  id="payout_account_id"
                   {...form.register('payout_account_id')}
                   className={cn(
                     'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500',
@@ -175,10 +177,11 @@ export function RequestPayoutDialog({ availableBalance, currency, minimumPayoutA
 
               {/* Amount Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="payout_amount" className="block text-sm font-medium text-gray-700 mb-1">
                   Amount ({currency})
                 </label>
                 <input
+                  id="payout_amount"
                   type="number"
                   {...form.register('amount', { valueAsNumber: true })}
                   placeholder="Enter amount"
@@ -228,10 +231,11 @@ export function RequestPayoutDialog({ availableBalance, currency, minimumPayoutA
 
               {/* Description (Optional) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="payout_description" className="block text-sm font-medium text-gray-700 mb-1">
                   Description (Optional)
                 </label>
                 <input
+                  id="payout_description"
                   type="text"
                   {...form.register('description')}
                   placeholder="e.g., Weekly payout"

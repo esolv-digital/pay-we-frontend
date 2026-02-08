@@ -133,6 +133,7 @@ export function ProfileSettings() {
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/gif"
+              aria-label="Upload profile picture"
               onChange={handleAvatarChange}
               className="hidden"
             />

@@ -200,11 +200,12 @@ export default function VendorTransactionsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="transaction-search" className="block text-sm font-medium text-gray-700 mb-1">
               Search (auto-applies)
             </label>
             <div className="relative">
               <input
+                id="transaction-search"
                 type="text"
                 placeholder="Reference, email, phone, customer name..."
                 value={searchInput}

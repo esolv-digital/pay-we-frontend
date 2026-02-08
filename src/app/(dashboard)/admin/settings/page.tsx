@@ -69,22 +69,22 @@ export default function AdminSettingsPage() {
               <h2 className="text-xl font-semibold mb-4">Platform Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="platform-name" className="block text-sm font-medium text-gray-700 mb-2">
                     Platform Name
                   </label>
-                  <Input type="text" defaultValue="PayWe" />
+                  <Input id="platform-name" type="text" defaultValue="PayWe" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="support-email" className="block text-sm font-medium text-gray-700 mb-2">
                     Support Email
                   </label>
-                  <Input type="email" defaultValue="support@paywe.com" />
+                  <Input id="support-email" type="email" defaultValue="support@paywe.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="support-phone" className="block text-sm font-medium text-gray-700 mb-2">
                     Support Phone
                   </label>
-                  <Input type="tel" defaultValue="+1 (555) 123-4567" />
+                  <Input id="support-phone" type="tel" defaultValue="+1 (555) 123-4567" />
                 </div>
               </div>
             </Card>
@@ -93,10 +93,10 @@ export default function AdminSettingsPage() {
               <h2 className="text-xl font-semibold mb-4">Regional Settings</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="default-currency" className="block text-sm font-medium text-gray-700 mb-2">
                     Default Currency
                   </label>
-                  <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                  <select id="default-currency" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                     <option value="USD">USD - US Dollar</option>
                     <option value="EUR">EUR - Euro</option>
                     <option value="GBP">GBP - British Pound</option>
@@ -104,10 +104,10 @@ export default function AdminSettingsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="default-timezone" className="block text-sm font-medium text-gray-700 mb-2">
                     Default Timezone
                   </label>
-                  <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                  <select id="default-timezone" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                     <option value="UTC">UTC</option>
                     <option value="America/New_York">Eastern Time (ET)</option>
                     <option value="Europe/London">London (GMT)</option>
@@ -149,16 +149,16 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="stripe-publishable-key" className="block text-sm font-medium text-gray-700 mb-1">
                         Publishable Key
                       </label>
-                      <Input type="text" placeholder="pk_live_..." />
+                      <Input id="stripe-publishable-key" type="text" placeholder="pk_live_..." />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="stripe-secret-key" className="block text-sm font-medium text-gray-700 mb-1">
                         Secret Key
                       </label>
-                      <Input type="password" placeholder="sk_live_..." />
+                      <Input id="stripe-secret-key" type="password" placeholder="sk_live_..." />
                     </div>
                   </div>
                 </div>
@@ -179,16 +179,16 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="paystack-public-key" className="block text-sm font-medium text-gray-700 mb-1">
                         Public Key
                       </label>
-                      <Input type="text" placeholder="pk_live_..." />
+                      <Input id="paystack-public-key" type="text" placeholder="pk_live_..." />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="paystack-secret-key" className="block text-sm font-medium text-gray-700 mb-1">
                         Secret Key
                       </label>
-                      <Input type="password" placeholder="sk_live_..." />
+                      <Input id="paystack-secret-key" type="password" placeholder="sk_live_..." />
                     </div>
                   </div>
                 </div>
@@ -208,10 +208,10 @@ export default function AdminSettingsPage() {
               <h2 className="text-xl font-semibold mb-4">Email Configuration</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="email-provider" className="block text-sm font-medium text-gray-700 mb-2">
                     Email Provider
                   </label>
-                  <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                  <select id="email-provider" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                     <option value="smtp">SMTP</option>
                     <option value="sendgrid">SendGrid</option>
                     <option value="mailgun">Mailgun</option>
@@ -219,16 +219,16 @@ export default function AdminSettingsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="from-email" className="block text-sm font-medium text-gray-700 mb-2">
                     From Email
                   </label>
-                  <Input type="email" defaultValue="noreply@paywe.com" />
+                  <Input id="from-email" type="email" defaultValue="noreply@paywe.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="from-name" className="block text-sm font-medium text-gray-700 mb-2">
                     From Name
                   </label>
-                  <Input type="text" defaultValue="PayWe" />
+                  <Input id="from-name" type="text" defaultValue="PayWe" />
                 </div>
               </div>
             </Card>
@@ -277,20 +277,20 @@ export default function AdminSettingsPage() {
                     <p className="font-medium">Require KYC for all vendors</p>
                     <p className="text-sm text-gray-600">All vendors must complete KYC</p>
                   </div>
-                  <input type="checkbox" className="w-5 h-5" defaultChecked />
+                  <input type="checkbox" className="w-5 h-5" defaultChecked aria-label="Require KYC for all vendors" />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">Auto-approve verified documents</p>
                     <p className="text-sm text-gray-600">Automatically approve verified IDs</p>
                   </div>
-                  <input type="checkbox" className="w-5 h-5" />
+                  <input type="checkbox" className="w-5 h-5" aria-label="Auto-approve verified documents" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="doc-expiry-warning" className="block text-sm font-medium text-gray-700 mb-2">
                     Document Expiry Warning (days)
                   </label>
-                  <Input type="number" defaultValue="30" />
+                  <Input id="doc-expiry-warning" type="number" defaultValue="30" />
                 </div>
               </div>
             </Card>
@@ -303,7 +303,7 @@ export default function AdminSettingsPage() {
                     <p className="font-medium">Require business verification</p>
                     <p className="text-sm text-gray-600">Require KYB for business accounts</p>
                   </div>
-                  <input type="checkbox" className="w-5 h-5" defaultChecked />
+                  <input type="checkbox" className="w-5 h-5" defaultChecked aria-label="Require business verification" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -348,19 +348,19 @@ export default function AdminSettingsPage() {
                     <p className="font-medium">Require two-factor authentication</p>
                     <p className="text-sm text-gray-600">Force 2FA for all admin users</p>
                   </div>
-                  <input type="checkbox" className="w-5 h-5" />
+                  <input type="checkbox" className="w-5 h-5" aria-label="Require two-factor authentication" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="session-timeout" className="block text-sm font-medium text-gray-700 mb-2">
                     Session Timeout (minutes)
                   </label>
-                  <Input type="number" defaultValue="60" />
+                  <Input id="session-timeout" type="number" defaultValue="60" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="password-min-length" className="block text-sm font-medium text-gray-700 mb-2">
                     Password Minimum Length
                   </label>
-                  <Input type="number" defaultValue="8" />
+                  <Input id="password-min-length" type="number" defaultValue="8" />
                 </div>
               </div>
             </Card>
@@ -373,13 +373,13 @@ export default function AdminSettingsPage() {
                     <p className="font-medium">Rate limiting enabled</p>
                     <p className="text-sm text-gray-600">Limit API requests per minute</p>
                   </div>
-                  <input type="checkbox" className="w-5 h-5" defaultChecked />
+                  <input type="checkbox" className="w-5 h-5" defaultChecked aria-label="Rate limiting enabled" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="rate-limit" className="block text-sm font-medium text-gray-700 mb-2">
                     Rate Limit (requests per minute)
                   </label>
-                  <Input type="number" defaultValue="100" />
+                  <Input id="rate-limit" type="number" defaultValue="100" />
                 </div>
               </div>
             </Card>
@@ -397,19 +397,19 @@ export default function AdminSettingsPage() {
               <h2 className="text-xl font-semibold mb-4">API Configuration</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="api-version" className="block text-sm font-medium text-gray-700 mb-2">
                     API Version
                   </label>
-                  <select className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                  <select id="api-version" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
                     <option value="v1">v1 (Current)</option>
                     <option value="v2">v2 (Beta)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="webhook-url" className="block text-sm font-medium text-gray-700 mb-2">
                     Webhook URL
                   </label>
-                  <Input type="url" placeholder="https://your-domain.com/webhooks" />
+                  <Input id="webhook-url" type="url" placeholder="https://your-domain.com/webhooks" />
                 </div>
               </div>
             </Card>

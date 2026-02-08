@@ -180,6 +180,7 @@ export function AddPayoutAccountDialog({ onClose }: AddPayoutAccountDialogProps)
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close dialog"
             className="text-gray-400 hover:text-gray-600"
           >
             ✕

@@ -197,6 +197,7 @@ export default function AdminSecurityPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
               <select
+                aria-label="Filter by login status"
                 value={
                   filters.successful === undefined ? '' : filters.successful ? 'true' : 'false'
                 }

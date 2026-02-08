@@ -168,10 +168,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
             <TabsContent value="basic">
               <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg shadow p-6 space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                     Page Title *
                   </label>
                   <input
+                    id="title"
                     {...register('title')}
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -183,10 +184,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
                     Page Slug
                   </label>
                   <input
+                    id="slug"
                     {...register('slug')}
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -201,10 +203,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                     Description
                   </label>
                   <textarea
+                    id="description"
                     {...register('description')}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -216,10 +219,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="amount_type" className="block text-sm font-medium text-gray-700 mb-2">
                     Amount Type *
                   </label>
                   <select
+                    id="amount_type"
                     {...register('amount_type')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -234,10 +238,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
 
                 {amountType === 'fixed' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="fixed_amount" className="block text-sm font-medium text-gray-700 mb-2">
                       Fixed Amount *
                     </label>
                     <input
+                      id="fixed_amount"
                       {...register('fixed_amount', { valueAsNumber: true })}
                       type="number"
                       step="0.01"
@@ -253,10 +258,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                 {amountType === 'flexible' && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="min_amount" className="block text-sm font-medium text-gray-700 mb-2">
                         Minimum Amount *
                       </label>
                       <input
+                        id="min_amount"
                         {...register('min_amount', { valueAsNumber: true })}
                         type="number"
                         step="0.01"
@@ -268,10 +274,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="max_amount" className="block text-sm font-medium text-gray-700 mb-2">
                         Maximum Amount
                       </label>
                       <input
+                        id="max_amount"
                         {...register('max_amount', { valueAsNumber: true })}
                         type="number"
                         step="0.01"
@@ -287,10 +294,11 @@ export default function EditPaymentPagePage({ params }: PageProps) {
 
                 {amountType === 'donation' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="min_donation_amount" className="block text-sm font-medium text-gray-700 mb-2">
                       Minimum Donation Amount *
                     </label>
                     <input
+                      id="min_donation_amount"
                       {...register('min_amount', { valueAsNumber: true })}
                       type="number"
                       step="0.01"

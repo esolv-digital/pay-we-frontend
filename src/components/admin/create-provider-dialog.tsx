@@ -268,6 +268,7 @@ export function CreateProviderDialog({ onClose }: CreateProviderDialogProps) {
               <input
                 type="checkbox"
                 {...register('is_active')}
+                aria-label="Active"
                 className="rounded border-gray-300"
               />
               <span className="text-sm">Active</span>
@@ -276,6 +277,7 @@ export function CreateProviderDialog({ onClose }: CreateProviderDialogProps) {
               <input
                 type="checkbox"
                 {...register('is_primary')}
+                aria-label="Primary"
                 className="rounded border-gray-300"
               />
               <span className="text-sm">Primary</span>

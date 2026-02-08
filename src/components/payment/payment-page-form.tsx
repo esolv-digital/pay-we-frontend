@@ -524,6 +524,7 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                   <div className="space-y-2">
                     <Input
                       placeholder="Street Address"
+                      aria-label="Street Address"
                       {...register('shipping_street')}
                       style={{
                         backgroundColor: isDark ? '#374151' : '#f9fafb',
@@ -535,6 +536,7 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       placeholder="City"
+                      aria-label="City"
                       {...register('shipping_city')}
                       style={{
                         backgroundColor: isDark ? '#374151' : '#f9fafb',
@@ -544,6 +546,7 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                     />
                     <Input
                       placeholder="State"
+                      aria-label="State"
                       {...register('shipping_state')}
                       style={{
                         backgroundColor: isDark ? '#374151' : '#f9fafb',
@@ -555,6 +558,7 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       placeholder="Country"
+                      aria-label="Country"
                       {...register('shipping_country')}
                       style={{
                         backgroundColor: isDark ? '#374151' : '#f9fafb',
@@ -564,6 +568,7 @@ export function PaymentPageForm({ paymentPage, onSubmit }: PaymentPageFormProps)
                     />
                     <Input
                       placeholder="Postal Code"
+                      aria-label="Postal Code"
                       {...register('shipping_postal_code')}
                       style={{
                         backgroundColor: isDark ? '#374151' : '#f9fafb',
