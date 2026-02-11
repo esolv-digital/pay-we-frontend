@@ -3,9 +3,10 @@ import { format as dateFnsFormat } from 'date-fns';
 /**
  * Format currency with proper symbol and decimals
  */
-export function formatCurrency(amount: number, currencyCode: string = 'USD'): string {
-  // Handle NaN, undefined, or invalid numbers
-  const safeAmount = Number.isFinite(amount) ? amount : 0;
+export function formatCurrency(amount: number | string, currencyCode: string = 'USD'): string {
+  // Handle string amounts from API (e.g., "10.00") and invalid values
+  const parsed = typeof amount === 'string' ? parseFloat(amount) : amount;
+  const safeAmount = Number.isFinite(parsed) ? parsed : 0;
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currencyCode,

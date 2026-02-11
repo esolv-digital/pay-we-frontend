@@ -222,11 +222,14 @@ export default function RoleDetailPage() {
 
           {role.permissions && role.permissions.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {role.permissions.map((permission) => (
-                <Badge key={permission} variant="outline">
-                  {permission}
-                </Badge>
-              ))}
+              {role.permissions.map((permission: any, index: number) => {
+                const name = typeof permission === 'string' ? permission : permission.name;
+                return (
+                  <Badge key={name ?? index} variant="outline">
+                    {name}
+                  </Badge>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">

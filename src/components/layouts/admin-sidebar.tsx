@@ -35,13 +35,13 @@ const navigation: Array<{
     permission: PERMISSIONS.ADMIN_VIEW_DISBURSEMENTS,
     category: 'financial',
   },
-  {
-    name: 'Payout Accounts',
-    href: ADMIN_ROUTES.PAYOUT_ACCOUNTS,
-    icon: '🏦',
-    permission: PERMISSIONS.ADMIN_VIEW_PAYOUT_ACCOUNTS,
-    category: 'financial',
-  },
+  // {
+  //   name: 'Payout Accounts',
+  //   href: ADMIN_ROUTES.PAYOUT_ACCOUNTS,
+  //   icon: '🏦',
+  //   permission: PERMISSIONS.ADMIN_VIEW_PAYOUT_ACCOUNTS,
+  //   category: 'financial',
+  // },
 
   // Compliance
   {
@@ -51,13 +51,13 @@ const navigation: Array<{
     permission: PERMISSIONS.VIEW_KYC,
     category: 'compliance',
   },
-  {
-    name: 'KYB Reviews',
-    href: ADMIN_ROUTES.KYB,
-    icon: '🏛️',
-    permission: PERMISSIONS.VIEW_KYC,
-    category: 'compliance',
-  },
+  // {
+  //   name: 'KYB Reviews',
+  //   href: ADMIN_ROUTES.KYB,
+  //   icon: '🏛️',
+  //   permission: PERMISSIONS.VIEW_KYC,
+  //   category: 'compliance',
+  // },
 
   // Management
   { name: 'Users', href: ADMIN_ROUTES.USERS, icon: '👥', category: 'management' },
@@ -92,20 +92,20 @@ const navigation: Array<{
     permission: PERMISSIONS.ADMIN_MANAGE_COUNTRIES,
     category: 'platform',
   },
-  {
-    name: 'Gateways',
-    href: ADMIN_ROUTES.GATEWAYS,
-    icon: '🔌',
-    permission: PERMISSIONS.ADMIN_MANAGE_GATEWAYS,
-    category: 'platform',
-  },
-  {
-    name: 'Fee Management',
-    href: ADMIN_ROUTES.FEES,
-    icon: '💰',
-    permission: PERMISSIONS.ADMIN_MANAGE_FEES,
-    category: 'platform',
-  },
+  // {
+  //   name: 'Gateways',
+  //   href: ADMIN_ROUTES.GATEWAYS,
+  //   icon: '🔌',
+  //   permission: PERMISSIONS.ADMIN_MANAGE_GATEWAYS,
+  //   category: 'platform',
+  // },
+  // {
+  //   name: 'Fee Management',
+  //   href: ADMIN_ROUTES.FEES,
+  //   icon: '💰',
+  //   permission: PERMISSIONS.ADMIN_MANAGE_FEES,
+  //   category: 'platform',
+  // },
 
   // System
   {

@@ -8,7 +8,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -82,19 +81,19 @@ export const adminPayoutAccountsApi = {
     return apiClient.get<PaginatedResponse<AdminPayoutAccount>>(`/admin/payout-accounts?${params.toString()}`);
   },
 
-  async get(id: string): Promise<ApiResponse<AdminPayoutAccount>> {
-    return apiClient.get<ApiResponse<AdminPayoutAccount>>(`/admin/payout-accounts/${id}`);
+  async get(id: string): Promise<AdminPayoutAccount> {
+    return apiClient.get<AdminPayoutAccount>(`/admin/payout-accounts/${id}`);
   },
 
-  async verify(id: string): Promise<ApiResponse<AdminPayoutAccount>> {
-    return apiClient.post<ApiResponse<AdminPayoutAccount>>(`/admin/payout-accounts/${id}/verify`);
+  async verify(id: string): Promise<AdminPayoutAccount> {
+    return apiClient.post<AdminPayoutAccount>(`/admin/payout-accounts/${id}/verify`);
   },
 
-  async flag(id: string, reason: string): Promise<ApiResponse<AdminPayoutAccount>> {
-    return apiClient.post<ApiResponse<AdminPayoutAccount>>(`/admin/payout-accounts/${id}/flag`, { reason });
+  async flag(id: string, reason: string): Promise<AdminPayoutAccount> {
+    return apiClient.post<AdminPayoutAccount>(`/admin/payout-accounts/${id}/flag`, { reason });
   },
 
-  async getStatistics(): Promise<ApiResponse<AdminPayoutAccountStatistics>> {
-    return apiClient.get<ApiResponse<AdminPayoutAccountStatistics>>('/admin/payout-accounts/statistics');
+  async getStatistics(): Promise<AdminPayoutAccountStatistics> {
+    return apiClient.get<AdminPayoutAccountStatistics>('/admin/payout-accounts/statistics');
   },
 };

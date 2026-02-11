@@ -50,7 +50,15 @@ export const payoutApi = {
    * GET /vendors/{vendor}/payout-accounts
    */
   getPayoutAccounts: async (vendorSlug: string): Promise<PayoutAccount[]> => {
-    return apiClient.get<PayoutAccount[]>(`/vendors/${vendorSlug}/payout-accounts`);
+    const accounts = await apiClient.get<PayoutAccount[]>(`/vendors/${vendorSlug}/payout-accounts`);
+    // Normalize: backend may return `account_type` instead of `type`
+    return (accounts || []).map((account) => {
+      const raw = account as unknown as Record<string, unknown>;
+      return {
+        ...account,
+        type: (account.type || raw.account_type || 'mobile_money') as PayoutAccount['type'],
+      };
+    });
   },
 
   /**

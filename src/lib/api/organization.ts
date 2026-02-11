@@ -30,7 +30,7 @@ export const organizationApi = {
    * Update organization details
    */
   async updateOrganization(organizationId: string, data: UpdateOrganizationInput): Promise<Organization> {
-    return apiClient.patch<Organization>(`/organizations/${organizationId}`, data);
+    return apiClient.put<Organization>(`/organizations/${organizationId}`, data);
   },
 
   /**

@@ -3,6 +3,7 @@ import { payoutApi } from '@/lib/api/payout';
 import { showApiError, showSuccess } from '@/lib/utils/error-handler';
 import { useRequiredVendorSlug } from './use-vendor-slug';
 import type {
+  PayoutAccount,
   VerifyAccountRequest,
   CreatePayoutAccountRequest,
   UpdatePayoutAccountRequest,
@@ -202,12 +203,36 @@ export function useSetDefaultPayoutAccount() {
   return useMutation({
     mutationFn: (accountId: string) =>
       payoutApi.updatePayoutAccount(vendorSlug!, accountId, { is_default: true }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['payout-accounts', vendorSlug] });
-      queryClient.invalidateQueries({ queryKey: ['disbursement-statistics', vendorSlug] });
+    onMutate: async (accountId: string) => {
+      // Cancel outgoing refetches so they don't overwrite optimistic update
+      await queryClient.cancelQueries({ queryKey: ['payout-accounts', vendorSlug] });
+
+      // Snapshot previous accounts for rollback
+      const previousAccounts = queryClient.getQueryData<PayoutAccount[]>(['payout-accounts', vendorSlug]);
+
+      // Optimistically update: set new default, unset old default
+      if (previousAccounts) {
+        queryClient.setQueryData<PayoutAccount[]>(
+          ['payout-accounts', vendorSlug],
+          previousAccounts.map((account) => ({
+            ...account,
+            is_default: account.id === accountId,
+          }))
+        );
+      }
+
+      return { previousAccounts };
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['payout-accounts', vendorSlug] });
+      await queryClient.invalidateQueries({ queryKey: ['disbursement-statistics', vendorSlug] });
       showSuccess('Default payout account updated!');
     },
-    onError: (error) => {
+    onError: (error, _accountId, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousAccounts) {
+        queryClient.setQueryData(['payout-accounts', vendorSlug], context.previousAccounts);
+      }
       showApiError(error);
     },
   });

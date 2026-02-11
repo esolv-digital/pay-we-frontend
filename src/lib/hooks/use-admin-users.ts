@@ -16,7 +16,7 @@ import {
   type CreateUserRequest,
   type UpdateUserRequest,
 } from '@/lib/api/admin-users';
-import type { PaginatedResponse, ApiResponse } from '@/types/api';
+import type { PaginatedResponse } from '@/types/api';
 
 // ============================================================================
 // QUERY KEYS
@@ -116,7 +116,7 @@ export function useAdminUser(
     enabled?: boolean;
   }
 ) {
-  return useQuery<ApiResponse<User>, Error>({
+  return useQuery<User, Error>({
     queryKey: adminUsersKeys.detail(id),
     queryFn: () => adminUsersApi.get(id),
     staleTime: 60_000, // 1 minute

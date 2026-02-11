@@ -103,35 +103,36 @@ export default function AdminTransactionsPage() {
   };
 
   // Calculate stats from metrics
+  const metrics = metricsData;
   const stats = [
     {
       label: 'Total Transactions',
-      value: metricsData?.data.total_transactions?.toLocaleString() || '0',
+      value: metrics?.total_transactions?.toLocaleString() || '0',
       subtext: 'All time',
       icon: '💳',
       color: 'bg-blue-50'
     },
     {
       label: 'Total Volume',
-      value: metricsData?.data.total_amount
-        ? `$${metricsData.data.total_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      value: metrics?.total_amount
+        ? `$${metrics.total_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
         : '$0.00',
       subtext: 'All time',
-      icon: '��',
+      icon: '💰',
       color: 'bg-green-50'
     },
     {
       label: 'Completed',
-      value: metricsData?.data.completed_transactions?.toLocaleString() || '0',
-      subtext: metricsData?.data.total_transactions
-        ? `Success rate: ${((metricsData.data.completed_transactions / metricsData.data.total_transactions) * 100).toFixed(1)}%`
+      value: metrics?.completed_transactions?.toLocaleString() || '0',
+      subtext: metrics?.total_transactions
+        ? `Success rate: ${((metrics.completed_transactions / metrics.total_transactions) * 100).toFixed(1)}%`
         : 'Success rate: 0%',
       icon: '✓',
       color: 'bg-emerald-50'
     },
     {
       label: 'Pending',
-      value: metricsData?.data.pending_transactions?.toLocaleString() || '0',
+      value: metrics?.pending_transactions?.toLocaleString() || '0',
       subtext: 'Awaiting completion',
       icon: '⏳',
       color: 'bg-yellow-50'

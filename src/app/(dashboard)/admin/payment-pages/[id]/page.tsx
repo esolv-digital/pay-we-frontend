@@ -26,10 +26,9 @@ export default function PaymentPageDetailPage() {
   const params = useParams();
   const pageId = params?.id as string;
 
-  const { data: response, isLoading, error } = useAdminPaymentPage(pageId);
+  const { data: page, isLoading, error } = useAdminPaymentPage(pageId);
   const { mutate: suspendPage } = useSuspendPaymentPage();
   const { mutate: activatePage } = useActivatePaymentPage();
-  const page = response?.data;
 
   const handleSuspend = () => {
     const reason = prompt('Reason for suspension:');

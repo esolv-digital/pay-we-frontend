@@ -21,9 +21,8 @@ export default function GatewayDetailPage() {
   const params = useParams();
   const gatewayId = params?.id as string;
 
-  const { data: response, isLoading, error } = useAdminGateway(gatewayId);
+  const { data: gateway, isLoading, error } = useAdminGateway(gatewayId);
   const { mutate: toggleGateway } = useToggleGateway();
-  const gateway = response?.data;
 
   if (isLoading) {
     return (

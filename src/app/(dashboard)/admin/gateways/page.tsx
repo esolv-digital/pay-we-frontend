@@ -58,7 +58,7 @@ export default function AdminGatewaysPage() {
     setFilters({ page: 1, per_page: 20, sort_by: 'created_at', sort_direction: 'desc' });
   };
 
-  const statistics = statsData?.data;
+  const statistics = statsData;
   const stats = [
     { label: 'Total Gateways', value: statistics?.total ?? 0, subtext: 'Configured', icon: '🔌', color: 'bg-blue-50' },
     { label: 'Active', value: statistics?.active ?? 0, subtext: 'Currently enabled', icon: '✓', color: 'bg-green-50' },

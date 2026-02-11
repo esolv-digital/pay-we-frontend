@@ -104,33 +104,34 @@ export default function AdminUsersPage() {
   };
 
   // Calculate stats
+  const statistics = statsData;
   const stats = [
     {
       label: 'Total Users',
-      value: statsData?.data.total_users?.toLocaleString() || '0',
+      value: statistics?.total_users?.toLocaleString() || '0',
       subtext: 'All platform users',
       icon: '👥',
       color: 'bg-blue-50'
     },
     {
       label: 'Active Users',
-      value: statsData?.data.active_users?.toLocaleString() || '0',
-      subtext: statsData?.data.total_users
-        ? `${((statsData.data.active_users / statsData.data.total_users) * 100).toFixed(1)}% of total`
+      value: statistics?.active_users?.toLocaleString() || '0',
+      subtext: statistics?.total_users
+        ? `${((statistics.active_users / statistics.total_users) * 100).toFixed(1)}% of total`
         : '0% of total',
       icon: '✓',
       color: 'bg-green-50'
     },
     {
       label: 'Suspended',
-      value: statsData?.data.suspended_users?.toLocaleString() || '0',
+      value: statistics?.suspended_users?.toLocaleString() || '0',
       subtext: 'Requires attention',
       icon: '⚠️',
       color: 'bg-red-50'
     },
     {
       label: 'Pending',
-      value: statsData?.data.pending_users?.toLocaleString() || '0',
+      value: statistics?.pending_users?.toLocaleString() || '0',
       subtext: 'Awaiting verification',
       icon: '⏳',
       color: 'bg-yellow-50'

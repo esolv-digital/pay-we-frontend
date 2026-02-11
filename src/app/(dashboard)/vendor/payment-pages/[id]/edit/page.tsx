@@ -62,9 +62,9 @@ export default function EditPaymentPagePage({ params }: PageProps) {
         slug: paymentPage.slug,
         description: paymentPage.description || '',
         amount_type: paymentPage.amount_type,
-        fixed_amount: paymentPage.fixed_amount || undefined,
-        min_amount: paymentPage.min_amount || undefined,
-        max_amount: paymentPage.max_amount || undefined,
+        fixed_amount: paymentPage.fixed_amount != null ? Number(paymentPage.fixed_amount) : undefined,
+        min_amount: paymentPage.min_amount != null ? Number(paymentPage.min_amount) : undefined,
+        max_amount: paymentPage.max_amount != null ? Number(paymentPage.max_amount) : undefined,
         currency_code: paymentPage.currency_code,
         collect_customer_info: paymentPage.collect_customer_info,
         collect_shipping_address: paymentPage.collect_shipping_address,
@@ -93,12 +93,24 @@ export default function EditPaymentPagePage({ params }: PageProps) {
   const amountType = watch('amount_type');
 
   const onSubmit = (data: PaymentPageFormData) => {
+    // Strip amount fields not relevant to the selected amount_type
+    // Backend rejects fields prohibited for the current amount_type
+    const { fixed_amount, min_amount, max_amount, ...rest } = data;
+    let amountFields = {};
+    if (data.amount_type === 'fixed') {
+      amountFields = { fixed_amount };
+    } else if (data.amount_type === 'flexible') {
+      amountFields = { min_amount, max_amount };
+    } else if (data.amount_type === 'donation') {
+      amountFields = { min_amount };
+    }
     updatePage(
       {
-        ...data,
+        ...rest,
+        ...amountFields,
         metadata: {
           customization,
-        }
+        },
       },
       {
         onSuccess: () => {
@@ -326,7 +338,7 @@ export default function EditPaymentPagePage({ params }: PageProps) {
                         placeholder="Select currency"
                         error={errors.currency_code?.message}
                         restrictToOrganization={true}
-                        autoSetDefault={false}
+                        autoSetDefault={true}
                       />
                     )}
                   />

@@ -28,10 +28,9 @@ export default function DisbursementDetailPage() {
   const params = useParams();
   const disbursementId = params?.id as string;
 
-  const { data: response, isLoading, error } = useAdminDisbursement(disbursementId);
+  const { data: disbursement, isLoading, error } = useAdminDisbursement(disbursementId);
   const { mutate: approveDisbursement } = useApproveDisbursement();
   const { mutate: rejectDisbursement } = useRejectDisbursement();
-  const disbursement = response?.data;
 
   const handleReject = () => {
     const reason = prompt('Reason for rejection:');

@@ -8,7 +8,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -97,20 +96,20 @@ export const adminDisbursementsApi = {
     return apiClient.get<PaginatedResponse<AdminDisbursement>>(`/admin/disbursements?${params.toString()}`);
   },
 
-  async get(id: string): Promise<ApiResponse<AdminDisbursement>> {
-    return apiClient.get<ApiResponse<AdminDisbursement>>(`/admin/disbursements/${id}`);
+  async get(id: string): Promise<AdminDisbursement> {
+    return apiClient.get<AdminDisbursement>(`/admin/disbursements/${id}`);
   },
 
-  async approve(id: string): Promise<ApiResponse<AdminDisbursement>> {
-    return apiClient.post<ApiResponse<AdminDisbursement>>(`/admin/disbursements/${id}/approve`);
+  async approve(id: string): Promise<AdminDisbursement> {
+    return apiClient.post<AdminDisbursement>(`/admin/disbursements/${id}/approve`);
   },
 
-  async reject(id: string, reason: string): Promise<ApiResponse<AdminDisbursement>> {
-    return apiClient.post<ApiResponse<AdminDisbursement>>(`/admin/disbursements/${id}/reject`, { reason });
+  async reject(id: string, reason: string): Promise<AdminDisbursement> {
+    return apiClient.post<AdminDisbursement>(`/admin/disbursements/${id}/reject`, { reason });
   },
 
-  async getStatistics(): Promise<ApiResponse<AdminDisbursementStatistics>> {
-    return apiClient.get<ApiResponse<AdminDisbursementStatistics>>('/admin/disbursements/statistics');
+  async getStatistics(): Promise<AdminDisbursementStatistics> {
+    return apiClient.get<AdminDisbursementStatistics>('/admin/disbursements/statistics');
   },
 
   async export(filters: ExportDisbursementsFilters = {}): Promise<string> {

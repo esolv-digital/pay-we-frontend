@@ -21,10 +21,9 @@ export default function PayoutAccountDetailPage() {
   const params = useParams();
   const accountId = params?.id as string;
 
-  const { data: response, isLoading, error } = useAdminPayoutAccount(accountId);
+  const { data: account, isLoading, error } = useAdminPayoutAccount(accountId);
   const { mutate: verifyAccount } = useVerifyPayoutAccount();
   const { mutate: flagAccount } = useFlagPayoutAccount();
-  const account = response?.data;
 
   const handleFlag = () => {
     const reason = prompt('Reason for flagging:');
@@ -96,8 +95,8 @@ export default function PayoutAccountDetailPage() {
             </dl>
             <dl className="space-y-3">
               <div><dt className="text-sm text-gray-500">Currency</dt><dd className="font-medium text-gray-900">{account.currency_code}</dd></div>
-              <div><dt className="text-sm text-gray-500">Vendor</dt><dd className="font-medium text-gray-900">{account.vendor.business_name}</dd></div>
-              <div><dt className="text-sm text-gray-500">Organization</dt><dd className="font-medium text-gray-900">{account.organization.name}</dd></div>
+              <div><dt className="text-sm text-gray-500">Vendor</dt><dd className="font-medium text-gray-900">{account.vendor?.business_name ?? '—'}</dd></div>
+              <div><dt className="text-sm text-gray-500">Organization</dt><dd className="font-medium text-gray-900">{account.organization?.name ?? '—'}</dd></div>
             </dl>
           </div>
         </Card>

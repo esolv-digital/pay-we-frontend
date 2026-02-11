@@ -51,7 +51,7 @@ export default function AdminOrganizationsPage() {
     {
       label: 'Total Organizations',
       value:
-        statsData?.data?.total_organizations?.toLocaleString() ||
+        statsData?.total_organizations?.toLocaleString() ||
         data?.meta?.total?.toLocaleString() ||
         '0',
       icon: Building2,
@@ -61,7 +61,7 @@ export default function AdminOrganizationsPage() {
     {
       label: 'Active Organizations',
       value:
-        statsData?.data?.active_organizations?.toLocaleString() || '0',
+        statsData?.active_organizations?.toLocaleString() || '0',
       icon: TrendingUp,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
@@ -69,15 +69,15 @@ export default function AdminOrganizationsPage() {
     {
       label: 'Suspended',
       value:
-        statsData?.data?.suspended_organizations?.toLocaleString() || '0',
+        statsData?.suspended_organizations?.toLocaleString() || '0',
       icon: AlertCircle,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
     },
     {
       label: 'Total Volume',
-      value: statsData?.data?.total_transaction_volume
-        ? `$${(statsData.data.total_transaction_volume / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      value: statsData?.total_transaction_volume
+        ? `$${(statsData.total_transaction_volume / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
         : '$0.00',
       icon: Users,
       color: 'text-purple-600',

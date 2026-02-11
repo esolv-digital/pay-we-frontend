@@ -14,7 +14,6 @@ import {
   type RevenueReport,
   type RevenueReportFilters,
 } from '@/lib/api/admin-reports';
-import type { ApiResponse } from '@/types/api';
 
 // ============================================================================
 // QUERY KEYS
@@ -68,7 +67,7 @@ export function useRevenueReport(
     refetchInterval?: number;
   }
 ) {
-  return useQuery<ApiResponse<RevenueReport>, Error>({
+  return useQuery<RevenueReport, Error>({
     queryKey: adminReportsKeys.revenueReport(filters),
     queryFn: () => adminReportsApi.getRevenue(filters),
     staleTime: 60_000, // 1 minute

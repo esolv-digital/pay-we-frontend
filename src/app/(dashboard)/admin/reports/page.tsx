@@ -40,7 +40,7 @@ export default function AdminReportsPage() {
   const { mutate: exportReport, isPending: isExporting } = useExportRevenueReport();
 
   // Statistics
-  const report = data?.data;
+  const report = data;
   const stats = [
     {
       label: 'Total Revenue',

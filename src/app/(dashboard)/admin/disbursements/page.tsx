@@ -77,7 +77,7 @@ export default function AdminDisbursementsPage() {
     if (reason) rejectDisbursement({ id, reason });
   };
 
-  const statistics = statsData?.data;
+  const statistics = statsData;
   const stats = [
     { label: 'Total Disbursed', value: statistics?.total_disbursed ? formatCurrency(statistics.total_disbursed) : '$0', subtext: 'All time', icon: '💸', color: 'bg-green-50' },
     { label: 'Pending', value: statistics?.pending_count ?? 0, subtext: statistics?.pending_amount ? formatCurrency(statistics.pending_amount) : '$0', icon: '⏳', color: 'bg-yellow-50' },

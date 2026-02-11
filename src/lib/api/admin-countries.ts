@@ -8,7 +8,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 import type { Country, CountryPaymentMethod, PaymentMethod } from '@/types/country';
 
@@ -96,31 +95,31 @@ export const adminCountriesApi = {
     return apiClient.get<PaginatedResponse<Country>>(`/admin/countries?${params.toString()}`);
   },
 
-  async get(id: string): Promise<ApiResponse<AdminCountry>> {
-    return apiClient.get<ApiResponse<AdminCountry>>(`/admin/countries/${id}`);
+  async get(id: string): Promise<AdminCountry> {
+    return apiClient.get<AdminCountry>(`/admin/countries/${id}`);
   },
 
-  async create(data: CreateCountryRequest): Promise<ApiResponse<Country>> {
-    return apiClient.post<ApiResponse<Country>>('/admin/countries', data);
+  async create(data: CreateCountryRequest): Promise<Country> {
+    return apiClient.post<Country>('/admin/countries', data);
   },
 
-  async update(id: string, data: UpdateCountryRequest): Promise<ApiResponse<Country>> {
-    return apiClient.put<ApiResponse<Country>>(`/admin/countries/${id}`, data);
+  async update(id: string, data: UpdateCountryRequest): Promise<Country> {
+    return apiClient.put<Country>(`/admin/countries/${id}`, data);
   },
 
-  async delete(id: string): Promise<ApiResponse<null>> {
-    return apiClient.delete<ApiResponse<null>>(`/admin/countries/${id}`);
+  async delete(id: string): Promise<null> {
+    return apiClient.delete<null>(`/admin/countries/${id}`);
   },
 
-  async updatePaymentMethods(id: string, data: UpdatePaymentMethodsRequest): Promise<ApiResponse<CountryPaymentMethod[]>> {
-    return apiClient.put<ApiResponse<CountryPaymentMethod[]>>(`/admin/countries/${id}/payment-methods`, data);
+  async updatePaymentMethods(id: string, data: UpdatePaymentMethodsRequest): Promise<CountryPaymentMethod[]> {
+    return apiClient.put<CountryPaymentMethod[]>(`/admin/countries/${id}/payment-methods`, data);
   },
 
-  async updateGateways(id: string, data: UpdateGatewaysRequest): Promise<ApiResponse<CountryGatewayAssignment[]>> {
-    return apiClient.put<ApiResponse<CountryGatewayAssignment[]>>(`/admin/countries/${id}/gateways`, data);
+  async updateGateways(id: string, data: UpdateGatewaysRequest): Promise<CountryGatewayAssignment[]> {
+    return apiClient.put<CountryGatewayAssignment[]>(`/admin/countries/${id}/gateways`, data);
   },
 
-  async getStatistics(): Promise<ApiResponse<CountryStatistics>> {
-    return apiClient.get<ApiResponse<CountryStatistics>>('/admin/countries/statistics');
+  async getStatistics(): Promise<CountryStatistics> {
+    return apiClient.get<CountryStatistics>('/admin/countries/statistics');
   },
 };

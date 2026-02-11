@@ -28,7 +28,8 @@ export function useAuth() {
   const isAuthRoute = typeof window !== 'undefined' &&
     (window.location.pathname === '/login' ||
      window.location.pathname.startsWith('/login/') ||
-     window.location.pathname === '/register');
+     window.location.pathname === '/register' ||
+     window.location.pathname === '/verify-email');
 
   const { data: currentUser, isLoading } = useQuery({
     queryKey: ['auth', 'me'],

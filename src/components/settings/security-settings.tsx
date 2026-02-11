@@ -7,20 +7,21 @@ import { z } from 'zod';
 import { useProfile, useChangePassword } from '@/lib/hooks/use-profile';
 import { useEnable2FA, useConfirm2FA, useDisable2FA, useRegenerateRecoveryCodes } from '@/lib/hooks/use-two-factor';
 import { useSocialAuth } from '@/lib/hooks/use-social-auth';
+import { QRCodeSVG } from 'qrcode.react';
 import { cn } from '@/lib/utils';
 
 const passwordSchema = z.object({
   current_password: z.string().min(1, 'Current password is required'),
-  password: z
+  new_password: z
     .string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Password must contain an uppercase letter')
     .regex(/[a-z]/, 'Password must contain a lowercase letter')
     .regex(/[0-9]/, 'Password must contain a number'),
-  password_confirmation: z.string(),
-}).refine((data) => data.password === data.password_confirmation, {
+  new_password_confirmation: z.string(),
+}).refine((data) => data.new_password === data.new_password_confirmation, {
   message: "Passwords don't match",
-  path: ['password_confirmation'],
+  path: ['new_password_confirmation'],
 });
 
 type PasswordFormData = z.infer<typeof passwordSchema>;
@@ -35,7 +36,7 @@ export function SecuritySettings() {
   const { isGoogleConnected, hasPassword, linkGoogle, unlinkGoogle, isUnlinking } = useSocialAuth();
 
   const [show2FASetup, setShow2FASetup] = useState(false);
-  const [setupData, setSetupData] = useState<{ secret: string; qr_code_url: string } | null>(null);
+  const [setupData, setSetupData] = useState<{ secret: string; provisioning_uri: string } | null>(null);
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
   const [verificationCode, setVerificationCode] = useState('');
   const [showRecoveryCodes, setShowRecoveryCodes] = useState(false);
@@ -45,8 +46,8 @@ export function SecuritySettings() {
     resolver: zodResolver(passwordSchema),
     defaultValues: {
       current_password: '',
-      password: '',
-      password_confirmation: '',
+      new_password: '',
+      new_password_confirmation: '',
     },
   });
 
@@ -135,38 +136,38 @@ export function SecuritySettings() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="new_password" className="block text-sm font-medium text-gray-700 mb-1">
               New Password
             </label>
             <input
-              id="password"
+              id="new_password"
               type="password"
-              {...passwordForm.register('password')}
+              {...passwordForm.register('new_password')}
               className={cn(
                 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500',
-                passwordForm.formState.errors.password ? 'border-red-500' : 'border-gray-300'
+                passwordForm.formState.errors.new_password ? 'border-red-500' : 'border-gray-300'
               )}
             />
-            {passwordForm.formState.errors.password && (
-              <p className="mt-1 text-sm text-red-600">{passwordForm.formState.errors.password.message}</p>
+            {passwordForm.formState.errors.new_password && (
+              <p className="mt-1 text-sm text-red-600">{passwordForm.formState.errors.new_password.message}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="new_password_confirmation" className="block text-sm font-medium text-gray-700 mb-1">
               Confirm New Password
             </label>
             <input
-              id="password_confirmation"
+              id="new_password_confirmation"
               type="password"
-              {...passwordForm.register('password_confirmation')}
+              {...passwordForm.register('new_password_confirmation')}
               className={cn(
                 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500',
-                passwordForm.formState.errors.password_confirmation ? 'border-red-500' : 'border-gray-300'
+                passwordForm.formState.errors.new_password_confirmation ? 'border-red-500' : 'border-gray-300'
               )}
             />
-            {passwordForm.formState.errors.password_confirmation && (
-              <p className="mt-1 text-sm text-red-600">{passwordForm.formState.errors.password_confirmation.message}</p>
+            {passwordForm.formState.errors.new_password_confirmation && (
+              <p className="mt-1 text-sm text-red-600">{passwordForm.formState.errors.new_password_confirmation.message}</p>
             )}
           </div>
 
@@ -255,7 +256,7 @@ export function SecuritySettings() {
                 </p>
 
                 <div className="flex justify-center mb-4">
-                  <img src={setupData.qr_code_url} alt="2FA QR Code" className="w-48 h-48" />
+                  <QRCodeSVG value={setupData.provisioning_uri} size={192} level="M" />
                 </div>
 
                 <p className="text-xs text-gray-500 mb-4 text-center">

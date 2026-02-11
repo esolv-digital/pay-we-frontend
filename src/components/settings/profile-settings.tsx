@@ -5,7 +5,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useProfile, useUpdateProfile, useUploadAvatar, useDeleteAvatar } from '@/lib/hooks/use-profile';
+import { useResendVerification } from '@/lib/hooks/use-email-verification';
 import { cn } from '@/lib/utils';
+import { Mail, AlertTriangle } from 'lucide-react';
 
 const profileSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),
@@ -20,6 +22,7 @@ export function ProfileSettings() {
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
   const deleteAvatar = useDeleteAvatar();
+  const resendVerification = useResendVerification();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
@@ -101,6 +104,38 @@ export function ProfileSettings() {
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold mb-6">Profile Information</h2>
+
+      {/* Email Verification Banner */}
+      {profile && !profile.email_verified_at && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-yellow-800">
+                Email not verified
+              </h3>
+              <p className="text-sm text-yellow-700 mt-1">
+                Your email address <span className="font-medium">{profile.email}</span> has not been verified.
+                Please check your inbox for the verification email or request a new one.
+              </p>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => resendVerification.mutate()}
+                  disabled={resendVerification.isPending}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-yellow-800 bg-yellow-100 border border-yellow-300 rounded-lg hover:bg-yellow-200 disabled:opacity-50"
+                >
+                  <Mail className="w-4 h-4" />
+                  {resendVerification.isPending ? 'Sending...' : 'Resend Verification Email'}
+                </button>
+                {resendVerification.isSuccess && (
+                  <span className="text-sm text-green-700">Sent! Check your inbox.</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Avatar Section */}
       <div className="mb-8">

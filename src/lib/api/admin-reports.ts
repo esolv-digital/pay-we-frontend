@@ -8,7 +8,6 @@
  */
 
 import { apiClient } from './client';
-import type { ApiResponse } from '@/types/api';
 
 // ============================================================================
 // TYPES
@@ -130,7 +129,7 @@ export const adminReportsApi = {
    */
   async getRevenue(
     filters: RevenueReportFilters = {}
-  ): Promise<ApiResponse<RevenueReport>> {
+  ): Promise<RevenueReport> {
     const params = new URLSearchParams();
 
     // Period
@@ -148,7 +147,7 @@ export const adminReportsApi = {
     if (filters.vendor_id) params.append('vendor_id', filters.vendor_id);
     if (filters.currency) params.append('currency', filters.currency);
 
-    const response = await apiClient.get<ApiResponse<RevenueReport>>(
+    const response = await apiClient.get<RevenueReport>(
       `/admin/reports/revenue?${params.toString()}`
     );
 

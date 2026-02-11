@@ -63,7 +63,7 @@ export default function AdminPayoutAccountsPage() {
     if (reason) flagAccount({ id, reason });
   };
 
-  const statistics = statsData?.data;
+  const statistics = statsData;
   const stats = [
     { label: 'Total Accounts', value: statistics?.total ?? 0, subtext: 'All payout accounts', icon: '🏦', color: 'bg-blue-50' },
     { label: 'Verified', value: statistics?.verified ?? 0, subtext: 'Confirmed accounts', icon: '✓', color: 'bg-green-50' },

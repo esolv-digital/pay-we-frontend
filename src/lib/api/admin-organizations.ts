@@ -11,7 +11,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -203,8 +202,8 @@ export const adminOrganizationsApi = {
    * const organization = await adminOrganizationsApi.get('org-uuid-123');
    * ```
    */
-  async get(id: string): Promise<ApiResponse<Organization>> {
-    const response = await apiClient.get<ApiResponse<Organization>>(
+  async get(id: string): Promise<Organization> {
+    const response = await apiClient.get<Organization>(
       `/admin/organizations/${id}`
     );
 
@@ -226,8 +225,8 @@ export const adminOrganizationsApi = {
   async suspend(
     id: string,
     reason?: string
-  ): Promise<ApiResponse<Organization>> {
-    const response = await apiClient.post<ApiResponse<Organization>>(
+  ): Promise<Organization> {
+    const response = await apiClient.post<Organization>(
       `/admin/organizations/${id}/suspend`,
       { reason }
     );
@@ -246,8 +245,8 @@ export const adminOrganizationsApi = {
    * await adminOrganizationsApi.activate('org-uuid-123');
    * ```
    */
-  async activate(id: string): Promise<ApiResponse<Organization>> {
-    const response = await apiClient.post<ApiResponse<Organization>>(
+  async activate(id: string): Promise<Organization> {
+    const response = await apiClient.post<Organization>(
       `/admin/organizations/${id}/activate`
     );
 
@@ -265,9 +264,9 @@ export const adminOrganizationsApi = {
    * console.log(stats.total_organizations, stats.active_organizations);
    * ```
    */
-  async getStatistics(): Promise<ApiResponse<OrganizationStatistics>> {
+  async getStatistics(): Promise<OrganizationStatistics> {
     const response = await apiClient.get<
-      ApiResponse<OrganizationStatistics>
+      OrganizationStatistics
     >('/admin/organizations/statistics');
 
     return response;

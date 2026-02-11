@@ -134,7 +134,7 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
                 <p className="text-gray-900 capitalize">{paymentPage.amount_type.replace('_', ' ')}</p>
               </div>
 
-              {paymentPage.amount_type === 'fixed' && paymentPage.fixed_amount && (
+              {paymentPage.amount_type === 'fixed' && paymentPage.fixed_amount != null && (
                 <div>
                   <label className="text-sm font-medium text-gray-500">Fixed Amount</label>
                   <p className="text-gray-900 text-2xl font-bold">
@@ -145,7 +145,7 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
 
               {paymentPage.amount_type === 'flexible' && (
                 <>
-                  {paymentPage.min_amount && (
+                  {paymentPage.min_amount != null && (
                     <div>
                       <label className="text-sm font-medium text-gray-500">Minimum Amount</label>
                       <p className="text-gray-900">
@@ -153,7 +153,7 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
                       </p>
                     </div>
                   )}
-                  {paymentPage.max_amount && (
+                  {paymentPage.max_amount != null && (
                     <div>
                       <label className="text-sm font-medium text-gray-500">Maximum Amount</label>
                       <p className="text-gray-900">

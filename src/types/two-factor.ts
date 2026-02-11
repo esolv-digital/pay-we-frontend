@@ -12,6 +12,7 @@ export interface TwoFactorStatus {
 export interface TwoFactorEnableResponse {
   secret: string;
   qr_code_url: string;
+  provisioning_uri: string;
 }
 
 export interface TwoFactorConfirmRequest {

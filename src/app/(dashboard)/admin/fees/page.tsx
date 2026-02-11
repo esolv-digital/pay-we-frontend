@@ -43,8 +43,8 @@ export default function AdminFeesPage() {
   const { data: statsData } = useAdminFeeStatistics();
   const { mutate: updateGlobalFees, isPending: isUpdating } = useUpdateGlobalFees();
 
-  const overview = overviewData?.data;
-  const statistics = statsData?.data;
+  const overview = overviewData;
+  const statistics = statsData;
 
   const handleEditGlobal = () => {
     if (overview?.global) {
@@ -185,7 +185,7 @@ export default function AdminFeesPage() {
                   </div>
                   <div>
                     <dt className="text-sm text-gray-500">Fee Bearer</dt>
-                    <dd className="text-lg font-semibold text-gray-900">{FEE_BEARER_LABELS[overview.global.fee_bearer]}</dd>
+                    <dd className="text-lg font-semibold text-gray-900">{FEE_BEARER_LABELS[overview.global.fee_bearer as keyof typeof FEE_BEARER_LABELS]}</dd>
                   </div>
                 </div>
               ) : (
@@ -209,7 +209,7 @@ export default function AdminFeesPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {overview.gateway_overrides.map((override) => (
+                      {overview.gateway_overrides.map((override: any) => (
                         <tr key={override.gateway_id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">{override.gateway_name}</td>
                           <td className="px-6 py-4 text-sm text-gray-900">{override.fee_percentage}%</td>

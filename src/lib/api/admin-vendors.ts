@@ -8,7 +8,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -78,19 +77,19 @@ export const adminVendorsApi = {
     return apiClient.get<PaginatedResponse<AdminVendor>>(`/admin/vendors?${params.toString()}`);
   },
 
-  async get(id: string): Promise<ApiResponse<AdminVendor>> {
-    return apiClient.get<ApiResponse<AdminVendor>>(`/admin/vendors/${id}`);
+  async get(id: string): Promise<AdminVendor> {
+    return apiClient.get<AdminVendor>(`/admin/vendors/${id}`);
   },
 
-  async suspend(id: string, reason: string): Promise<ApiResponse<AdminVendor>> {
-    return apiClient.post<ApiResponse<AdminVendor>>(`/admin/vendors/${id}/suspend`, { reason });
+  async suspend(id: string, reason: string): Promise<AdminVendor> {
+    return apiClient.post<AdminVendor>(`/admin/vendors/${id}/suspend`, { reason });
   },
 
-  async activate(id: string): Promise<ApiResponse<AdminVendor>> {
-    return apiClient.post<ApiResponse<AdminVendor>>(`/admin/vendors/${id}/activate`);
+  async activate(id: string): Promise<AdminVendor> {
+    return apiClient.post<AdminVendor>(`/admin/vendors/${id}/activate`);
   },
 
-  async getStatistics(): Promise<ApiResponse<AdminVendorStatistics>> {
-    return apiClient.get<ApiResponse<AdminVendorStatistics>>('/admin/vendors/statistics');
+  async getStatistics(): Promise<AdminVendorStatistics> {
+    return apiClient.get<AdminVendorStatistics>('/admin/vendors/statistics');
   },
 };

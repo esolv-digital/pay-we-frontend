@@ -8,7 +8,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -79,19 +78,19 @@ export const adminPaymentPagesApi = {
     return apiClient.get<PaginatedResponse<AdminPaymentPage>>(`/admin/payment-pages?${params.toString()}`);
   },
 
-  async get(id: string): Promise<ApiResponse<AdminPaymentPage>> {
-    return apiClient.get<ApiResponse<AdminPaymentPage>>(`/admin/payment-pages/${id}`);
+  async get(id: string): Promise<AdminPaymentPage> {
+    return apiClient.get<AdminPaymentPage>(`/admin/payment-pages/${id}`);
   },
 
-  async suspend(id: string, reason: string): Promise<ApiResponse<AdminPaymentPage>> {
-    return apiClient.post<ApiResponse<AdminPaymentPage>>(`/admin/payment-pages/${id}/suspend`, { reason });
+  async suspend(id: string, reason: string): Promise<AdminPaymentPage> {
+    return apiClient.post<AdminPaymentPage>(`/admin/payment-pages/${id}/suspend`, { reason });
   },
 
-  async activate(id: string): Promise<ApiResponse<AdminPaymentPage>> {
-    return apiClient.post<ApiResponse<AdminPaymentPage>>(`/admin/payment-pages/${id}/activate`);
+  async activate(id: string): Promise<AdminPaymentPage> {
+    return apiClient.post<AdminPaymentPage>(`/admin/payment-pages/${id}/activate`);
   },
 
-  async getStatistics(): Promise<ApiResponse<AdminPaymentPageStatistics>> {
-    return apiClient.get<ApiResponse<AdminPaymentPageStatistics>>('/admin/payment-pages/statistics');
+  async getStatistics(): Promise<AdminPaymentPageStatistics> {
+    return apiClient.get<AdminPaymentPageStatistics>('/admin/payment-pages/statistics');
   },
 };

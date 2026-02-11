@@ -84,14 +84,25 @@ export default function CreatePaymentPagePage() {
   }, [titleValue, setValue]);
 
   const onSubmit = (data: PaymentPageFormData) => {
+    // Strip amount fields not relevant to the selected amount_type
+    // Backend rejects fields prohibited for the current amount_type
+    const { fixed_amount, min_amount, max_amount, ...rest } = data;
+    let amountFields = {};
+    if (data.amount_type === 'fixed') {
+      amountFields = { fixed_amount };
+    } else if (data.amount_type === 'flexible') {
+      amountFields = { min_amount, max_amount };
+    } else if (data.amount_type === 'donation') {
+      amountFields = { min_amount };
+    }
     createPage(
       {
-        ...data,
-        // Include fee setting - false = vendor pays, true = customer pays
+        ...rest,
+        ...amountFields,
         include_fees_in_amount: data.include_fees_in_amount ?? false,
         metadata: {
           customization,
-        }
+        },
       },
       {
         onSuccess: () => {

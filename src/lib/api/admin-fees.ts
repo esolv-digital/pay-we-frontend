@@ -5,7 +5,6 @@
  */
 
 import { apiClient } from './client';
-import type { ApiResponse } from '@/types/api';
 
 // ============================================================================
 // TYPES
@@ -109,39 +108,39 @@ export interface UpdateVendorFeesRequest {
 // ============================================================================
 
 export const adminFeesApi = {
-  async getOverview(): Promise<ApiResponse<FeeOverviewResponse>> {
-    return apiClient.get<ApiResponse<FeeOverviewResponse>>('/admin/fees');
+  async getOverview(): Promise<FeeOverviewResponse> {
+    return apiClient.get<FeeOverviewResponse>('/admin/fees');
   },
 
-  async updateGlobalFees(data: UpdateGlobalFeesRequest): Promise<ApiResponse<GlobalFees>> {
-    return apiClient.put<ApiResponse<GlobalFees>>('/admin/fees/global', data);
+  async updateGlobalFees(data: UpdateGlobalFeesRequest): Promise<GlobalFees> {
+    return apiClient.put<GlobalFees>('/admin/fees/global', data);
   },
 
-  async getGatewayFees(gatewayId: string): Promise<ApiResponse<GatewayFeeOverride>> {
-    return apiClient.get<ApiResponse<GatewayFeeOverride>>(`/admin/fees/gateways/${gatewayId}`);
+  async getGatewayFees(gatewayId: string): Promise<GatewayFeeOverride> {
+    return apiClient.get<GatewayFeeOverride>(`/admin/fees/gateways/${gatewayId}`);
   },
 
-  async updateGatewayFees(gatewayId: string, data: UpdateGatewayFeesRequest): Promise<ApiResponse<GatewayFeeOverride>> {
-    return apiClient.put<ApiResponse<GatewayFeeOverride>>(`/admin/fees/gateways/${gatewayId}`, data);
+  async updateGatewayFees(gatewayId: string, data: UpdateGatewayFeesRequest): Promise<GatewayFeeOverride> {
+    return apiClient.put<GatewayFeeOverride>(`/admin/fees/gateways/${gatewayId}`, data);
   },
 
-  async getOrganizationFees(orgId: string): Promise<ApiResponse<OrganizationFeeOverride>> {
-    return apiClient.get<ApiResponse<OrganizationFeeOverride>>(`/admin/fees/organizations/${orgId}`);
+  async getOrganizationFees(orgId: string): Promise<OrganizationFeeOverride> {
+    return apiClient.get<OrganizationFeeOverride>(`/admin/fees/organizations/${orgId}`);
   },
 
-  async updateOrganizationFees(orgId: string, data: UpdateOrganizationFeesRequest): Promise<ApiResponse<OrganizationFeeOverride>> {
-    return apiClient.put<ApiResponse<OrganizationFeeOverride>>(`/admin/fees/organizations/${orgId}`, data);
+  async updateOrganizationFees(orgId: string, data: UpdateOrganizationFeesRequest): Promise<OrganizationFeeOverride> {
+    return apiClient.put<OrganizationFeeOverride>(`/admin/fees/organizations/${orgId}`, data);
   },
 
-  async getVendorFees(vendorId: string): Promise<ApiResponse<VendorFeeOverride>> {
-    return apiClient.get<ApiResponse<VendorFeeOverride>>(`/admin/fees/vendors/${vendorId}`);
+  async getVendorFees(vendorId: string): Promise<VendorFeeOverride> {
+    return apiClient.get<VendorFeeOverride>(`/admin/fees/vendors/${vendorId}`);
   },
 
-  async updateVendorFees(vendorId: string, data: UpdateVendorFeesRequest): Promise<ApiResponse<VendorFeeOverride>> {
-    return apiClient.put<ApiResponse<VendorFeeOverride>>(`/admin/fees/vendors/${vendorId}`, data);
+  async updateVendorFees(vendorId: string, data: UpdateVendorFeesRequest): Promise<VendorFeeOverride> {
+    return apiClient.put<VendorFeeOverride>(`/admin/fees/vendors/${vendorId}`, data);
   },
 
-  async getStatistics(): Promise<ApiResponse<FeeStatistics>> {
-    return apiClient.get<ApiResponse<FeeStatistics>>('/admin/fees/statistics');
+  async getStatistics(): Promise<FeeStatistics> {
+    return apiClient.get<FeeStatistics>('/admin/fees/statistics');
   },
 };

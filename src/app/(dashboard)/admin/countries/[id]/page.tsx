@@ -23,8 +23,7 @@ export default function CountryDetailPage() {
   const params = useParams();
   const countryId = params?.id as string;
 
-  const { data: response, isLoading, error } = useAdminCountry(countryId);
-  const country = response?.data;
+  const { data: country, isLoading, error } = useAdminCountry(countryId);
 
   if (isLoading) {
     return (

@@ -14,7 +14,7 @@ import {
   type ActivityLog,
   type LogFilters,
 } from '@/lib/api/admin-logs';
-import type { PaginatedResponse, ApiResponse } from '@/types/api';
+import type { PaginatedResponse } from '@/types/api';
 
 // ============================================================================
 // QUERY KEYS
@@ -113,7 +113,7 @@ export function useAdminLog(
     enabled?: boolean;
   }
 ) {
-  return useQuery<ApiResponse<ActivityLog>, Error>({
+  return useQuery<ActivityLog, Error>({
     queryKey: adminLogsKeys.detail(id),
     queryFn: () => adminLogsApi.get(id),
     staleTime: 60_000, // 1 minute

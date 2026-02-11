@@ -8,7 +8,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -87,27 +86,27 @@ export const adminGatewaysApi = {
     return apiClient.get<PaginatedResponse<Gateway>>(`/admin/gateways?${params.toString()}`);
   },
 
-  async get(id: string): Promise<ApiResponse<Gateway>> {
-    return apiClient.get<ApiResponse<Gateway>>(`/admin/gateways/${id}`);
+  async get(id: string): Promise<Gateway> {
+    return apiClient.get<Gateway>(`/admin/gateways/${id}`);
   },
 
-  async create(data: CreateGatewayRequest): Promise<ApiResponse<Gateway>> {
-    return apiClient.post<ApiResponse<Gateway>>('/admin/gateways', data);
+  async create(data: CreateGatewayRequest): Promise<Gateway> {
+    return apiClient.post<Gateway>('/admin/gateways', data);
   },
 
-  async update(id: string, data: UpdateGatewayRequest): Promise<ApiResponse<Gateway>> {
-    return apiClient.put<ApiResponse<Gateway>>(`/admin/gateways/${id}`, data);
+  async update(id: string, data: UpdateGatewayRequest): Promise<Gateway> {
+    return apiClient.put<Gateway>(`/admin/gateways/${id}`, data);
   },
 
-  async deleteGateway(id: string): Promise<ApiResponse<null>> {
-    return apiClient.delete<ApiResponse<null>>(`/admin/gateways/${id}`);
+  async deleteGateway(id: string): Promise<null> {
+    return apiClient.delete<null>(`/admin/gateways/${id}`);
   },
 
-  async toggleActive(id: string): Promise<ApiResponse<Gateway>> {
-    return apiClient.post<ApiResponse<Gateway>>(`/admin/gateways/${id}/toggle`);
+  async toggleActive(id: string): Promise<Gateway> {
+    return apiClient.post<Gateway>(`/admin/gateways/${id}/toggle`);
   },
 
-  async getStatistics(): Promise<ApiResponse<GatewayStatistics>> {
-    return apiClient.get<ApiResponse<GatewayStatistics>>('/admin/gateways/statistics');
+  async getStatistics(): Promise<GatewayStatistics> {
+    return apiClient.get<GatewayStatistics>('/admin/gateways/statistics');
   },
 };

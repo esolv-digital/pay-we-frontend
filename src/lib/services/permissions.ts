@@ -172,7 +172,7 @@ export class PermissionService {
    * @returns Array of direct permissions
    */
   static getDirectPermissions(user: AuthUser | null): PermissionWithSource[] {
-    return this.getAllPermissions(user).filter((p) => p.source === 'direct');
+    return this.getAllPermissions(user).filter((p) => p.source?.startsWith('direct'));
   }
 
   /**
@@ -182,7 +182,7 @@ export class PermissionService {
    * @returns Array of role-based permissions
    */
   static getRolePermissions(user: AuthUser | null): PermissionWithSource[] {
-    return this.getAllPermissions(user).filter((p) => p.source.startsWith('role:'));
+    return this.getAllPermissions(user).filter((p) => p.source?.startsWith('role:'));
   }
 
   /**

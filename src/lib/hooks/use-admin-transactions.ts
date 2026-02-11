@@ -16,7 +16,7 @@ import {
   type TransactionMetrics,
   type ExportFormat,
 } from '@/lib/api/admin-transactions';
-import type { PaginatedResponse, ApiResponse } from '@/types/api';
+import type { PaginatedResponse } from '@/types/api';
 
 // ============================================================================
 // QUERY KEYS
@@ -117,7 +117,7 @@ export function useAdminTransaction(
     enabled?: boolean;
   }
 ) {
-  return useQuery<ApiResponse<Transaction>, Error>({
+  return useQuery<Transaction, Error>({
     queryKey: adminTransactionsKeys.detail(id),
     queryFn: () => adminTransactionsApi.get(id),
     staleTime: 60_000, // 1 minute
@@ -165,7 +165,7 @@ export function useAdminTransactionMetrics(
     refetchInterval?: number;
   }
 ) {
-  return useQuery<ApiResponse<TransactionMetrics>, Error>({
+  return useQuery<TransactionMetrics, Error>({
     queryKey: adminTransactionsKeys.metric(filters),
     queryFn: () => adminTransactionsApi.getMetrics(filters),
     staleTime: 60_000, // 1 minute

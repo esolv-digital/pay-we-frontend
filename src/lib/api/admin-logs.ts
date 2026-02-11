@@ -11,7 +11,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -223,8 +222,8 @@ export const adminLogsApi = {
    * const log = await adminLogsApi.get('log-uuid-123');
    * ```
    */
-  async get(id: string): Promise<ApiResponse<ActivityLog>> {
-    const response = await apiClient.get<ApiResponse<ActivityLog>>(
+  async get(id: string): Promise<ActivityLog> {
+    const response = await apiClient.get<ActivityLog>(
       `/admin/logs/${id}`
     );
 
@@ -242,8 +241,8 @@ export const adminLogsApi = {
    * console.log(stats.total_logs, stats.logs_today);
    * ```
    */
-  async getStatistics(): Promise<ApiResponse<LogStatistics>> {
-    const response = await apiClient.get<ApiResponse<LogStatistics>>(
+  async getStatistics(): Promise<LogStatistics> {
+    const response = await apiClient.get<LogStatistics>(
       '/admin/logs/statistics'
     );
 

@@ -74,7 +74,7 @@ export default function AdminVendorsPage() {
     if (reason) suspendVendor({ id, reason });
   };
 
-  const statistics = statsData?.data;
+  const statistics = statsData;
   const stats = [
     { label: 'Total Vendors', value: statistics?.total ?? 0, subtext: 'All vendors', icon: '🏪', color: 'bg-blue-50' },
     { label: 'Active', value: statistics?.active ?? 0, subtext: 'Currently active', icon: '✓', color: 'bg-green-50' },

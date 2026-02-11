@@ -69,7 +69,7 @@ export default function AdminCountriesPage() {
     }
   };
 
-  const statistics = statsData?.data;
+  const statistics = statsData;
   const stats = [
     { label: 'Total Countries', value: statistics?.total ?? 0, subtext: 'Configured', icon: '🌍', color: 'bg-blue-50' },
     { label: 'Active', value: statistics?.active ?? 0, subtext: 'Currently enabled', icon: '✓', color: 'bg-green-50' },

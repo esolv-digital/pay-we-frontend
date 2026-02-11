@@ -40,28 +40,28 @@ export default function AdminLogsPage() {
   const stats = [
     {
       label: 'Total Logs',
-      value: statsData?.data?.total_logs?.toLocaleString() || data?.meta?.total?.toLocaleString() || '0',
+      value: statsData?.total_logs?.toLocaleString() || data?.meta?.total?.toLocaleString() || '0',
       icon: Activity,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
       label: 'Logs Today',
-      value: statsData?.data?.logs_today?.toLocaleString() || '0',
+      value: statsData?.logs_today?.toLocaleString() || '0',
       icon: Clock,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
       label: 'Errors',
-      value: statsData?.data?.error_logs?.toLocaleString() || '0',
+      value: statsData?.error_logs?.toLocaleString() || '0',
       icon: AlertCircle,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
     },
     {
       label: 'Security Events',
-      value: statsData?.data?.critical_logs?.toLocaleString() || '0',
+      value: statsData?.critical_logs?.toLocaleString() || '0',
       icon: Shield,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',

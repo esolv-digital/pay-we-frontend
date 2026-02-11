@@ -63,7 +63,7 @@ export default function AdminPaymentPagesPage() {
     if (reason) suspendPage({ id, reason });
   };
 
-  const statistics = statsData?.data;
+  const statistics = statsData;
   const stats = [
     { label: 'Total Pages', value: statistics?.total ?? 0, subtext: 'All payment pages', icon: '📄', color: 'bg-blue-50' },
     { label: 'Active', value: statistics?.active ?? 0, subtext: 'Currently live', icon: '✓', color: 'bg-green-50' },
@@ -167,15 +167,15 @@ export default function AdminPaymentPagesPage() {
                           <div className="text-sm font-medium text-gray-900">{page.title}</div>
                           <div className="text-xs text-gray-500">{page.slug}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{page.vendor.business_name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{page.vendor?.business_name ?? '—'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {page.amount_type === 'fixed' && page.amount
                             ? formatCurrency(page.amount, page.currency_code)
                             : <Badge variant="outline" className="text-xs capitalize">{page.amount_type}</Badge>
                           }
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(page.total_revenue, page.currency_code)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{page.total_transactions.toLocaleString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(page.total_revenue ?? 0, page.currency_code)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(page.total_transactions ?? 0).toLocaleString()}</td>
                         <td className="px-6 py-4 whitespace-nowrap"><Badge className={STATUS_COLORS[page.status]}>{page.status}</Badge></td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end gap-2">

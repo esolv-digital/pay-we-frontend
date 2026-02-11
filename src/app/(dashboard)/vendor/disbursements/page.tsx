@@ -5,12 +5,10 @@ import {
   usePayoutAccounts,
   usePayouts,
   useDisbursementStatistics,
-  useToggleAutoPayout,
 } from '@/lib/hooks/use-payouts';
 import { formatCurrency } from '@/lib/utils/format';
 import { PayoutAccountsList } from '@/components/disbursements/payout-accounts-list';
 import { AddPayoutAccountDialog } from '@/components/disbursements/add-payout-account-dialog';
-import { RequestPayoutDialog } from '@/components/disbursements/request-payout-dialog';
 import { PayoutHistoryTable } from '@/components/disbursements/payout-history-table';
 import { cn } from '@/lib/utils';
 
@@ -19,28 +17,14 @@ type TabType = 'overview' | 'accounts' | 'history';
 export default function VendorDisbursementsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [showAddAccount, setShowAddAccount] = useState(false);
-  const [showRequestPayout, setShowRequestPayout] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useDisbursementStatistics();
   const { data: accounts, isLoading: accountsLoading } = usePayoutAccounts();
   const { data: payoutsData, isLoading: payoutsLoading } = usePayouts({ per_page: 5 });
-  const toggleAutoPayout = useToggleAutoPayout();
 
   const hasAccounts = accounts && accounts.length > 0;
   const recentPayouts = payoutsData?.data || [];
   const currency = stats?.currency || 'GHS';
-
-  const handleAutoPayoutToggle = () => {
-    if (!stats) return;
-
-    // If trying to enable but no default account, show warning
-    if (!stats.auto_payout_enabled && !stats.has_default_payout_account) {
-      setShowAddAccount(true);
-      return;
-    }
-
-    toggleAutoPayout.mutate(!stats.auto_payout_enabled);
-  };
 
   const tabs = [
     { id: 'overview' as TabType, label: 'Overview', icon: '📊' },
@@ -52,14 +36,6 @@ export default function VendorDisbursementsPage() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Disbursements</h1>
-        <button
-          type="button"
-          onClick={() => setShowRequestPayout(true)}
-          disabled={!hasAccounts || (stats?.withdrawable_balance || 0) <= 0}
-          className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Request Payout
-        </button>
       </div>
 
       {/* Balance Cards */}
@@ -89,69 +65,6 @@ export default function VendorDisbursementsPage() {
         </div>
       </div>
 
-      {/* Auto-Payout Card */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Auto-Payout</h3>
-              <p className="text-sm text-gray-500">
-                {stats?.auto_payout_enabled
-                  ? 'Payments are automatically transferred to your default account'
-                  : 'Enable to automatically transfer payments to your default account'}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleAutoPayoutToggle}
-            disabled={toggleAutoPayout.isPending || statsLoading}
-            aria-label={stats?.auto_payout_enabled ? 'Disable auto-payout' : 'Enable auto-payout'}
-            className={cn(
-              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-              stats?.auto_payout_enabled ? 'bg-blue-600' : 'bg-gray-200',
-              (toggleAutoPayout.isPending || statsLoading) && 'opacity-50 cursor-not-allowed'
-            )}
-          >
-            <span
-              className={cn(
-                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-                stats?.auto_payout_enabled ? 'translate-x-6' : 'translate-x-1'
-              )}
-            />
-          </button>
-        </div>
-
-        {/* Default Account Info */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-700">Default Account</p>
-              {stats?.default_payout_account ? (
-                <p className="text-sm text-gray-600">
-                  {stats.default_payout_account.display_name}
-                </p>
-              ) : (
-                <p className="text-sm text-yellow-600">No default account set</p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => setActiveTab('accounts')}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              {stats?.default_payout_account ? 'Change' : 'Set Default'}
-            </button>
-          </div>
-
-          {stats?.minimum_payout_amount && stats.minimum_payout_amount > 0 && (
-            <p className="text-xs text-gray-500 mt-2">
-              Minimum payout: {formatCurrency(stats.minimum_payout_amount, currency)}
-            </p>
-          )}
-        </div>
-      </div>
-
       {/* Unsettled Transactions Card */}
       {stats && stats.unsettled_transaction_count > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -166,18 +79,7 @@ export default function VendorDisbursementsPage() {
                 </p>
               </div>
             </div>
-            {stats.auto_payout_enabled && stats.has_default_payout_account ? (
-              <span className="text-sm text-blue-600">Auto-payout enabled</span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowRequestPayout(true)}
-                disabled={(stats.withdrawable_balance || 0) <= 0}
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                Request Payout
-              </button>
-            )}
+            <span className="text-sm text-blue-600">Auto-payout enabled</span>
           </div>
         </div>
       )}
@@ -259,19 +161,6 @@ export default function VendorDisbursementsPage() {
                     <span className="font-medium">Add Payout Account</span>
                     <p className="text-sm text-gray-500 mt-1">
                       Add a bank or mobile money account
-                    </p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowRequestPayout(true)}
-                    disabled={!hasAccounts || (stats?.withdrawable_balance || 0) <= 0}
-                    className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span className="text-2xl block mb-2">💸</span>
-                    <span className="font-medium">Request Payout</span>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Withdraw funds to your account
                     </p>
                   </button>
                 </div>
@@ -381,14 +270,6 @@ export default function VendorDisbursementsPage() {
         <AddPayoutAccountDialog onClose={() => setShowAddAccount(false)} />
       )}
 
-      {showRequestPayout && (
-        <RequestPayoutDialog
-          availableBalance={stats?.withdrawable_balance || 0}
-          currency={currency}
-          minimumPayoutAmount={stats?.minimum_payout_amount}
-          onClose={() => setShowRequestPayout(false)}
-        />
-      )}
     </div>
   );
 }

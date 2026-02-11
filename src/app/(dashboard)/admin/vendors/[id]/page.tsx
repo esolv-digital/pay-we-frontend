@@ -26,10 +26,9 @@ export default function VendorDetailPage() {
   const params = useParams();
   const vendorId = params?.id as string;
 
-  const { data: response, isLoading, error } = useAdminVendor(vendorId);
+  const { data: vendor, isLoading, error } = useAdminVendor(vendorId);
   const { mutate: suspendVendor } = useSuspendVendor();
   const { mutate: activateVendor } = useActivateVendor();
-  const vendor = response?.data;
 
   const handleSuspend = () => {
     const reason = prompt('Reason for suspension:');

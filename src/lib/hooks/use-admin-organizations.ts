@@ -14,7 +14,7 @@ import {
   type Organization,
   type OrganizationFilters,
 } from '@/lib/api/admin-organizations';
-import type { PaginatedResponse, ApiResponse } from '@/types/api';
+import type { PaginatedResponse } from '@/types/api';
 
 // ============================================================================
 // QUERY KEYS
@@ -114,7 +114,7 @@ export function useAdminOrganization(
     enabled?: boolean;
   }
 ) {
-  return useQuery<ApiResponse<Organization>, Error>({
+  return useQuery<Organization, Error>({
     queryKey: adminOrganizationsKeys.detail(id),
     queryFn: () => adminOrganizationsApi.get(id),
     staleTime: 60_000, // 1 minute

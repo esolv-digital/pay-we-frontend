@@ -11,7 +11,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -209,8 +208,8 @@ export const adminUsersApi = {
    * const user = await adminUsersApi.get('user-uuid-123');
    * ```
    */
-  async get(id: string): Promise<ApiResponse<User>> {
-    const response = await apiClient.get<ApiResponse<User>>(
+  async get(id: string): Promise<User> {
+    const response = await apiClient.get<User>(
       `/admin/users/${id}`
     );
 
@@ -235,8 +234,8 @@ export const adminUsersApi = {
    * });
    * ```
    */
-  async create(data: CreateUserRequest): Promise<ApiResponse<User>> {
-    const response = await apiClient.post<ApiResponse<User>>(
+  async create(data: CreateUserRequest): Promise<User> {
+    const response = await apiClient.post<User>(
       '/admin/users',
       data
     );
@@ -262,8 +261,8 @@ export const adminUsersApi = {
   async update(
     id: string,
     data: UpdateUserRequest
-  ): Promise<ApiResponse<User>> {
-    const response = await apiClient.put<ApiResponse<User>>(
+  ): Promise<User> {
+    const response = await apiClient.put<User>(
       `/admin/users/${id}`,
       data
     );
@@ -282,8 +281,8 @@ export const adminUsersApi = {
    * await adminUsersApi.delete('user-uuid-123');
    * ```
    */
-  async delete(id: string): Promise<ApiResponse<null>> {
-    const response = await apiClient.delete<ApiResponse<null>>(
+  async delete(id: string): Promise<null> {
+    const response = await apiClient.delete<null>(
       `/admin/users/${id}`
     );
 
@@ -305,8 +304,8 @@ export const adminUsersApi = {
   async suspend(
     id: string,
     reason?: string
-  ): Promise<ApiResponse<User>> {
-    const response = await apiClient.post<ApiResponse<User>>(
+  ): Promise<User> {
+    const response = await apiClient.post<User>(
       `/admin/users/${id}/suspend`,
       { reason }
     );
@@ -325,8 +324,8 @@ export const adminUsersApi = {
    * await adminUsersApi.activate('user-uuid-123');
    * ```
    */
-  async activate(id: string): Promise<ApiResponse<User>> {
-    const response = await apiClient.post<ApiResponse<User>>(
+  async activate(id: string): Promise<User> {
+    const response = await apiClient.post<User>(
       `/admin/users/${id}/activate`
     );
 
@@ -348,8 +347,8 @@ export const adminUsersApi = {
   async assignRoles(
     userId: string,
     roles: string[]
-  ): Promise<ApiResponse<User>> {
-    const response = await apiClient.post<ApiResponse<User>>(
+  ): Promise<User> {
+    const response = await apiClient.post<User>(
       '/admin/roles/assign',
       {
         user_id: userId,
@@ -371,8 +370,8 @@ export const adminUsersApi = {
    * console.log(stats.total_users, stats.active_users);
    * ```
    */
-  async getStatistics(): Promise<ApiResponse<UserStatistics>> {
-    const response = await apiClient.get<ApiResponse<UserStatistics>>(
+  async getStatistics(): Promise<UserStatistics> {
+    const response = await apiClient.get<UserStatistics>(
       '/admin/users/statistics'
     );
 
@@ -390,8 +389,8 @@ export const adminUsersApi = {
    * await adminUsersApi.resendVerificationEmail('user-uuid-123');
    * ```
    */
-  async resendVerificationEmail(id: string): Promise<ApiResponse<null>> {
-    const response = await apiClient.post<ApiResponse<null>>(
+  async resendVerificationEmail(id: string): Promise<null> {
+    const response = await apiClient.post<null>(
       `/admin/users/${id}/resend-verification`
     );
 
@@ -409,8 +408,8 @@ export const adminUsersApi = {
    * await adminUsersApi.resetPassword('user-uuid-123');
    * ```
    */
-  async resetPassword(id: string): Promise<ApiResponse<null>> {
-    const response = await apiClient.post<ApiResponse<null>>(
+  async resetPassword(id: string): Promise<null> {
+    const response = await apiClient.post<null>(
       `/admin/users/${id}/reset-password`
     );
 

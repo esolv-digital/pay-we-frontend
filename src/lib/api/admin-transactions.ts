@@ -11,7 +11,6 @@ import { apiClient } from './client';
 import type {
   PaginatedResponse,
   PaginationParams,
-  ApiResponse,
 } from '@/types/api';
 
 // ============================================================================
@@ -284,8 +283,8 @@ export const adminTransactionsApi = {
    * const transaction = await adminTransactionsApi.get('txn_123');
    * ```
    */
-  async get(id: string): Promise<ApiResponse<Transaction>> {
-    const response = await apiClient.get<ApiResponse<Transaction>>(
+  async get(id: string): Promise<Transaction> {
+    const response = await apiClient.get<Transaction>(
       `/admin/transactions/${id}`
     );
 
@@ -308,7 +307,7 @@ export const adminTransactionsApi = {
    */
   async getMetrics(
     filters: Omit<TransactionFilters, 'page' | 'per_page'> = {}
-  ): Promise<ApiResponse<TransactionMetrics>> {
+  ): Promise<TransactionMetrics> {
     const params = new URLSearchParams();
 
     // Apply same filters as list (except pagination)
@@ -345,7 +344,7 @@ export const adminTransactionsApi = {
       params.append('currency_code', filters.currency_code);
     }
 
-    const response = await apiClient.get<ApiResponse<TransactionMetrics>>(
+    const response = await apiClient.get<TransactionMetrics>(
       `/admin/transactions/metrics?${params.toString()}`
     );
 
