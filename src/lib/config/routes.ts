@@ -41,6 +41,8 @@ export const ADMIN_ROUTES = {
   DISBURSEMENT_DETAILS: (id: string) => `/admin/disbursements/${id}`,
   PAYOUT_ACCOUNTS: '/admin/payout-accounts',
   PAYOUT_ACCOUNT_DETAILS: (id: string) => `/admin/payout-accounts/${id}`,
+  ADMIN_MANAGEMENT: '/admin/admin-management',
+  ADMIN_MANAGEMENT_DETAILS: (id: string) => `/admin/admin-management/${id}`,
 } as const;
 
 // Vendor Routes

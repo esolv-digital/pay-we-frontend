@@ -43,10 +43,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Plus, Shield, Users, Lock, Trash2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import type { Role, CreateRoleRequest } from '@/lib/api/admin-roles';
+import { getPermissionName } from '@/lib/api/admin-roles';
 
 export default function AdminRolesPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -279,7 +279,7 @@ export default function AdminRolesPage() {
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-xl font-semibold text-gray-900">{role.name}</h3>
                       <Badge className="bg-gray-100 text-gray-800">
-                        {role.guard_name}
+                        {role.guard_name || 'api'}
                       </Badge>
                       {role.users_count !== undefined && (
                         <Badge variant="outline">
@@ -294,11 +294,14 @@ export default function AdminRolesPage() {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {role.permissions && role.permissions.length > 0 ? (
-                          role.permissions.slice(0, 10).map((perm) => (
-                            <Badge key={perm} variant="outline" className="text-xs">
-                              {perm}
-                            </Badge>
-                          ))
+                          role.permissions.slice(0, 10).map((perm, idx) => {
+                            const name = getPermissionName(perm);
+                            return (
+                              <Badge key={name ?? idx} variant="outline" className="text-xs">
+                                {name}
+                              </Badge>
+                            );
+                          })
                         ) : (
                           <span className="text-sm text-gray-500">No permissions assigned</span>
                         )}

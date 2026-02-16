@@ -25,7 +25,6 @@ import {
   useAdminUserStatistics,
   useSuspendUser,
   useActivateUser,
-  useDeleteUser,
   useResetUserPassword,
 } from '@/lib/hooks/use-admin-users';
 import type { UserFilters as ApiUserFilters, UserStatus } from '@/lib/api/admin-users';
@@ -65,7 +64,6 @@ export default function AdminUsersPage() {
   // Mutations
   const { mutate: suspendUser } = useSuspendUser();
   const { mutate: activateUser } = useActivateUser();
-  const { mutate: deleteUser } = useDeleteUser();
   const { mutate: resetPassword } = useResetUserPassword();
 
   const handleFilterChange = (key: keyof ApiUserFilters, value: any) => {
@@ -94,12 +92,6 @@ export default function AdminUsersPage() {
     const reason = prompt('Reason for suspension:');
     if (reason) {
       suspendUser({ id: userId, reason });
-    }
-  };
-
-  const handleDeleteUser = (userId: string) => {
-    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      deleteUser(userId);
     }
   };
 
@@ -146,7 +138,7 @@ export default function AdminUsersPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
             <p className="text-gray-600 mt-1">
-              Manage all platform users, roles, and permissions
+              Manage vendor and organization users
             </p>
           </div>
           <div className="flex gap-3">
@@ -210,18 +202,6 @@ export default function AdminUsersPage() {
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Role
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Filter by role..."
-                  value={filters.role || ''}
-                  onChange={(e) => handleFilterChange('role', e.target.value)}
-                />
               </div>
 
               <div>
@@ -356,7 +336,7 @@ export default function AdminUsersPage() {
                         Email
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Roles
+                        Organization
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -402,18 +382,10 @@ export default function AdminUsersPage() {
                             <div className="text-xs text-gray-500">Not verified</div>
                           )}
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {user.roles && user.roles.length > 0 ? (
-                              user.roles.map((role: string) => (
-                                <Badge key={role} variant="outline" className="text-xs">
-                                  {role}
-                                </Badge>
-                              ))
-                            ) : (
-                              <span className="text-xs text-gray-400">No roles</span>
-                            )}
-                          </div>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.organization_name || (
+                            <span className="text-gray-400">—</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Badge className={STATUS_COLORS[user.status]}>

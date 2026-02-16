@@ -83,6 +83,13 @@ const navigation: Array<{
     permission: PERMISSIONS.VIEW_ROLES,
     category: 'management',
   },
+  {
+    name: 'Admin Management',
+    href: ADMIN_ROUTES.ADMIN_MANAGEMENT,
+    icon: '🛡️',
+    permission: PERMISSIONS.ADMIN_MANAGE_ADMINS,
+    category: 'management',
+  },
 
   // Platform
   {

@@ -11,7 +11,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { PermissionGuard } from '@/components/permissions';
 import { PERMISSIONS } from '@/types/permissions';
 import { Card } from '@/components/ui/card';
@@ -43,11 +43,11 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
-import type { Permission, GroupedPermission } from '@/lib/api/admin-roles';
+import { getPermissionName } from '@/lib/api/admin-roles';
+import type { GroupedPermission } from '@/lib/api/admin-roles';
 
 export default function RoleDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const roleId = parseInt(params?.id as string);
 
   const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
@@ -108,7 +108,8 @@ export default function RoleDetailPage() {
   );
 
   const handleOpenPermissions = () => {
-    setSelectedPermissions(role.permissions || []);
+    const permNames = (role.permissions || []).map(getPermissionName);
+    setSelectedPermissions(permNames);
     setShowPermissionsDialog(true);
   };
 
@@ -199,7 +200,7 @@ export default function RoleDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Guard Type</p>
-                <p className="text-xl font-bold text-gray-900 capitalize">{role.guard_name}</p>
+                <p className="text-xl font-bold text-gray-900 capitalize">{role.guard_name || 'api'}</p>
               </div>
               <div className="rounded-full p-3 bg-green-50">
                 <Shield className="h-6 w-6 text-green-600" />

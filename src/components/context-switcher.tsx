@@ -210,7 +210,7 @@ export function ContextSwitcher() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between"
+            className="w-full justify-between border-gray-700 bg-gray-800/50 text-gray-200 hover:bg-gray-700 hover:text-white"
             disabled={isSwitchContextPending}
           >
             <span className="flex items-center">

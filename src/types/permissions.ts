@@ -151,6 +151,9 @@ export const PERMISSIONS = {
   ADMIN_MANAGE_COUNTRIES: 'Admin Manage Countries',
   ADMIN_MANAGE_GATEWAYS: 'Admin Manage Gateways',
   ADMIN_MANAGE_FEES: 'Admin Manage Fees',
+
+  // Admin - Admin Management
+  ADMIN_MANAGE_ADMINS: 'Manage Admins',
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

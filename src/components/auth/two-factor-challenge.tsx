@@ -8,7 +8,6 @@
 
 'use client';
 
-import { useState } from 'react';
 import { Shield, Key, ArrowLeft, AlertCircle } from 'lucide-react';
 import { VerificationInput } from '@/components/settings/two-factor/verification-input';
 

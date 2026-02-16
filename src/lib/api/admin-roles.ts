@@ -21,10 +21,18 @@ export interface Role {
   id: number;
   name: string;
   guard_name: string;
-  permissions: string[]; // Array of permission names
+  permissions: (string | Permission)[]; // Backend may return objects or strings
   users_count?: number;
   created_at: string;
   updated_at?: string;
+}
+
+/**
+ * Extract permission name from either a string or Permission object.
+ * Backend may return permissions as objects ({id, name, guard_name}) or plain strings.
+ */
+export function getPermissionName(perm: string | Permission): string {
+  return typeof perm === 'string' ? perm : perm.name;
 }
 
 /**
