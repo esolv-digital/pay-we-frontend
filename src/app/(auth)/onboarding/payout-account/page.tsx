@@ -34,7 +34,7 @@ type PayoutAccountFormData = z.infer<typeof payoutAccountSchema>;
 export default function PayoutAccountPage() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { createPayoutAccount, isPayoutAccountPending, status } = useOnboarding();
+  const { skipPayout, submitPayout, isPayoutAccountPending, status } = useOnboarding();
   const [paymentMethod, setPaymentMethod] = useState<'bank' | 'mobile_money'>('bank');
 
   const {
@@ -83,27 +83,12 @@ export default function PayoutAccountPage() {
     mobile_money: ['GH', 'NG', 'KE', 'UG'].includes(countryCode),
   };
 
-  const onSubmit = (data: PayoutAccountFormData) => {
-    const accountDetails: Record<string, string> = {};
-
-    if (paymentMethod === 'bank') {
-      if (data.account_number) accountDetails.account_number = data.account_number;
-      if (data.bank_code) accountDetails.bank_code = data.bank_code;
-      if (data.account_name) accountDetails.account_name = data.account_name;
-    } else {
-      if (data.mobile_number) accountDetails.mobile_number = data.mobile_number;
-      if (data.mobile_provider) accountDetails.mobile_provider = data.mobile_provider;
-      if (data.account_name) accountDetails.account_name = data.account_name;
-    }
-
-    createPayoutAccount({
-      payment_method: paymentMethod,
-      account_details: accountDetails,
-    });
+  const onSubmit = () => {
+    submitPayout();
   };
 
   const handleSkip = () => {
-    createPayoutAccount({ payment_method: 'bank', account_details: {}, skip: true });
+    skipPayout();
   };
 
   const handleLogout = () => {

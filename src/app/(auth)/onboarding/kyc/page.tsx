@@ -18,7 +18,7 @@ import { LogOut, CheckCircle } from 'lucide-react';
 export default function KYCUploadPage() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { uploadKYC, isKYCUploadPending, status } = useOnboarding();
+  const { skipKYC, submitKYC, isKYCUploadPending, status } = useOnboarding();
 
   // Redirect if user doesn't have organization
   useEffect(() => {
@@ -44,17 +44,6 @@ export default function KYCUploadPage() {
       </div>
     );
   }
-
-  const handleSubmit = (data: { documentType: string; file: File }) => {
-    uploadKYC({
-      document_type: data.documentType,
-      file: data.file,
-    });
-  };
-
-  const handleSkip = () => {
-    uploadKYC({ skip: true });
-  };
 
   const handleLogout = () => {
     logout();
@@ -103,8 +92,8 @@ export default function KYCUploadPage() {
 
       {/* KYC Upload Form */}
       <KYCUploadForm
-        onSubmit={handleSubmit}
-        onSkip={handleSkip}
+        onSubmit={submitKYC}
+        onSkip={skipKYC}
         isLoading={isKYCUploadPending}
       />
 

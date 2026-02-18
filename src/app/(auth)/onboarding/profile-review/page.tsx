@@ -49,7 +49,7 @@ export default function ProfileReviewPage() {
   const vendor = organization.vendors?.[0];
 
   const handleContinue = () => {
-    completeProfileReview({});
+    completeProfileReview();
   };
 
   const handleLogout = () => {

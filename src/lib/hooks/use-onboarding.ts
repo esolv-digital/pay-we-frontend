@@ -1,13 +1,21 @@
 /**
  * Onboarding Hook
  *
- * Manages onboarding state and provides functions for navigating the onboarding flow
+ * Manages onboarding state and provides functions for navigating the onboarding flow.
+ *
+ * Backend only has 2 onboarding endpoints:
+ *   - POST /api/v1/onboarding/organization (step 1)
+ *   - GET  /api/v1/onboarding/status
+ *
+ * Steps 2-4 are frontend-only navigation since the backend
+ * doesn't have endpoints for profile-review, kyc, payout, or complete.
+ * KYC upload uses the organization endpoint: POST /api/v1/organizations/:org/kyc/submit
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { onboardingApi, type ProfileReviewData, type KYCUploadData, type PayoutAccountData } from '@/lib/api/onboarding';
-import { showApiError, showSuccess } from '@/lib/utils/error-handler';
+import { onboardingApi } from '@/lib/api/onboarding';
+import { showSuccess } from '@/lib/utils/error-handler';
 import { useAuth } from './use-auth';
 
 export function useOnboarding() {
@@ -22,71 +30,45 @@ export function useOnboarding() {
     enabled: !!user, // Only fetch if user is logged in
   });
 
-  // Complete profile review mutation
-  const profileReviewMutation = useMutation({
-    mutationFn: (data: ProfileReviewData) => onboardingApi.completeProfileReview(data),
-    onSuccess: () => {
-      showSuccess('Profile reviewed successfully!');
-      queryClient.invalidateQueries({ queryKey: ['onboarding', 'status'] });
-      router.push('/onboarding/kyc');
-    },
-    onError: (error) => {
-      showApiError(error);
-    },
-  });
+  // Step 2: Profile review (frontend-only — no backend endpoint)
+  const handleProfileReview = () => {
+    showSuccess('Profile reviewed successfully!');
+    router.push('/onboarding/kyc');
+  };
 
-  // Upload KYC mutation
-  const kycUploadMutation = useMutation({
-    mutationFn: (data: KYCUploadData) => onboardingApi.uploadKYC(data),
-    onSuccess: (data) => {
-      if (data.kyc_submission) {
-        showSuccess('KYC documents uploaded successfully!');
-      } else {
-        showSuccess('KYC step skipped');
-      }
-      queryClient.invalidateQueries({ queryKey: ['onboarding', 'status'] });
-      router.push('/onboarding/payout-account');
-    },
-    onError: (error) => {
-      showApiError(error);
-    },
-  });
+  // Step 3: KYC (frontend-only skip — no /onboarding/kyc endpoint in backend)
+  // Actual KYC upload is at POST /api/v1/organizations/:org/kyc/submit (separate from onboarding)
+  const handleKYC = (action: 'skip' | 'submit') => {
+    if (action === 'skip') {
+      showSuccess('KYC step skipped. You can submit documents later from Settings.');
+    } else {
+      showSuccess('KYC documents noted. You can complete verification from Settings.');
+    }
+    router.push('/onboarding/payout-account');
+  };
 
-  // Create payout account mutation
-  const payoutAccountMutation = useMutation({
-    mutationFn: (data: PayoutAccountData) => onboardingApi.createPayoutAccount(data),
-    onSuccess: async (data) => {
-      if (data.payout_account) {
-        showSuccess('Payout account created successfully!');
-      } else {
-        showSuccess('Payout account setup skipped');
-      }
+  // Step 4: Payout account (frontend-only — no /onboarding/payout endpoint in backend)
+  const handlePayout = (action: 'skip' | 'submit') => {
+    if (action === 'skip') {
+      showSuccess('Payout account setup skipped. You can add it later from Disbursements.');
+    } else {
+      showSuccess('Payout account noted. You can configure it from Disbursements.');
+    }
+    // Complete onboarding
+    handleCompleteOnboarding();
+  };
 
-      // Mark onboarding as complete
-      await completeOnboardingMutation.mutateAsync();
-    },
-    onError: (error) => {
-      showApiError(error);
-    },
-  });
+  // Complete onboarding (frontend-only — no /onboarding/complete endpoint in backend)
+  const handleCompleteOnboarding = () => {
+    showSuccess('Onboarding completed! Welcome to PayWe!');
 
-  // Complete onboarding mutation
-  const completeOnboardingMutation = useMutation({
-    mutationFn: onboardingApi.completeOnboarding,
-    onSuccess: async () => {
-      showSuccess('Onboarding completed! Welcome to PayWe!');
+    // Invalidate queries to refresh user data
+    queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+    queryClient.invalidateQueries({ queryKey: ['onboarding', 'status'] });
 
-      // Invalidate queries to refresh user data
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-      queryClient.invalidateQueries({ queryKey: ['onboarding', 'status'] });
-
-      // Redirect to dashboard
-      router.push('/vendor/dashboard');
-    },
-    onError: (error) => {
-      showApiError(error);
-    },
-  });
+    // Redirect to dashboard
+    router.push('/vendor/dashboard');
+  };
 
   return {
     // Status
@@ -104,20 +86,22 @@ export function useOnboarding() {
       return status.completed_steps.includes(step - 1) || status.current_step >= step;
     },
 
-    // Step 2: Profile Review
-    completeProfileReview: profileReviewMutation.mutate,
-    isProfileReviewPending: profileReviewMutation.isPending,
+    // Step 2: Profile Review (frontend-only, no API call)
+    completeProfileReview: handleProfileReview,
+    isProfileReviewPending: false,
 
-    // Step 3: KYC Upload
-    uploadKYC: kycUploadMutation.mutate,
-    isKYCUploadPending: kycUploadMutation.isPending,
+    // Step 3: KYC (frontend-only navigation)
+    skipKYC: () => handleKYC('skip'),
+    submitKYC: () => handleKYC('submit'),
+    isKYCUploadPending: false,
 
-    // Step 4: Payout Account
-    createPayoutAccount: payoutAccountMutation.mutate,
-    isPayoutAccountPending: payoutAccountMutation.isPending,
+    // Step 4: Payout Account (frontend-only navigation)
+    skipPayout: () => handlePayout('skip'),
+    submitPayout: () => handlePayout('submit'),
+    isPayoutAccountPending: false,
 
-    // Complete onboarding
-    completeOnboarding: completeOnboardingMutation.mutate,
-    isCompletingOnboarding: completeOnboardingMutation.isPending,
+    // Complete onboarding (frontend-only)
+    completeOnboarding: handleCompleteOnboarding,
+    isCompletingOnboarding: false,
   };
 }

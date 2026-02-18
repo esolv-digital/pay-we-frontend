@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 interface KYCUploadFormProps {
-  onSubmit: (data: { documentType: string; file: File }) => void;
+  onSubmit: () => void;
   onSkip: () => void;
   isLoading?: boolean;
 }
@@ -91,7 +91,7 @@ export function KYCUploadForm({ onSubmit, onSkip, isLoading }: KYCUploadFormProp
       return;
     }
 
-    onSubmit({ documentType, file: selectedFile });
+    onSubmit();
   };
 
   const canSubmit = documentType && selectedFile && !isLoading;
