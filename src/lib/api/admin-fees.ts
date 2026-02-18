@@ -1,7 +1,14 @@
 /**
  * Admin Fee Management API Client
  *
- * Aligned with backend Postman B3 contract.
+ * Aligned with backend COUNTRY_AND_FEE_SYSTEM_API.md contract.
+ *
+ * Fee hierarchy (highest priority first):
+ * 1. Payment Page Level (gateway_fee_bearer override, include_fees_in_amount)
+ * 2. Vendor Level (platform_fee_type/value, gateway_fee_bearer/vendor_percentage)
+ * 3. Organization Level (fee_overrides in settings)
+ * 4. Country + Gateway Level (country.platform_fee_percentage + gateway.fee_percentage)
+ * 5. Global Platform Level (PlatformSetting, group: 'fees')
  */
 
 import { apiClient } from './client';
@@ -10,7 +17,8 @@ import { apiClient } from './client';
 // TYPES
 // ============================================================================
 
-export type FeeBearer = 'customer' | 'vendor' | 'split';
+/** 'inherit' is used at payment page level to inherit vendor's fee bearer setting */
+export type FeeBearer = 'customer' | 'vendor' | 'split' | 'inherit';
 
 export interface FeeConfiguration {
   platform_fee_percentage: number;

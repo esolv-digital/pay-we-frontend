@@ -6,6 +6,8 @@ import { formatCurrency } from '@/lib/utils/format';
 import { cn } from '@/lib/utils';
 import type { ReportPeriod, ReportType } from '@/types';
 import { REPORT_PERIODS, REPORT_TYPES } from '@/types';
+import { AlertTriangle, BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 export default function VendorReportsPage() {
   const [period, setPeriod] = useState<ReportPeriod>('month');
@@ -150,13 +152,13 @@ export default function VendorReportsPage() {
           </div>
         ) : error ? (
           <div className="p-12 text-center">
-            <span className="text-6xl block mb-4">⚠️</span>
+            <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
             <h2 className="text-xl font-semibold mb-2">Failed to Load Report</h2>
             <p className="text-gray-600">Please try again later.</p>
           </div>
         ) : !report ? (
           <div className="p-12 text-center">
-            <span className="text-6xl block mb-4">📊</span>
+            <IconBadge icon={BarChart3} variant="empty-state" color="blue" />
             <h2 className="text-xl font-semibold mb-2">No Data Available</h2>
             <p className="text-gray-600">
               No transactions found for the selected period.
@@ -225,7 +227,7 @@ export default function VendorReportsPage() {
                       ? 'bg-green-100'
                       : 'bg-red-100'
                   )}>
-                    {report.growth.revenue_growth_percentage >= 0 ? '📈' : '📉'}
+                    {report.growth.revenue_growth_percentage >= 0 ? <TrendingUp className="h-6 w-6 text-green-600" /> : <TrendingDown className="h-6 w-6 text-red-600" />}
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Revenue Growth</p>

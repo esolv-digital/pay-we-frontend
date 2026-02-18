@@ -23,11 +23,14 @@ import {
   useUpdateGlobalFees,
 } from '@/lib/hooks/use-admin-fees';
 import type { FeeBearer } from '@/lib/api/admin-fees';
+import { DollarSign, BarChart3, Wrench, Settings, Info } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
-const FEE_BEARER_LABELS: Record<FeeBearer, string> = {
+const FEE_BEARER_LABELS: Record<string, string> = {
   customer: 'Customer pays fees',
   vendor: 'Vendor absorbs fees',
   split: 'Split between customer & vendor',
+  inherit: 'Inherit from vendor settings',
 };
 
 export default function AdminFeesPage() {
@@ -65,10 +68,10 @@ export default function AdminFeesPage() {
   };
 
   const stats = [
-    { label: 'Total Fees Collected', value: statistics?.total_fees_collected ? `$${statistics.total_fees_collected.toLocaleString()}` : '$0', subtext: 'All time', icon: '💰', color: 'bg-green-50' },
-    { label: 'Avg Fee Rate', value: statistics?.avg_fee_percentage ? `${statistics.avg_fee_percentage}%` : '0%', subtext: 'Effective rate', icon: '📊', color: 'bg-blue-50' },
-    { label: 'Gateway Overrides', value: overview?.gateway_overrides?.length ?? 0, subtext: 'Custom gateway fees', icon: '🔧', color: 'bg-purple-50' },
-    { label: 'Org/Vendor Overrides', value: (overview?.organization_overrides_count ?? 0) + (overview?.vendor_overrides_count ?? 0), subtext: 'Custom overrides', icon: '⚙️', color: 'bg-indigo-50' },
+    { label: 'Total Fees Collected', value: statistics?.total_fees_collected ? `$${statistics.total_fees_collected.toLocaleString()}` : '$0', subtext: 'All time', icon: DollarSign, color: 'green' },
+    { label: 'Avg Fee Rate', value: statistics?.avg_fee_percentage ? `${statistics.avg_fee_percentage}%` : '0%', subtext: 'Effective rate', icon: BarChart3, color: 'blue' },
+    { label: 'Gateway Overrides', value: overview?.gateway_overrides?.length ?? 0, subtext: 'Custom gateway fees', icon: Wrench, color: 'purple' },
+    { label: 'Org/Vendor Overrides', value: (overview?.organization_overrides_count ?? 0) + (overview?.vendor_overrides_count ?? 0), subtext: 'Custom overrides', icon: Settings, color: 'indigo' },
   ];
 
   return (
@@ -82,17 +85,34 @@ export default function AdminFeesPage() {
           </div>
         </div>
 
+        {/* Fee Hierarchy Info */}
+        <Card className="p-4 mb-6 bg-blue-50 border-blue-200">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-blue-800">
+              <p className="font-medium mb-1">Fee Hierarchy (highest priority first)</p>
+              <ol className="list-decimal list-inside space-y-0.5 text-xs">
+                <li><strong>Payment Page</strong> &mdash; fee bearer override, include_fees_in_amount</li>
+                <li><strong>Vendor</strong> &mdash; custom platform fee type/value, gateway fee bearer</li>
+                <li><strong>Organization</strong> &mdash; fee overrides in org settings</li>
+                <li><strong>Country + Gateway</strong> &mdash; platform_fee_percentage + per-gateway fee_percentage (managed in Country Management)</li>
+                <li><strong>Global Platform</strong> &mdash; default rates configured below</li>
+              </ol>
+            </div>
+          </div>
+        </Card>
+
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => (
-            <Card key={stat.label} className={`p-6 ${stat.color}`}>
+            <Card key={stat.label} className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
                   <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                   <p className="text-xs text-gray-500 mt-1">{stat.subtext}</p>
                 </div>
-                <span className="text-4xl">{stat.icon}</span>
+                <IconBadge icon={stat.icon} color={stat.color} />
               </div>
             </Card>
           ))}

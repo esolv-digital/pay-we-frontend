@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge';
 import { ADMIN_ROUTES } from '@/lib/config/routes';
 import { formatDate } from '@/lib/utils/format';
 import { useAdminGateway, useToggleGateway } from '@/lib/hooks/use-admin-gateways';
+import { AlertTriangle } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 export default function GatewayDetailPage() {
   const params = useParams();
@@ -39,7 +41,7 @@ export default function GatewayDetailPage() {
     return (
       <div className="p-8">
         <Card className="p-12 text-center">
-          <span className="text-6xl mb-4 block">⚠️</span>
+          <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
           <h2 className="text-2xl font-semibold mb-2">Gateway Not Found</h2>
           <p className="text-gray-600 mb-4">The requested gateway could not be found.</p>
           <Link href={ADMIN_ROUTES.GATEWAYS}><Button>Back to Gateways</Button></Link>

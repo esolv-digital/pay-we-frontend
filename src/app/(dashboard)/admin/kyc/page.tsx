@@ -22,6 +22,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import type { AdminKYCFilters, KYCStatus, KYCExportFormat } from '@/types/kyc';
+import { AlertTriangle, FileText } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { format } from 'date-fns';
 
 const KYC_STATUSES: { label: string; value: KYCStatus | '' }[] = [
@@ -160,7 +162,7 @@ export default function AdminKYCPage() {
         {/* KYC List */}
         {isError ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">⚠️</span>
+            <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
             <h2 className="text-2xl font-semibold mb-2 text-red-600">Error Loading KYC Documents</h2>
             <p className="text-gray-600 mb-4">
               {error instanceof Error ? error.message : 'Failed to load KYC documents. Please try again.'}
@@ -183,7 +185,7 @@ export default function AdminKYCPage() {
           </div>
         ) : !data?.kyc_documents || data.kyc_documents.length === 0 ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">📄</span>
+            <IconBadge icon={FileText} variant="empty-state" color="blue" />
             <h2 className="text-2xl font-semibold mb-2">No KYC Documents Found</h2>
             <p className="text-gray-600">
               {filters.search || filters.status

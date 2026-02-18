@@ -131,7 +131,7 @@ export default function AdminLogsPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_VIEW_LOGS}>
-      <div className="space-y-6">
+      <div className="p-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

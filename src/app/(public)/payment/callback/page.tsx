@@ -345,7 +345,7 @@ function PaymentCallbackContent() {
 
             <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg text-sm text-center">
               <p className="text-blue-900 font-medium">
-                ✓ A confirmation email has been sent to {transaction.customer_email || 'your email'}
+                <CheckCircle className="inline h-4 w-4 mr-1" /> A confirmation email has been sent to {transaction.customer_email || 'your email'}
               </p>
             </div>
 

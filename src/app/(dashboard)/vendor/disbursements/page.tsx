@@ -11,6 +11,8 @@ import { PayoutAccountsList } from '@/components/disbursements/payout-accounts-l
 import { AddPayoutAccountDialog } from '@/components/disbursements/add-payout-account-dialog';
 import { PayoutHistoryTable } from '@/components/disbursements/payout-history-table';
 import { cn } from '@/lib/utils';
+import { BarChart3, Landmark, ScrollText, Clock, AlertTriangle, PlusCircle, Inbox } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 type TabType = 'overview' | 'accounts' | 'history';
 
@@ -27,9 +29,9 @@ export default function VendorDisbursementsPage() {
   const currency = stats?.currency || 'GHS';
 
   const tabs = [
-    { id: 'overview' as TabType, label: 'Overview', icon: '📊' },
-    { id: 'accounts' as TabType, label: 'Payout Accounts', icon: '🏦' },
-    { id: 'history' as TabType, label: 'Payout History', icon: '📜' },
+    { id: 'overview' as TabType, label: 'Overview', icon: BarChart3 },
+    { id: 'accounts' as TabType, label: 'Payout Accounts', icon: Landmark },
+    { id: 'history' as TabType, label: 'Payout History', icon: ScrollText },
   ];
 
   return (
@@ -70,7 +72,7 @@ export default function VendorDisbursementsPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">⏳</span>
+              <Clock className="h-6 w-6 text-blue-600" />
               <div>
                 <p className="font-medium text-blue-800">Unsettled Transactions</p>
                 <p className="text-sm text-blue-700">
@@ -88,7 +90,7 @@ export default function VendorDisbursementsPage() {
       {!accountsLoading && !hasAccounts && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">⚠️</span>
+            <AlertTriangle className="h-6 w-6 text-yellow-600" />
             <div>
               <p className="font-medium text-yellow-800">No payout account added</p>
               <p className="text-sm text-yellow-700">
@@ -122,7 +124,7 @@ export default function VendorDisbursementsPage() {
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 )}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <tab.icon className="h-4 w-4 mr-2 inline" />
                 {tab.label}
               </button>
             ))}
@@ -157,7 +159,7 @@ export default function VendorDisbursementsPage() {
                     onClick={() => setShowAddAccount(true)}
                     className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-left"
                   >
-                    <span className="text-2xl block mb-2">➕</span>
+                    <PlusCircle className="h-6 w-6 text-blue-500 mb-2" />
                     <span className="font-medium">Add Payout Account</span>
                     <p className="text-sm text-gray-500 mt-1">
                       Add a bank or mobile money account
@@ -187,7 +189,7 @@ export default function VendorDisbursementsPage() {
                   </div>
                 ) : recentPayouts.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    <span className="text-4xl block mb-2">📭</span>
+                    <Inbox className="h-10 w-10 text-gray-400 mx-auto mb-2" />
                     <p>No payouts yet</p>
                   </div>
                 ) : (

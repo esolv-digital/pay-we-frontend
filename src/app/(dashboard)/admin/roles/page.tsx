@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { IconBadge } from '@/components/ui/icon-badge';
 import {
   useAdminRolesList,
   useAdminRoleStatistics,
@@ -261,7 +262,7 @@ export default function AdminRolesPage() {
         {/* Roles List */}
         {!isLoading && !error && filteredRoles.length === 0 && (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">🔐</span>
+            <IconBadge icon={Lock} variant="empty-state" color="blue" />
             <h2 className="text-2xl font-semibold mb-2">No Roles Found</h2>
             <p className="text-gray-600 mb-4">
               {searchQuery ? 'Try adjusting your search' : 'Get started by creating a new role'}

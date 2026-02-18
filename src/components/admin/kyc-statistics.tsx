@@ -11,7 +11,10 @@
 'use client';
 
 import { useAdminKYCStatistics } from '@/lib/hooks/use-admin-kyc';
+import { FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { cn } from '@/lib/utils';
 
 interface KYCStatisticsProps {
@@ -45,30 +48,34 @@ export function KYCStatistics({
   const stats = data?.statistics;
   if (!stats) return null;
 
-  const metrics = [
+  const metrics: Array<{ label: string; value: string; icon: LucideIcon; color: string; badgeColor: string }> = [
     {
       label: 'Total KYC',
       value: stats.total.toLocaleString(),
-      icon: '📄',
+      icon: FileText,
       color: 'text-gray-900',
+      badgeColor: 'blue',
     },
     {
       label: 'Pending Review',
       value: (stats.pending + stats.submitted + stats.in_review).toLocaleString(),
-      icon: '⏳',
+      icon: Clock,
       color: 'text-orange-600',
+      badgeColor: 'orange',
     },
     {
       label: 'Approved',
       value: stats.approved.toLocaleString(),
-      icon: '✓',
+      icon: CheckCircle,
       color: 'text-green-600',
+      badgeColor: 'green',
     },
     {
       label: 'Rejected',
       value: stats.rejected.toLocaleString(),
-      icon: '✗',
+      icon: XCircle,
       color: 'text-red-600',
+      badgeColor: 'red',
     },
   ];
 
@@ -84,7 +91,7 @@ export function KYCStatistics({
                   {metric.value}
                 </p>
               </div>
-              <span className="text-3xl">{metric.icon}</span>
+              <IconBadge icon={metric.icon} color={metric.badgeColor} />
             </div>
           </Card>
         ))}

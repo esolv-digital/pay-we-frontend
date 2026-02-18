@@ -9,6 +9,7 @@ import { useEnable2FA, useConfirm2FA, useDisable2FA, useRegenerateRecoveryCodes 
 import { useSocialAuth } from '@/lib/hooks/use-social-auth';
 import { QRCodeSVG } from 'qrcode.react';
 import { cn } from '@/lib/utils';
+import { CheckCircle } from 'lucide-react';
 
 const passwordSchema = z.object({
   current_password: z.string().min(1, 'Current password is required'),
@@ -191,7 +192,7 @@ export function SecuritySettings() {
         {profile?.two_factor_enabled ? (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <span className="text-green-500 text-2xl">✓</span>
+              <CheckCircle className="h-6 w-6 text-green-500" />
               <span className="text-green-700 font-medium">Two-factor authentication is enabled</span>
             </div>
 

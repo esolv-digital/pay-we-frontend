@@ -12,11 +12,17 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import {
+  CreditCard, DollarSign, Users, Store, Clock, CheckCircle,
+  Landmark, AlertTriangle, TrendingUp, Activity,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
 import { formatCurrency } from '@/lib/utils/format';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { IconBadge } from '@/components/ui/icon-badge';
 import Link from 'next/link';
 import { ADMIN_ROUTES } from '@/lib/config/routes';
 
@@ -44,12 +50,16 @@ export default function AdminDashboardPage() {
   // Type-safe access to stats with defaults
   const statsData = stats as any;
 
-  const primaryMetrics = [
+  const primaryMetrics: Array<{
+    label: string; value: string; subtext: string; icon: LucideIcon;
+    color: string; trend: string; trendUp: boolean; href: string;
+  }> = [
     {
       label: 'Total Transactions',
       value: stats?.total_transactions?.toLocaleString() || '0',
       subtext: 'All time',
-      icon: '💳',
+      icon: CreditCard,
+      color: 'blue',
       trend: '+12.5%',
       trendUp: true,
       href: ADMIN_ROUTES.TRANSACTIONS,
@@ -58,7 +68,8 @@ export default function AdminDashboardPage() {
       label: 'Total Revenue',
       value: formatCurrency(stats?.total_revenue || 0, 'USD'),
       subtext: 'Lifetime earnings',
-      icon: '💰',
+      icon: DollarSign,
+      color: 'green',
       trend: '+8.2%',
       trendUp: true,
       href: ADMIN_ROUTES.TRANSACTIONS,
@@ -67,7 +78,8 @@ export default function AdminDashboardPage() {
       label: 'Active Users',
       value: statsData?.active_users?.toLocaleString() || '0',
       subtext: 'Last 30 days',
-      icon: '👥',
+      icon: Users,
+      color: 'purple',
       trend: '+5.3%',
       trendUp: true,
       href: ADMIN_ROUTES.USERS,
@@ -76,40 +88,47 @@ export default function AdminDashboardPage() {
       label: 'Active Vendors',
       value: stats?.active_vendors?.toLocaleString() || '0',
       subtext: 'Organizations',
-      icon: '🏪',
+      icon: Store,
+      color: 'indigo',
       trend: '+3.1%',
       trendUp: true,
       href: ADMIN_ROUTES.ORGANIZATIONS,
     },
   ];
 
-  const complianceMetrics = [
+  const complianceMetrics: Array<{
+    label: string; value: number; status: string; icon: LucideIcon; color: string; href: string;
+  }> = [
     {
       label: 'Pending KYC',
       value: stats?.pending_kyc || 0,
       status: 'warning',
-      icon: '⏳',
+      icon: Clock,
+      color: 'yellow',
       href: ADMIN_ROUTES.KYC,
     },
     {
       label: 'Approved KYC',
       value: statsData?.approved_kyc || 0,
       status: 'success',
-      icon: '✓',
+      icon: CheckCircle,
+      color: 'green',
       href: ADMIN_ROUTES.KYC,
     },
     {
       label: 'Pending KYB',
       value: statsData?.pending_kyb || 0,
       status: 'warning',
-      icon: '🏛️',
+      icon: Landmark,
+      color: 'yellow',
       href: ADMIN_ROUTES.KYB,
     },
     {
       label: 'Flagged Transactions',
       value: statsData?.flagged_transactions || 0,
       status: 'danger',
-      icon: '⚠️',
+      icon: AlertTriangle,
+      color: 'red',
       href: ADMIN_ROUTES.TRANSACTIONS,
     },
   ];
@@ -120,11 +139,11 @@ export default function AdminDashboardPage() {
     danger: 'bg-red-50 border-red-200',
   };
 
-  const quickActions = [
-    { label: 'Review KYC', href: ADMIN_ROUTES.KYC, icon: '✓' },
-    { label: 'View Reports', href: ADMIN_ROUTES.REPORTS, icon: '📈' },
-    { label: 'Check Logs', href: ADMIN_ROUTES.LOGS, icon: '📝' },
-    { label: 'Manage Users', href: ADMIN_ROUTES.USERS, icon: '👥' },
+  const quickActions: Array<{ label: string; href: string; icon: LucideIcon }> = [
+    { label: 'Review KYC', href: ADMIN_ROUTES.KYC, icon: CheckCircle },
+    { label: 'View Reports', href: ADMIN_ROUTES.REPORTS, icon: TrendingUp },
+    { label: 'Check Logs', href: ADMIN_ROUTES.LOGS, icon: Activity },
+    { label: 'Manage Users', href: ADMIN_ROUTES.USERS, icon: Users },
   ];
 
   return (
@@ -141,7 +160,7 @@ export default function AdminDashboardPage() {
           {quickActions.map((action) => (
             <Link key={action.label} href={action.href}>
               <Button variant="outline" size="sm">
-                <span className="mr-2">{action.icon}</span>
+                <action.icon className="h-4 w-4 mr-2" />
                 {action.label}
               </Button>
             </Link>
@@ -162,7 +181,7 @@ export default function AdminDashboardPage() {
                     <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
                     <p className="text-xs text-gray-500 mt-1">{metric.subtext}</p>
                   </div>
-                  <span className="text-3xl">{metric.icon}</span>
+                  <IconBadge icon={metric.icon} color={metric.color} />
                 </div>
                 <div className="flex items-center text-sm">
                   <span
@@ -196,7 +215,7 @@ export default function AdminDashboardPage() {
                     <p className="text-sm text-gray-600 mb-1">{metric.label}</p>
                     <p className="text-3xl font-bold text-gray-900">{metric.value}</p>
                   </div>
-                  <span className="text-4xl">{metric.icon}</span>
+                  <IconBadge icon={metric.icon} color={metric.color} />
                 </div>
               </Card>
             </Link>
@@ -220,9 +239,7 @@ export default function AdminDashboardPage() {
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-lg">💳</span>
-                  </div>
+                  <IconBadge icon={CreditCard} color="blue" size="sm" />
                   <div>
                     <p className="font-medium text-sm">Transaction #{1000 + i}</p>
                     <p className="text-xs text-gray-500">2 minutes ago</p>

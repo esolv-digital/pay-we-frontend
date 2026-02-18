@@ -15,6 +15,8 @@ import { ADMIN_ROUTES } from '@/lib/config/routes';
 import { formatDate, formatCurrency } from '@/lib/utils/format';
 import { useAdminVendor, useSuspendVendor, useActivateVendor } from '@/lib/hooks/use-admin-vendors';
 import type { AdminVendorStatus } from '@/lib/api/admin-vendors';
+import { AlertTriangle } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 const STATUS_COLORS: Record<AdminVendorStatus, string> = {
   active: 'bg-green-100 text-green-800',
@@ -50,7 +52,7 @@ export default function VendorDetailPage() {
     return (
       <div className="p-8">
         <Card className="p-12 text-center">
-          <span className="text-6xl mb-4 block">⚠️</span>
+          <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
           <h2 className="text-2xl font-semibold mb-2">Vendor Not Found</h2>
           <p className="text-gray-600 mb-4">The requested vendor could not be found.</p>
           <Link href={ADMIN_ROUTES.VENDORS}><Button>Back to Vendors</Button></Link>

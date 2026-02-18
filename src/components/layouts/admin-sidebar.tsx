@@ -2,6 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { LucideIcon } from 'lucide-react';
+import {
+  LayoutDashboard, CreditCard, Banknote, CheckCircle, Users, Building2,
+  Store, FileText, Lock, ShieldCheck, Globe, Activity, TrendingUp, Settings,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ADMIN_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/lib/hooks/use-auth';
@@ -13,32 +18,32 @@ import type { PermissionName } from '@/types/permissions';
 const navigation: Array<{
   name: string;
   href: string;
-  icon: string;
+  icon: LucideIcon;
   permission?: PermissionName;
   category?: string;
 }> = [
   // Overview
-  { name: 'Dashboard', href: ADMIN_ROUTES.DASHBOARD, icon: '📊', category: 'overview' },
+  { name: 'Dashboard', href: ADMIN_ROUTES.DASHBOARD, icon: LayoutDashboard, category: 'overview' },
 
   // Financial
   {
     name: 'Transactions',
     href: ADMIN_ROUTES.TRANSACTIONS,
-    icon: '💳',
+    icon: CreditCard,
     permission: PERMISSIONS.VIEW_TRANSACTIONS,
     category: 'financial',
   },
   {
     name: 'Disbursements',
     href: ADMIN_ROUTES.DISBURSEMENTS,
-    icon: '💸',
+    icon: Banknote,
     permission: PERMISSIONS.ADMIN_VIEW_DISBURSEMENTS,
     category: 'financial',
   },
   // {
   //   name: 'Payout Accounts',
   //   href: ADMIN_ROUTES.PAYOUT_ACCOUNTS,
-  //   icon: '🏦',
+  //   icon: Landmark,
   //   permission: PERMISSIONS.ADMIN_VIEW_PAYOUT_ACCOUNTS,
   //   category: 'financial',
   // },
@@ -47,46 +52,46 @@ const navigation: Array<{
   {
     name: 'KYC Reviews',
     href: ADMIN_ROUTES.KYC,
-    icon: '✓',
+    icon: CheckCircle,
     permission: PERMISSIONS.VIEW_KYC,
     category: 'compliance',
   },
   // {
   //   name: 'KYB Reviews',
   //   href: ADMIN_ROUTES.KYB,
-  //   icon: '🏛️',
+  //   icon: Landmark,
   //   permission: PERMISSIONS.VIEW_KYC,
   //   category: 'compliance',
   // },
 
   // Management
-  { name: 'Users', href: ADMIN_ROUTES.USERS, icon: '👥', category: 'management' },
-  { name: 'Organizations', href: ADMIN_ROUTES.ORGANIZATIONS, icon: '🏢', category: 'management' },
+  { name: 'Users', href: ADMIN_ROUTES.USERS, icon: Users, category: 'management' },
+  { name: 'Organizations', href: ADMIN_ROUTES.ORGANIZATIONS, icon: Building2, category: 'management' },
   {
     name: 'Vendors',
     href: ADMIN_ROUTES.VENDORS,
-    icon: '🏪',
+    icon: Store,
     permission: PERMISSIONS.ADMIN_VIEW_VENDORS,
     category: 'management',
   },
   {
     name: 'Payment Pages',
     href: ADMIN_ROUTES.PAYMENT_PAGES,
-    icon: '📄',
+    icon: FileText,
     permission: PERMISSIONS.ADMIN_VIEW_PAYMENT_PAGES,
     category: 'management',
   },
   {
     name: 'Roles & Permissions',
     href: ADMIN_ROUTES.ROLES,
-    icon: '🔐',
+    icon: Lock,
     permission: PERMISSIONS.VIEW_ROLES,
     category: 'management',
   },
   {
     name: 'Admin Management',
     href: ADMIN_ROUTES.ADMIN_MANAGEMENT,
-    icon: '🛡️',
+    icon: ShieldCheck,
     permission: PERMISSIONS.ADMIN_MANAGE_ADMINS,
     category: 'management',
   },
@@ -95,21 +100,21 @@ const navigation: Array<{
   {
     name: 'Countries',
     href: ADMIN_ROUTES.COUNTRIES,
-    icon: '🌍',
+    icon: Globe,
     permission: PERMISSIONS.ADMIN_MANAGE_COUNTRIES,
     category: 'platform',
   },
   // {
   //   name: 'Gateways',
   //   href: ADMIN_ROUTES.GATEWAYS,
-  //   icon: '🔌',
+  //   icon: Plug,
   //   permission: PERMISSIONS.ADMIN_MANAGE_GATEWAYS,
   //   category: 'platform',
   // },
   // {
   //   name: 'Fee Management',
   //   href: ADMIN_ROUTES.FEES,
-  //   icon: '💰',
+  //   icon: DollarSign,
   //   permission: PERMISSIONS.ADMIN_MANAGE_FEES,
   //   category: 'platform',
   // },
@@ -118,21 +123,21 @@ const navigation: Array<{
   {
     name: 'Activity Logs',
     href: ADMIN_ROUTES.LOGS,
-    icon: '📝',
+    icon: Activity,
     permission: PERMISSIONS.MANAGE_SETTINGS,
     category: 'system',
   },
   {
     name: 'Reports',
     href: ADMIN_ROUTES.REPORTS,
-    icon: '📈',
+    icon: TrendingUp,
     permission: PERMISSIONS.VIEW_TRANSACTIONS,
     category: 'system',
   },
   {
     name: 'Settings',
     href: ADMIN_ROUTES.SETTINGS,
-    icon: '⚙️',
+    icon: Settings,
     permission: PERMISSIONS.MANAGE_SETTINGS,
     category: 'system',
   },
@@ -194,7 +199,7 @@ export function AdminSidebar() {
                           : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                       )}
                     >
-                      <span className="text-lg">{item.icon}</span>
+                      <item.icon className="h-5 w-5 shrink-0" />
                       <span>{item.name}</span>
                     </Link>
                   );

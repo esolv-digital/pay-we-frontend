@@ -1,68 +1,42 @@
 /**
  * Admin Management Page
  *
- * List and manage platform administrators (Super Admins, Platform Admins).
- * Supports: create, edit, suspend/activate, role assignment.
- * No delete — only suspend.
+ * Manage platform administrators (Super Admin, Platform Admin).
+ * Features: listing with table, filtering, statistics, create/edit/suspend/activate.
+ *
+ * ISO 27001: No delete — only suspend/activate. Suspension requires reason.
+ * Self-protection: Cannot suspend self or Super Admins.
+ * SOLID: Dialogs extracted into single-responsibility components.
+ *
+ * Ref: docs/ADMIN_AND_USER_MANAGEMENT.md
  */
 
 'use client';
 
 import { useState } from 'react';
-import { PermissionGuard } from '@/components/permissions';
+import Link from 'next/link';
+import { PermissionGuard, Can } from '@/components/permissions';
 import { PERMISSIONS } from '@/types/permissions';
 import { ADMIN_ROUTES } from '@/lib/config/routes';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { formatDate } from '@/lib/utils/format';
+import { useAuth } from '@/lib/hooks/use-auth';
 import {
   useAdminList,
   useAdminStatistics,
-  useCreateAdmin,
-  useSuspendAdmin,
   useActivateAdmin,
 } from '@/lib/hooks/use-admin-management';
-import type {
-  AdminUser,
-  AdminFilters,
-  AdminStatus,
-  AdminRole,
-  CreateAdminRequest,
-  SuspendAdminRequest,
-} from '@/lib/api/admin-management';
+import type { AdminFilters, AdminStatus, AdminRole, AdminUser } from '@/lib/api/admin-management';
+import { ShieldCheck, Shield, UserCheck, UserX, AlertTriangle, Plus } from 'lucide-react';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-  Loader2,
-  Plus,
-  Shield,
-  ShieldCheck,
-  Users,
-  UserX,
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+  CreateAdminDialog,
+  SuspendAdminDialog,
+  DemoteAdminDialog,
+} from '@/components/admin/admin-management';
 
 const STATUS_COLORS: Record<AdminStatus, string> = {
   active: 'bg-green-100 text-green-800',
@@ -75,48 +49,29 @@ const ADMIN_STATUSES = [
   { label: 'Suspended', value: 'suspended' },
 ];
 
-const ADMIN_ROLES: { label: string; value: string }[] = [
+const ROLE_FILTER_OPTIONS = [
   { label: 'All Roles', value: '' },
   { label: 'Super Admin', value: 'Super Admin' },
   { label: 'Platform Admin', value: 'Platform Admin' },
 ];
 
 export default function AdminManagementPage() {
+  const { user: currentUser } = useAuth();
+
   const [filters, setFilters] = useState<AdminFilters>({
     page: 1,
     per_page: 20,
   });
 
-  // Dialogs
+  // Dialog state
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showSuspendDialog, setShowSuspendDialog] = useState(false);
-  const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
-  const [createForm, setCreateForm] = useState<CreateAdminRequest>({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    password: '',
-    password_confirmation: '',
-    role: 'Platform Admin',
-  });
-  const [suspendForm, setSuspendForm] = useState<SuspendAdminRequest>({
-    reason: '',
-    duration_days: undefined,
-  });
+  const [suspendTarget, setSuspendTarget] = useState<AdminUser | null>(null);
+  const [demoteTarget, setDemoteTarget] = useState<AdminUser | null>(null);
 
-  // Data
-  const { data, isLoading, error } = useAdminList(filters);
-  const { data: statsData } = useAdminStatistics();
-
-  // Mutations
-  const { mutate: createAdmin, isPending: isCreating } = useCreateAdmin();
-  const { mutate: suspendAdmin, isPending: isSuspending } = useSuspendAdmin();
-  const { mutate: activateAdmin, isPending: isActivating } = useActivateAdmin();
-
-  const admins = data?.data || [];
-  const meta = data?.meta;
-  const stats = statsData || { total: 0, super_admins: 0, platform_admins: 0, active: 0, suspended: 0 };
+  // Data fetching
+  const { data, isLoading, isError, error } = useAdminList(filters);
+  const { data: statistics } = useAdminStatistics();
+  const { mutate: activateAdmin } = useActivateAdmin();
 
   const handleFilterChange = (key: keyof AdminFilters, value: string) => {
     setFilters((prev) => ({
@@ -130,56 +85,81 @@ export default function AdminManagementPage() {
     setFilters((prev) => ({ ...prev, page: newPage }));
   };
 
-  const handleOpenCreate = () => {
-    setCreateForm({
-      first_name: '',
-      last_name: '',
-      email: '',
-      phone: '',
-      password: '',
-      password_confirmation: '',
-      role: 'Platform Admin',
-    });
-    setShowCreateDialog(true);
+  const handleClearFilters = () => {
+    setFilters({ page: 1, per_page: 20 });
   };
 
-  const handleCreate = () => {
-    createAdmin(createForm, {
-      onSuccess: () => {
-        setShowCreateDialog(false);
-      },
-    });
+  const getAdminRoleLabel = (admin: AdminUser): string => {
+    if (admin.admin.is_super_admin) return 'Super Admin';
+    if (admin.admin.is_platform_admin) return 'Platform Admin';
+    return 'Admin';
   };
 
-  const handleOpenSuspend = (admin: AdminUser) => {
-    setSelectedAdmin(admin);
-    setSuspendForm({ reason: '', duration_days: undefined });
-    setShowSuspendDialog(true);
+  /**
+   * Self-protection rules (backend also enforces these):
+   * - Cannot suspend yourself
+   * - Cannot suspend a Super Admin (must demote first)
+   */
+  const canSuspend = (admin: AdminUser): boolean => {
+    const isCurrentUser = admin.id === currentUser?.id;
+    const isSuperAdmin = admin.admin.is_super_admin;
+    return !isCurrentUser && !isSuperAdmin;
   };
 
-  const handleSuspend = () => {
-    if (!selectedAdmin) return;
-    suspendAdmin(
-      { id: selectedAdmin.id, data: suspendForm },
-      {
-        onSuccess: () => {
-          setShowSuspendDialog(false);
-          setSelectedAdmin(null);
-        },
-      }
-    );
+  const getSuspendTooltip = (admin: AdminUser): string | undefined => {
+    if (admin.id === currentUser?.id) return 'You cannot suspend your own account';
+    if (admin.admin.is_super_admin) return 'Cannot suspend a Super Admin. Demote them first.';
+    return undefined;
   };
 
-  const handleActivate = (admin: AdminUser) => {
-    activateAdmin(admin.id);
+  /**
+   * Self-protection rules for demote (same as suspend):
+   * - Cannot demote yourself
+   * - Cannot demote a Super Admin (must change role first)
+   */
+  const canDemote = (admin: AdminUser): boolean => {
+    const isCurrentUser = admin.id === currentUser?.id;
+    const isSuperAdmin = admin.admin.is_super_admin;
+    return !isCurrentUser && !isSuperAdmin;
   };
 
-  const statisticsCards = [
-    { label: 'Total Admins', value: stats.total, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Super Admins', value: stats.super_admins, icon: ShieldCheck, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'Platform Admins', value: stats.platform_admins, icon: Shield, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { label: 'Active', value: stats.active, icon: Users, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'Suspended', value: stats.suspended, icon: UserX, color: 'text-red-600', bg: 'bg-red-50' },
+  const getDemoteTooltip = (admin: AdminUser): string | undefined => {
+    if (admin.id === currentUser?.id) return 'You cannot demote your own account';
+    if (admin.admin.is_super_admin) return 'Cannot demote a Super Admin. Change their role to Platform Admin first.';
+    return undefined;
+  };
+
+  const stats = [
+    {
+      label: 'Total Admins',
+      value: statistics?.total?.toLocaleString() || '0',
+      subtext: 'All administrators',
+      icon: ShieldCheck,
+      color: 'blue',
+    },
+    {
+      label: 'Super Admins',
+      value: statistics?.super_admins?.toLocaleString() || '0',
+      subtext: 'Full platform access',
+      icon: Shield,
+      color: 'purple',
+    },
+    {
+      label: 'Active',
+      value: statistics?.active?.toLocaleString() || '0',
+      subtext: statistics?.total
+        ? `${((statistics.active / statistics.total) * 100).toFixed(0)}% of total`
+        : '0% of total',
+      icon: UserCheck,
+      color: 'green',
+    },
+    {
+      label: 'Suspended',
+      value: statistics?.suspended?.toLocaleString() || '0',
+      subtext: 'Access revoked',
+      icon: UserX,
+      color: 'red',
+    },
   ];
 
   return (
@@ -189,216 +169,295 @@ export default function AdminManagementPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Admin Management</h1>
-            <p className="text-gray-600 mt-1">Manage platform administrators and their access</p>
+            <p className="text-gray-600 mt-1">
+              Manage platform administrators and their access levels
+            </p>
           </div>
-          <Button onClick={handleOpenCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Admin
-          </Button>
+          <Can permission={PERMISSIONS.ADMIN_MANAGE_ADMINS}>
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Administrator
+            </Button>
+          </Can>
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-          {statisticsCards.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.label} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600 mb-1">{stat.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  </div>
-                  <div className={`rounded-full p-2 ${stat.bg}`}>
-                    <Icon className={`h-5 w-5 ${stat.color}`} />
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat) => (
+            <Card key={stat.label} className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
+                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                  <p className="text-xs text-gray-500 mt-1">{stat.subtext}</p>
                 </div>
-              </Card>
-            );
-          })}
+                <IconBadge icon={stat.icon} color={stat.color} />
+              </div>
+            </Card>
+          ))}
         </div>
 
         {/* Filters */}
         <Card className="p-6 mb-6">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-[200px]">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
               <Input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Name or email..."
                 value={filters.search || ''}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
               />
             </div>
-            <select
-              aria-label="Filter by status"
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-              value={filters.status || ''}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-            >
-              {ADMIN_STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="Filter by role"
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-              value={filters.role || ''}
-              onChange={(e) => handleFilterChange('role', e.target.value)}
-            >
-              {ADMIN_ROLES.map((r) => (
-                <option key={r.value} value={r.value}>
-                  {r.label}
-                </option>
-              ))}
-            </select>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <select
+                aria-label="Filter by admin status"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                value={filters.status || ''}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+              >
+                {ADMIN_STATUSES.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+              <select
+                aria-label="Filter by admin role"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                value={filters.role || ''}
+                onChange={(e) => handleFilterChange('role', e.target.value as AdminRole)}
+              >
+                {ROLE_FILTER_OPTIONS.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Actions</label>
+              <Button variant="outline" size="sm" onClick={handleClearFilters} className="w-full">
+                Clear Filters
+              </Button>
+            </div>
           </div>
         </Card>
 
-        {/* Error */}
-        {error && (
-          <Card className="p-8 mb-6 text-center">
-            <AlertCircle className="mx-auto h-12 w-12 text-red-400 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Failed to load administrators</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              {error instanceof Error ? error.message : 'An error occurred'}
+        {/* Admin List */}
+        {isError ? (
+          <Card className="p-12 text-center">
+            <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
+            <h2 className="text-2xl font-semibold mb-2 text-red-600">
+              Error Loading Administrators
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {error instanceof Error ? error.message : 'Failed to load administrators.'}
             </p>
-            <Button variant="outline" onClick={() => window.location.reload()}>
+            <Button onClick={() => window.location.reload()} variant="outline">
               Retry
             </Button>
           </Card>
-        )}
-
-        {/* Loading */}
-        {isLoading && (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="p-6">
-                <div className="animate-pulse space-y-3">
-                  <div className="h-4 bg-gray-200 rounded w-1/3" />
-                  <div className="h-4 bg-gray-200 rounded w-2/3" />
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {/* Empty */}
-        {!isLoading && !error && admins.length === 0 && (
-          <Card className="p-12 text-center">
-            <Shield className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h2 className="text-2xl font-semibold mb-2">No Administrators Found</h2>
-            <p className="text-gray-600 mb-4">
-              {filters.search || filters.status || filters.role
-                ? 'Try adjusting your filters'
-                : 'Get started by creating a new administrator'}
-            </p>
-            <Button onClick={handleOpenCreate}>Create Admin</Button>
-          </Card>
-        )}
-
-        {/* Admin List */}
-        {!isLoading && !error && admins.length > 0 && (
-          <>
+        ) : isLoading ? (
+          <Card className="p-6">
             <div className="space-y-4">
-              {admins.map((admin) => (
-                <Card key={admin.id} className="p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{admin.full_name}</h3>
-                        <Badge className={STATUS_COLORS[admin.status]}>
-                          {admin.status}
-                        </Badge>
-                        {admin.admin.is_super_admin && (
-                          <Badge className="bg-purple-100 text-purple-800">Super Admin</Badge>
-                        )}
-                        {!admin.admin.is_super_admin && admin.admin.is_platform_admin && (
-                          <Badge className="bg-indigo-100 text-indigo-800">Platform Admin</Badge>
-                        )}
-                      </div>
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <p>{admin.email}</p>
-                        {admin.phone && <p>{admin.phone}</p>}
-                        <div className="flex items-center gap-4 mt-2">
-                          <span>
-                            2FA: {admin.two_factor_enabled ? (
-                              <Badge variant="outline" className="text-green-700">Enabled</Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-gray-500">Disabled</Badge>
-                            )}
-                          </span>
-                          {admin.last_login_at && (
-                            <span className="text-gray-500">
-                              Last login: {formatDate(admin.last_login_at)}
-                            </span>
-                          )}
-                        </div>
-                        {admin.admin.platform_roles.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {admin.admin.platform_roles.map((role) => (
-                              <Badge key={role} variant="outline" className="text-xs">
-                                {role}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-2 ml-4">
-                      <Link href={ADMIN_ROUTES.ADMIN_MANAGEMENT_DETAILS(String(admin.id))}>
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                      </Link>
-                      {admin.status === 'active' ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleOpenSuspend(admin)}
-                        >
-                          Suspend
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-green-600 hover:text-green-700"
-                          onClick={() => handleActivate(admin)}
-                          disabled={isActivating}
-                        >
-                          Activate
-                        </Button>
-                      )}
-                    </div>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="animate-pulse flex space-x-4">
+                  <div className="rounded-full bg-gray-200 h-12 w-12" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
+          </Card>
+        ) : !data?.data || data.data.length === 0 ? (
+          <Card className="p-12 text-center">
+            <IconBadge icon={ShieldCheck} variant="empty-state" color="blue" />
+            <h2 className="text-2xl font-semibold mb-2">No Administrators Found</h2>
+            <p className="text-gray-600">
+              {filters.search || filters.status || filters.role
+                ? 'Try adjusting your filters'
+                : 'Get started by adding a new administrator'}
+            </p>
+          </Card>
+        ) : (
+          <>
+            {/* Table */}
+            <Card className="overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Administrator
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        2FA
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Last Login
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Added
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {data.data.map((admin) => (
+                      <tr key={admin.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                              <span className="text-indigo-600 font-medium text-sm">
+                                {admin.first_name[0]}{admin.last_name[0]}
+                              </span>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {admin.full_name}
+                                {admin.id === currentUser?.id && (
+                                  <span className="ml-2 text-xs text-gray-400">(You)</span>
+                                )}
+                              </div>
+                              {admin.phone && (
+                                <div className="text-xs text-gray-500">{admin.phone}</div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{admin.email}</div>
+                          {admin.email_verified_at ? (
+                            <div className="text-xs text-green-600">Verified</div>
+                          ) : (
+                            <div className="text-xs text-gray-500">Not verified</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Badge
+                            className={
+                              admin.admin.is_super_admin
+                                ? 'bg-purple-100 text-purple-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }
+                          >
+                            {getAdminRoleLabel(admin)}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Badge className={STATUS_COLORS[admin.status]}>
+                            {admin.status}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {admin.two_factor_enabled ? (
+                            <span className="text-green-600 font-medium">Enabled</span>
+                          ) : (
+                            <span className="text-gray-400">Disabled</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {admin.last_login_at ? formatDate(admin.last_login_at) : 'Never'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(admin.created_at)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex justify-end gap-2">
+                            <Link
+                              href={ADMIN_ROUTES.ADMIN_MANAGEMENT_DETAILS(admin.id)}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              View
+                            </Link>
+                            <Can permission={PERMISSIONS.ADMIN_MANAGE_ADMINS}>
+                              {admin.status === 'active' && (
+                                <button
+                                  type="button"
+                                  onClick={() => setSuspendTarget(admin)}
+                                  disabled={!canSuspend(admin)}
+                                  title={getSuspendTooltip(admin)}
+                                  className={
+                                    canSuspend(admin)
+                                      ? 'text-red-600 hover:text-red-900'
+                                      : 'text-gray-300 cursor-not-allowed'
+                                  }
+                                >
+                                  Suspend
+                                </button>
+                              )}
+                              {admin.status === 'suspended' && (
+                                <button
+                                  type="button"
+                                  onClick={() => activateAdmin(admin.id)}
+                                  className="text-green-600 hover:text-green-900"
+                                >
+                                  Activate
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => setDemoteTarget(admin)}
+                                disabled={!canDemote(admin)}
+                                title={getDemoteTooltip(admin)}
+                                className={
+                                  canDemote(admin)
+                                    ? 'text-orange-600 hover:text-orange-900'
+                                    : 'text-gray-300 cursor-not-allowed'
+                                }
+                              >
+                                Demote
+                              </button>
+                            </Can>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
 
             {/* Pagination */}
-            {meta && meta.last_page > 1 && (
-              <div className="flex items-center justify-between mt-6">
-                <p className="text-sm text-gray-600">
-                  Showing page {meta.current_page} of {meta.last_page} ({meta.total} total)
-                </p>
+            {data.meta && data.meta.last_page > 1 && (
+              <div className="mt-6 flex items-center justify-between">
+                <div className="text-sm text-gray-700">
+                  Showing {data.meta.from} to {data.meta.to} of {data.meta.total} administrators
+                </div>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(meta.current_page - 1)}
-                    disabled={meta.current_page <= 1}
+                    onClick={() => handlePageChange(data.meta.current_page - 1)}
+                    disabled={data.meta.current_page === 1}
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    Previous
                   </Button>
+                  <span className="px-4 py-2 text-sm text-gray-700">
+                    Page {data.meta.current_page} of {data.meta.last_page}
+                  </span>
                   <Button
                     variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(meta.current_page + 1)}
-                    disabled={meta.current_page >= meta.last_page}
+                    onClick={() => handlePageChange(data.meta.current_page + 1)}
+                    disabled={data.meta.current_page === data.meta.last_page}
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    Next
                   </Button>
                 </div>
               </div>
@@ -406,167 +465,27 @@ export default function AdminManagementPage() {
           </>
         )}
 
-        {/* Create Admin Dialog */}
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Create Administrator</DialogTitle>
-              <DialogDescription>
-                Add a new platform administrator. They will have immediate access.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="create-first-name">First Name</Label>
-                  <Input
-                    id="create-first-name"
-                    placeholder="First name"
-                    value={createForm.first_name}
-                    onChange={(e) => setCreateForm({ ...createForm, first_name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="create-last-name">Last Name</Label>
-                  <Input
-                    id="create-last-name"
-                    placeholder="Last name"
-                    value={createForm.last_name}
-                    onChange={(e) => setCreateForm({ ...createForm, last_name: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="create-email">Email</Label>
-                <Input
-                  id="create-email"
-                  type="email"
-                  placeholder="admin@paywe.com"
-                  value={createForm.email}
-                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="create-phone">Phone (optional)</Label>
-                <Input
-                  id="create-phone"
-                  type="tel"
-                  placeholder="+1234567890"
-                  value={createForm.phone || ''}
-                  onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="create-role">Role</Label>
-                <select
-                  id="create-role"
-                  aria-label="Select admin role"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                  value={createForm.role}
-                  onChange={(e) =>
-                    setCreateForm({ ...createForm, role: e.target.value as AdminRole })
-                  }
-                >
-                  <option value="Platform Admin">Platform Admin</option>
-                  <option value="Super Admin">Super Admin</option>
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="create-password">Password</Label>
-                <Input
-                  id="create-password"
-                  type="password"
-                  placeholder="Min 8 chars, uppercase, lowercase, number, symbol"
-                  value={createForm.password}
-                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="create-password-confirm">Confirm Password</Label>
-                <Input
-                  id="create-password-confirm"
-                  type="password"
-                  placeholder="Confirm password"
-                  value={createForm.password_confirmation}
-                  onChange={(e) =>
-                    setCreateForm({ ...createForm, password_confirmation: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreate}
-                disabled={
-                  isCreating ||
-                  !createForm.first_name.trim() ||
-                  !createForm.last_name.trim() ||
-                  !createForm.email.trim() ||
-                  !createForm.password.trim() ||
-                  createForm.password !== createForm.password_confirmation
-                }
-              >
-                {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Administrator
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Dialogs */}
+        <CreateAdminDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+        />
 
-        {/* Suspend Dialog */}
-        <AlertDialog open={showSuspendDialog} onOpenChange={setShowSuspendDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Suspend Administrator</AlertDialogTitle>
-              <AlertDialogDescription>
-                Suspend {selectedAdmin?.full_name}&apos;s access to the platform. They will not be
-                able to log in until reactivated.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="suspend-reason">Reason (required)</Label>
-                <Input
-                  id="suspend-reason"
-                  placeholder="Reason for suspension"
-                  value={suspendForm.reason}
-                  onChange={(e) => setSuspendForm({ ...suspendForm, reason: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="suspend-duration">Duration (days, optional)</Label>
-                <Input
-                  id="suspend-duration"
-                  type="number"
-                  min={1}
-                  max={365}
-                  placeholder="Leave empty for indefinite"
-                  value={suspendForm.duration_days ?? ''}
-                  onChange={(e) =>
-                    setSuspendForm({
-                      ...suspendForm,
-                      duration_days: e.target.value ? parseInt(e.target.value) : undefined,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleSuspend}
-                disabled={isSuspending || !suspendForm.reason.trim()}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                {isSuspending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Suspend Administrator
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {suspendTarget && (
+          <SuspendAdminDialog
+            open={!!suspendTarget}
+            onOpenChange={(open) => { if (!open) setSuspendTarget(null); }}
+            admin={suspendTarget}
+          />
+        )}
+
+        {demoteTarget && (
+          <DemoteAdminDialog
+            open={!!demoteTarget}
+            onOpenChange={(open) => { if (!open) setDemoteTarget(null); }}
+            admin={demoteTarget}
+          />
+        )}
       </div>
     </PermissionGuard>
   );

@@ -1,5 +1,8 @@
 /**
  * Admin Countries Management React Query Hooks
+ *
+ * All country identification uses ISO alpha-2 `code` (e.g. "GH"), not numeric IDs.
+ * Countries cannot be deleted — use toggleStatus to activate/deactivate.
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +21,7 @@ export const adminCountriesKeys = {
   lists: () => [...adminCountriesKeys.all, 'list'] as const,
   list: (filters: CountryFilters) => [...adminCountriesKeys.lists(), filters] as const,
   details: () => [...adminCountriesKeys.all, 'detail'] as const,
-  detail: (id: string) => [...adminCountriesKeys.details(), id] as const,
+  detail: (code: string) => [...adminCountriesKeys.details(), code] as const,
   statistics: () => [...adminCountriesKeys.all, 'statistics'] as const,
 };
 
@@ -30,11 +33,11 @@ export function useAdminCountriesList(filters: CountryFilters = {}) {
   });
 }
 
-export function useAdminCountry(id: string) {
+export function useAdminCountry(code: string) {
   return useQuery({
-    queryKey: adminCountriesKeys.detail(id),
-    queryFn: () => adminCountriesApi.get(id),
-    enabled: !!id,
+    queryKey: adminCountriesKeys.detail(code),
+    queryFn: () => adminCountriesApi.get(code),
+    enabled: !!code,
     staleTime: 60_000,
   });
 }
@@ -62,8 +65,8 @@ export function useCreateCountry() {
 export function useUpdateCountry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateCountryRequest }) =>
-      adminCountriesApi.update(id, data),
+    mutationFn: ({ code, data }: { code: string; data: UpdateCountryRequest }) =>
+      adminCountriesApi.update(code, data),
     onSuccess: () => {
       toast.success('Country updated successfully');
       queryClient.invalidateQueries({ queryKey: adminCountriesKeys.all });
@@ -72,23 +75,24 @@ export function useUpdateCountry() {
   });
 }
 
-export function useDeleteCountry() {
+export function useToggleCountryStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => adminCountriesApi.delete(id),
-    onSuccess: () => {
-      toast.success('Country deleted successfully');
+    mutationFn: (code: string) => adminCountriesApi.toggleStatus(code),
+    onSuccess: (data) => {
+      const status = data?.is_active ? 'activated' : 'deactivated';
+      toast.success(`Country ${status} successfully`);
       queryClient.invalidateQueries({ queryKey: adminCountriesKeys.all });
     },
-    onError: () => { toast.error('Failed to delete country'); },
+    onError: () => { toast.error('Failed to toggle country status'); },
   });
 }
 
 export function useUpdateCountryPaymentMethods() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdatePaymentMethodsRequest }) =>
-      adminCountriesApi.updatePaymentMethods(id, data),
+    mutationFn: ({ code, data }: { code: string; data: UpdatePaymentMethodsRequest }) =>
+      adminCountriesApi.updatePaymentMethods(code, data),
     onSuccess: () => {
       toast.success('Payment methods updated successfully');
       queryClient.invalidateQueries({ queryKey: adminCountriesKeys.all });
@@ -100,8 +104,8 @@ export function useUpdateCountryPaymentMethods() {
 export function useUpdateCountryGateways() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateGatewaysRequest }) =>
-      adminCountriesApi.updateGateways(id, data),
+    mutationFn: ({ code, data }: { code: string; data: UpdateGatewaysRequest }) =>
+      adminCountriesApi.updateGateways(code, data),
     onSuccess: () => {
       toast.success('Gateways updated successfully');
       queryClient.invalidateQueries({ queryKey: adminCountriesKeys.all });

@@ -2,41 +2,39 @@
  * Admin Detail Page
  *
  * View and manage a single administrator:
- * - Profile information
+ * - Profile information with audit trail fields
  * - Role management (promote/demote)
- * - Suspend/activate
+ * - Suspend/activate (no delete — ISO 27001)
  * - Permissions overview
+ *
+ * Self-protection rules enforced in UI:
+ * - Cannot change own role
+ * - Cannot suspend self
+ * - Cannot suspend a Super Admin (must demote first)
+ *
+ * Ref: docs/ADMIN_AND_USER_MANAGEMENT.md
  */
 
 'use client';
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { PermissionGuard } from '@/components/permissions';
+import Link from 'next/link';
+import { PermissionGuard, Can } from '@/components/permissions';
 import { PERMISSIONS } from '@/types/permissions';
 import { ADMIN_ROUTES } from '@/lib/config/routes';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import Link from 'next/link';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { formatDate } from '@/lib/utils/format';
+import { useAuth } from '@/lib/hooks/use-auth';
 import {
   useAdminDetail,
   useUpdateAdmin,
-  useSuspendAdmin,
   useActivateAdmin,
 } from '@/lib/hooks/use-admin-management';
-import type { AdminRole, SuspendAdminRequest, UpdateAdminRequest } from '@/lib/api/admin-management';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import type { AdminRole } from '@/lib/api/admin-management';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,28 +46,33 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  Loader2,
   ArrowLeft,
-  Shield,
   ShieldCheck,
+  Shield,
+  Lock,
+  Clock,
   Mail,
   Phone,
-  Clock,
-  Lock,
   Edit,
-  AlertCircle,
+  AlertTriangle,
+  Loader2,
 } from 'lucide-react';
+import {
+  EditAdminDialog,
+  SuspendAdminDialog,
+  DemoteAdminDialog,
+} from '@/components/admin/admin-management';
 
 export default function AdminDetailPage() {
   const params = useParams();
-  const adminId = parseInt(params?.id as string);
+  const adminId = params?.id as string;
+  const { user: currentUser } = useAuth();
 
-  // Dialogs
+  // Dialog state
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
+  const [showDemoteDialog, setShowDemoteDialog] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const [editForm, setEditForm] = useState<UpdateAdminRequest>({});
-  const [suspendForm, setSuspendForm] = useState<SuspendAdminRequest>({ reason: '' });
   const [newRole, setNewRole] = useState<AdminRole>('Platform Admin');
 
   // Data
@@ -77,8 +80,14 @@ export default function AdminDetailPage() {
 
   // Mutations
   const { mutate: updateAdmin, isPending: isUpdating } = useUpdateAdmin();
-  const { mutate: suspendAdmin, isPending: isSuspending } = useSuspendAdmin();
   const { mutate: activateAdmin, isPending: isActivating } = useActivateAdmin();
+
+  // Self-protection checks
+  const isCurrentUser = admin?.id === currentUser?.id;
+  const isSuperAdmin = admin?.admin.is_super_admin ?? false;
+  const canChangeRole = !isCurrentUser;
+  const canSuspendAdmin = !isCurrentUser && !isSuperAdmin;
+  const canDemoteAdmin = !isCurrentUser && !isSuperAdmin;
 
   if (isLoading) {
     return (
@@ -100,7 +109,7 @@ export default function AdminDetailPage() {
     return (
       <div className="p-8">
         <Card className="p-12 text-center">
-          <AlertCircle className="mx-auto h-12 w-12 text-red-400 mb-4" />
+          <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
           <h2 className="text-2xl font-semibold mb-2">Administrator Not Found</h2>
           <p className="text-gray-600 mb-4">
             The requested administrator could not be found or you don&apos;t have permission.
@@ -113,23 +122,6 @@ export default function AdminDetailPage() {
     );
   }
 
-  const handleOpenEdit = () => {
-    setEditForm({
-      first_name: admin.first_name,
-      last_name: admin.last_name,
-      email: admin.email,
-      phone: admin.phone || '',
-    });
-    setShowEditDialog(true);
-  };
-
-  const handleUpdate = () => {
-    updateAdmin(
-      { id: admin.id, data: editForm },
-      { onSuccess: () => setShowEditDialog(false) }
-    );
-  };
-
   const handleOpenRole = () => {
     setNewRole(admin.admin.is_super_admin ? 'Platform Admin' : 'Super Admin');
     setShowRoleDialog(true);
@@ -140,22 +132,6 @@ export default function AdminDetailPage() {
       { id: admin.id, data: { role: newRole } },
       { onSuccess: () => setShowRoleDialog(false) }
     );
-  };
-
-  const handleOpenSuspend = () => {
-    setSuspendForm({ reason: '', duration_days: undefined });
-    setShowSuspendDialog(true);
-  };
-
-  const handleSuspend = () => {
-    suspendAdmin(
-      { id: admin.id, data: suspendForm },
-      { onSuccess: () => setShowSuspendDialog(false) }
-    );
-  };
-
-  const handleActivate = () => {
-    activateAdmin(admin.id);
   };
 
   return (
@@ -174,47 +150,97 @@ export default function AdminDetailPage() {
         <div className="flex justify-between items-start mt-4 mb-8">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-gray-900">{admin.full_name}</h1>
-              <Badge className={admin.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {admin.full_name}
+                {isCurrentUser && (
+                  <span className="ml-2 text-lg text-gray-400">(You)</span>
+                )}
+              </h1>
+              <Badge
+                className={
+                  admin.status === 'active'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }
+              >
                 {admin.status}
               </Badge>
-              {admin.admin.is_super_admin ? (
-                <Badge className="bg-purple-100 text-purple-800">Super Admin</Badge>
-              ) : (
-                <Badge className="bg-indigo-100 text-indigo-800">Platform Admin</Badge>
-              )}
+              <Badge
+                className={
+                  admin.admin.is_super_admin
+                    ? 'bg-purple-100 text-purple-800'
+                    : 'bg-indigo-100 text-indigo-800'
+                }
+              >
+                {admin.admin.is_super_admin ? 'Super Admin' : 'Platform Admin'}
+              </Badge>
             </div>
             <p className="text-gray-600 mt-1">Administrator profile and access management</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleOpenEdit}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Profile
-            </Button>
-            <Button variant="outline" onClick={handleOpenRole}>
-              <Shield className="mr-2 h-4 w-4" />
-              Change Role
-            </Button>
-            {admin.status === 'active' ? (
+          <Can permission={PERMISSIONS.ADMIN_MANAGE_ADMINS}>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowEditDialog(true)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Profile
+              </Button>
+              {canChangeRole && (
+                <Button variant="outline" onClick={handleOpenRole}>
+                  <Shield className="mr-2 h-4 w-4" />
+                  Change Role
+                </Button>
+              )}
               <Button
                 variant="outline"
-                className="text-red-600 hover:text-red-700"
-                onClick={handleOpenSuspend}
+                className={
+                  canDemoteAdmin
+                    ? 'text-orange-600 hover:text-orange-700'
+                    : 'text-gray-300'
+                }
+                onClick={() => setShowDemoteDialog(true)}
+                disabled={!canDemoteAdmin}
+                title={
+                  isCurrentUser
+                    ? 'You cannot demote your own account'
+                    : isSuperAdmin
+                      ? 'Cannot demote a Super Admin. Change their role to Platform Admin first.'
+                      : undefined
+                }
               >
-                Suspend
+                Demote
               </Button>
-            ) : (
-              <Button
-                variant="outline"
-                className="text-green-600 hover:text-green-700"
-                onClick={handleActivate}
-                disabled={isActivating}
-              >
-                {isActivating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Activate
-              </Button>
-            )}
-          </div>
+              {admin.status === 'active' ? (
+                <Button
+                  variant="outline"
+                  className={
+                    canSuspendAdmin
+                      ? 'text-red-600 hover:text-red-700'
+                      : 'text-gray-300'
+                  }
+                  onClick={() => setShowSuspendDialog(true)}
+                  disabled={!canSuspendAdmin}
+                  title={
+                    isCurrentUser
+                      ? 'You cannot suspend your own account'
+                      : isSuperAdmin
+                        ? 'Cannot suspend a Super Admin. Demote them first.'
+                        : undefined
+                  }
+                >
+                  Suspend
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="text-green-600 hover:text-green-700"
+                  onClick={() => activateAdmin(admin.id)}
+                  disabled={isActivating}
+                >
+                  {isActivating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Activate
+                </Button>
+              )}
+            </div>
+          </Can>
         </div>
 
         {/* Stats cards */}
@@ -227,9 +253,7 @@ export default function AdminDetailPage() {
                   {admin.admin.is_super_admin ? 'Super Admin' : 'Platform Admin'}
                 </p>
               </div>
-              <div className="rounded-full p-3 bg-purple-50">
-                <ShieldCheck className="h-6 w-6 text-purple-600" />
-              </div>
+              <IconBadge icon={ShieldCheck} color="purple" />
             </div>
           </Card>
 
@@ -241,9 +265,7 @@ export default function AdminDetailPage() {
                   {admin.admin.platform_permissions.length}
                 </p>
               </div>
-              <div className="rounded-full p-3 bg-blue-50">
-                <Lock className="h-6 w-6 text-blue-600" />
-              </div>
+              <IconBadge icon={Lock} color="blue" />
             </div>
           </Card>
 
@@ -255,9 +277,7 @@ export default function AdminDetailPage() {
                   {admin.two_factor_enabled ? 'Enabled' : 'Disabled'}
                 </p>
               </div>
-              <div className="rounded-full p-3 bg-green-50">
-                <Shield className="h-6 w-6 text-green-600" />
-              </div>
+              <IconBadge icon={Shield} color="green" />
             </div>
           </Card>
 
@@ -269,9 +289,7 @@ export default function AdminDetailPage() {
                   {admin.last_login_at ? formatDate(admin.last_login_at) : 'Never'}
                 </p>
               </div>
-              <div className="rounded-full p-3 bg-orange-50">
-                <Clock className="h-6 w-6 text-orange-600" />
-              </div>
+              <IconBadge icon={Clock} color="orange" />
             </div>
           </Card>
         </div>
@@ -366,64 +384,32 @@ export default function AdminDetailPage() {
           </div>
         </Card>
 
-        {/* Edit Profile Dialog */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Administrator</DialogTitle>
-              <DialogDescription>Update {admin.full_name}&apos;s profile information.</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-first-name">First Name</Label>
-                  <Input
-                    id="edit-first-name"
-                    value={editForm.first_name || ''}
-                    onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-last-name">Last Name</Label>
-                  <Input
-                    id="edit-last-name"
-                    value={editForm.last_name || ''}
-                    onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="edit-email">Email</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={editForm.email || ''}
-                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-phone">Phone</Label>
-                <Input
-                  id="edit-phone"
-                  type="tel"
-                  value={editForm.phone || ''}
-                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleUpdate} disabled={isUpdating}>
-                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Extracted Dialogs */}
+        {showEditDialog && (
+          <EditAdminDialog
+            open={showEditDialog}
+            onOpenChange={setShowEditDialog}
+            admin={admin}
+          />
+        )}
 
-        {/* Change Role Dialog */}
+        {showSuspendDialog && (
+          <SuspendAdminDialog
+            open={showSuspendDialog}
+            onOpenChange={setShowSuspendDialog}
+            admin={admin}
+          />
+        )}
+
+        {showDemoteDialog && (
+          <DemoteAdminDialog
+            open={showDemoteDialog}
+            onOpenChange={setShowDemoteDialog}
+            admin={admin}
+          />
+        )}
+
+        {/* Change Role Dialog — kept inline (simple confirmation) */}
         <AlertDialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -435,11 +421,13 @@ export default function AdminDetailPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="py-4">
-              <Label htmlFor="new-role">New Role</Label>
+              <label htmlFor="new-role" className="block text-sm font-medium text-gray-700 mb-1">
+                New Role
+              </label>
               <select
                 id="new-role"
                 aria-label="Select new role"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mt-1"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as AdminRole)}
               >
@@ -452,57 +440,6 @@ export default function AdminDetailPage() {
               <AlertDialogAction onClick={handleRoleChange} disabled={isUpdating}>
                 {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Confirm Role Change
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Suspend Dialog */}
-        <AlertDialog open={showSuspendDialog} onOpenChange={setShowSuspendDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Suspend Administrator</AlertDialogTitle>
-              <AlertDialogDescription>
-                Suspend {admin.full_name}&apos;s access. They will not be able to log in until reactivated.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="detail-suspend-reason">Reason (required)</Label>
-                <Input
-                  id="detail-suspend-reason"
-                  placeholder="Reason for suspension"
-                  value={suspendForm.reason}
-                  onChange={(e) => setSuspendForm({ ...suspendForm, reason: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="detail-suspend-duration">Duration (days, optional)</Label>
-                <Input
-                  id="detail-suspend-duration"
-                  type="number"
-                  min={1}
-                  max={365}
-                  placeholder="Leave empty for indefinite"
-                  value={suspendForm.duration_days ?? ''}
-                  onChange={(e) =>
-                    setSuspendForm({
-                      ...suspendForm,
-                      duration_days: e.target.value ? parseInt(e.target.value) : undefined,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleSuspend}
-                disabled={isSuspending || !suspendForm.reason.trim()}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                {isSuspending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Suspend
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

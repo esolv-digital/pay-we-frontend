@@ -26,6 +26,8 @@ import {
   useFlagPayoutAccount,
 } from '@/lib/hooks/use-admin-payout-accounts';
 import type { AdminPayoutAccountFilters, PayoutAccountType, PayoutAccountStatus } from '@/lib/api/admin-payout-accounts';
+import { Landmark, CheckCircle, Clock, Flag, AlertTriangle } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 const STATUS_COLORS: Record<PayoutAccountStatus, string> = {
   active: 'bg-green-100 text-green-800',
@@ -65,10 +67,10 @@ export default function AdminPayoutAccountsPage() {
 
   const statistics = statsData;
   const stats = [
-    { label: 'Total Accounts', value: statistics?.total ?? 0, subtext: 'All payout accounts', icon: '🏦', color: 'bg-blue-50' },
-    { label: 'Verified', value: statistics?.verified ?? 0, subtext: 'Confirmed accounts', icon: '✓', color: 'bg-green-50' },
-    { label: 'Unverified', value: statistics?.unverified ?? 0, subtext: 'Pending verification', icon: '⏳', color: 'bg-yellow-50' },
-    { label: 'Flagged', value: statistics?.flagged ?? 0, subtext: 'Requires review', icon: '🚩', color: 'bg-red-50' },
+    { label: 'Total Accounts', value: statistics?.total ?? 0, subtext: 'All payout accounts', icon: Landmark, color: 'blue' },
+    { label: 'Verified', value: statistics?.verified ?? 0, subtext: 'Confirmed accounts', icon: CheckCircle, color: 'green' },
+    { label: 'Unverified', value: statistics?.unverified ?? 0, subtext: 'Pending verification', icon: Clock, color: 'yellow' },
+    { label: 'Flagged', value: statistics?.flagged ?? 0, subtext: 'Requires review', icon: Flag, color: 'red' },
   ];
 
   return (
@@ -83,14 +85,14 @@ export default function AdminPayoutAccountsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => (
-            <Card key={stat.label} className={`p-6 ${stat.color}`}>
+            <Card key={stat.label} className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
                   <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                   <p className="text-xs text-gray-500 mt-1">{stat.subtext}</p>
                 </div>
-                <span className="text-4xl">{stat.icon}</span>
+                <IconBadge icon={stat.icon} color={stat.color} />
               </div>
             </Card>
           ))}
@@ -128,7 +130,7 @@ export default function AdminPayoutAccountsPage() {
 
         {isError ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">⚠️</span>
+            <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
             <h2 className="text-2xl font-semibold mb-2 text-red-600">Error Loading Payout Accounts</h2>
             <p className="text-gray-600 mb-4">{error instanceof Error ? error.message : 'Failed to load payout accounts.'}</p>
             <Button onClick={() => window.location.reload()} variant="outline">Retry</Button>
@@ -139,7 +141,7 @@ export default function AdminPayoutAccountsPage() {
           </Card>
         ) : !data?.data || data.data.length === 0 ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">🏦</span>
+            <IconBadge icon={Landmark} variant="empty-state" color="blue" />
             <h2 className="text-2xl font-semibold mb-2">No Payout Accounts Found</h2>
             <p className="text-gray-600">{Object.keys(filters).length > 4 ? 'Try adjusting your filters' : 'No payout accounts registered yet'}</p>
           </Card>

@@ -2,20 +2,29 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { LucideIcon } from 'lucide-react';
+import {
+  LayoutDashboard, FileText, CreditCard, Wallet, TrendingUp, Lock, Settings,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { VENDOR_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useKYCStatus } from '@/lib/hooks/use-kyc-status';
 import { ContextSwitcher } from '@/components/context-switcher';
 
-const baseNavigation = [
-  { name: 'Dashboard', href: VENDOR_ROUTES.DASHBOARD, icon: '📊' },
-  { name: 'Payment Pages', href: VENDOR_ROUTES.PAYMENT_PAGES, icon: '📄' },
-  { name: 'Transactions', href: VENDOR_ROUTES.TRANSACTIONS, icon: '💳' },
-  { name: 'Disbursements', href: VENDOR_ROUTES.DISBURSEMENTS, icon: '💰' },
-  { name: 'Reports', href: VENDOR_ROUTES.REPORTS, icon: '📈' },
-  { name: 'KYC Verification', href: VENDOR_ROUTES.KYC, icon: '🔐', hideWhenApproved: true },
-  { name: 'Settings', href: VENDOR_ROUTES.SETTINGS, icon: '⚙️' },
+const baseNavigation: Array<{
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  hideWhenApproved?: boolean;
+}> = [
+  { name: 'Dashboard', href: VENDOR_ROUTES.DASHBOARD, icon: LayoutDashboard },
+  { name: 'Payment Pages', href: VENDOR_ROUTES.PAYMENT_PAGES, icon: FileText },
+  { name: 'Transactions', href: VENDOR_ROUTES.TRANSACTIONS, icon: CreditCard },
+  { name: 'Disbursements', href: VENDOR_ROUTES.DISBURSEMENTS, icon: Wallet },
+  { name: 'Reports', href: VENDOR_ROUTES.REPORTS, icon: TrendingUp },
+  { name: 'KYC Verification', href: VENDOR_ROUTES.KYC, icon: Lock, hideWhenApproved: true },
+  { name: 'Settings', href: VENDOR_ROUTES.SETTINGS, icon: Settings },
 ];
 
 export function VendorSidebar() {
@@ -52,7 +61,7 @@ export function VendorSidebar() {
                   : 'text-gray-300 hover:bg-gray-800 hover:text-white'
               )}
             >
-              <span>{item.icon}</span>
+              <item.icon className="h-5 w-5 shrink-0" />
               {item.name}
             </Link>
           );

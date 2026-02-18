@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge';
 import { ADMIN_ROUTES } from '@/lib/config/routes';
 import { formatDate } from '@/lib/utils/format';
 import { useAdminPayoutAccount, useVerifyPayoutAccount, useFlagPayoutAccount } from '@/lib/hooks/use-admin-payout-accounts';
+import { AlertTriangle } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 export default function PayoutAccountDetailPage() {
   const params = useParams();
@@ -38,7 +40,7 @@ export default function PayoutAccountDetailPage() {
 
   if (error || !account) {
     return (
-      <div className="p-8"><Card className="p-12 text-center"><span className="text-6xl mb-4 block">⚠️</span><h2 className="text-2xl font-semibold mb-2">Payout Account Not Found</h2><p className="text-gray-600 mb-4">The requested payout account could not be found.</p><Link href={ADMIN_ROUTES.PAYOUT_ACCOUNTS}><Button>Back to Payout Accounts</Button></Link></Card></div>
+      <div className="p-8"><Card className="p-12 text-center"><IconBadge icon={AlertTriangle} variant="empty-state" color="red" /><h2 className="text-2xl font-semibold mb-2">Payout Account Not Found</h2><p className="text-gray-600 mb-4">The requested payout account could not be found.</p><Link href={ADMIN_ROUTES.PAYOUT_ACCOUNTS}><Button>Back to Payout Accounts</Button></Link></Card></div>
     );
   }
 

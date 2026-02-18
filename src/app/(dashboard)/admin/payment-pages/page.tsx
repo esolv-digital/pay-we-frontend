@@ -26,6 +26,9 @@ import {
   useActivatePaymentPage,
 } from '@/lib/hooks/use-admin-payment-pages';
 import type { AdminPaymentPageFilters, AdminPaymentPageStatus } from '@/lib/api/admin-payment-pages';
+import { FileText, CheckCircle, DollarSign, AlertTriangle } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 const STATUS_COLORS: Record<AdminPaymentPageStatus, string> = {
   active: 'bg-green-100 text-green-800',
@@ -65,10 +68,10 @@ export default function AdminPaymentPagesPage() {
 
   const statistics = statsData;
   const stats = [
-    { label: 'Total Pages', value: statistics?.total ?? 0, subtext: 'All payment pages', icon: '📄', color: 'bg-blue-50' },
-    { label: 'Active', value: statistics?.active ?? 0, subtext: 'Currently live', icon: '✓', color: 'bg-green-50' },
-    { label: 'Total Revenue', value: statistics?.total_revenue ? formatCurrency(statistics.total_revenue) : '$0', subtext: 'All time', icon: '💰', color: 'bg-purple-50' },
-    { label: 'Suspended', value: statistics?.suspended ?? 0, subtext: 'Requires review', icon: '⚠️', color: 'bg-red-50' },
+    { label: 'Total Pages', value: statistics?.total ?? 0, subtext: 'All payment pages', icon: FileText, color: 'blue' },
+    { label: 'Active', value: statistics?.active ?? 0, subtext: 'Currently live', icon: CheckCircle, color: 'green' },
+    { label: 'Total Revenue', value: statistics?.total_revenue ? formatCurrency(statistics.total_revenue) : '$0', subtext: 'All time', icon: DollarSign, color: 'purple' },
+    { label: 'Suspended', value: statistics?.suspended ?? 0, subtext: 'Requires review', icon: AlertTriangle, color: 'red' },
   ];
 
   return (
@@ -83,14 +86,14 @@ export default function AdminPaymentPagesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => (
-            <Card key={stat.label} className={`p-6 ${stat.color}`}>
+            <Card key={stat.label} className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
                   <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                   <p className="text-xs text-gray-500 mt-1">{stat.subtext}</p>
                 </div>
-                <span className="text-4xl">{stat.icon}</span>
+                <IconBadge icon={stat.icon} color={stat.color} />
               </div>
             </Card>
           ))}
@@ -129,7 +132,7 @@ export default function AdminPaymentPagesPage() {
 
         {isError ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">⚠️</span>
+            <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
             <h2 className="text-2xl font-semibold mb-2 text-red-600">Error Loading Payment Pages</h2>
             <p className="text-gray-600 mb-4">{error instanceof Error ? error.message : 'Failed to load payment pages.'}</p>
             <Button onClick={() => window.location.reload()} variant="outline">Retry</Button>
@@ -140,7 +143,7 @@ export default function AdminPaymentPagesPage() {
           </Card>
         ) : !data?.data || data.data.length === 0 ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">📄</span>
+            <IconBadge icon={FileText} variant="empty-state" color="blue" />
             <h2 className="text-2xl font-semibold mb-2">No Payment Pages Found</h2>
             <p className="text-gray-600">{Object.keys(filters).length > 4 ? 'Try adjusting your filters' : 'No payment pages created yet'}</p>
           </Card>

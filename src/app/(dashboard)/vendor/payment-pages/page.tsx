@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { usePaymentPages, useDeletePaymentPage } from '@/lib/hooks/use-payment-pages';
 import { formatDate } from '@/lib/utils/format';
 import Link from 'next/link';
-import { ExternalLink, Trash2, QrCode } from 'lucide-react';
+import { ExternalLink, Trash2, QrCode, FileText } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 import { DeleteConfirmationDialog } from '@/components/shared/delete-confirmation-dialog';
 import { ShareButton } from '@/components/shared/share-button';
 import { QRCodeModal } from '@/components/shared/qr-code-modal';
@@ -80,7 +81,7 @@ export default function PaymentPagesPage() {
 
       {!pages || pages.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
-          <span className="text-6xl mb-4 block">📄</span>
+          <IconBadge icon={FileText} variant="empty-state" color="blue" />
           <h2 className="text-2xl font-semibold mb-2">No payment pages yet</h2>
           <p className="text-gray-600 mb-6">
             Create your first payment page to start accepting payments

@@ -27,6 +27,9 @@ import {
   useRejectDisbursement,
 } from '@/lib/hooks/use-admin-disbursements';
 import type { AdminDisbursementFilters, AdminDisbursementStatus } from '@/lib/api/admin-disbursements';
+import { Banknote, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 const STATUS_COLORS: Record<AdminDisbursementStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -79,10 +82,10 @@ export default function AdminDisbursementsPage() {
 
   const statistics = statsData;
   const stats = [
-    { label: 'Total Disbursed', value: statistics?.total_disbursed ? formatCurrency(statistics.total_disbursed) : '$0', subtext: 'All time', icon: '💸', color: 'bg-green-50' },
-    { label: 'Pending', value: statistics?.pending_count ?? 0, subtext: statistics?.pending_amount ? formatCurrency(statistics.pending_amount) : '$0', icon: '⏳', color: 'bg-yellow-50' },
-    { label: 'Completed', value: statistics?.completed_count ?? 0, subtext: statistics?.completed_amount ? formatCurrency(statistics.completed_amount) : '$0', icon: '✓', color: 'bg-blue-50' },
-    { label: 'Failed', value: statistics?.failed_count ?? 0, subtext: statistics?.failed_amount ? formatCurrency(statistics.failed_amount) : '$0', icon: '✗', color: 'bg-red-50' },
+    { label: 'Total Disbursed', value: statistics?.total_disbursed ? formatCurrency(statistics.total_disbursed) : '$0', subtext: 'All time', icon: Banknote, color: 'green' },
+    { label: 'Pending', value: statistics?.pending_count ?? 0, subtext: statistics?.pending_amount ? formatCurrency(statistics.pending_amount) : '$0', icon: Clock, color: 'yellow' },
+    { label: 'Completed', value: statistics?.completed_count ?? 0, subtext: statistics?.completed_amount ? formatCurrency(statistics.completed_amount) : '$0', icon: CheckCircle, color: 'blue' },
+    { label: 'Failed', value: statistics?.failed_count ?? 0, subtext: statistics?.failed_amount ? formatCurrency(statistics.failed_amount) : '$0', icon: XCircle, color: 'red' },
   ];
 
   return (
@@ -97,14 +100,14 @@ export default function AdminDisbursementsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => (
-            <Card key={stat.label} className={`p-6 ${stat.color}`}>
+            <Card key={stat.label} className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
                   <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                   <p className="text-xs text-gray-500 mt-1">{stat.subtext}</p>
                 </div>
-                <span className="text-4xl">{stat.icon}</span>
+                <IconBadge icon={stat.icon} color={stat.color} />
               </div>
             </Card>
           ))}
@@ -165,7 +168,7 @@ export default function AdminDisbursementsPage() {
 
         {isError ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">⚠️</span>
+            <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
             <h2 className="text-2xl font-semibold mb-2 text-red-600">Error Loading Disbursements</h2>
             <p className="text-gray-600 mb-4">{error instanceof Error ? error.message : 'Failed to load disbursements.'}</p>
             <Button onClick={() => window.location.reload()} variant="outline">Retry</Button>
@@ -176,7 +179,7 @@ export default function AdminDisbursementsPage() {
           </Card>
         ) : !data?.data || data.data.length === 0 ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">💸</span>
+            <IconBadge icon={Banknote} variant="empty-state" color="blue" />
             <h2 className="text-2xl font-semibold mb-2">No Disbursements Found</h2>
             <p className="text-gray-600">{Object.keys(filters).length > 4 ? 'Try adjusting your filters' : 'No disbursements processed yet'}</p>
           </Card>

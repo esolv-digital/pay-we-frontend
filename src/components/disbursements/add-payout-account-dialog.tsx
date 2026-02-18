@@ -9,6 +9,7 @@ import { useProviders } from '@/lib/hooks/use-providers';
 import { useCountry } from '@/lib/hooks/use-countries';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { cn } from '@/lib/utils';
+import { X, CheckCircle } from 'lucide-react';
 import type { PayoutAccountType, Provider } from '@/types';
 
 const accountSchema = z.object({
@@ -183,7 +184,7 @@ export function AddPayoutAccountDialog({ onClose }: AddPayoutAccountDialogProps)
             aria-label="Close dialog"
             className="text-gray-400 hover:text-gray-600"
           >
-            ✕
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -338,7 +339,7 @@ export function AddPayoutAccountDialog({ onClose }: AddPayoutAccountDialogProps)
             <div className="space-y-4">
               <div className="bg-green-50 p-4 rounded-lg">
                 <div className="flex items-center gap-2 text-green-700 mb-2">
-                  <span className="text-xl">✓</span>
+                  <CheckCircle className="h-5 w-5" />
                   <span className="font-medium">
                     {accountType === 'bank' ? 'Account Verified' : 'Ready to Add'}
                   </span>

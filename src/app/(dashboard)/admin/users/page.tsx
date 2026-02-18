@@ -28,6 +28,10 @@ import {
   useResetUserPassword,
 } from '@/lib/hooks/use-admin-users';
 import type { UserFilters as ApiUserFilters, UserStatus } from '@/lib/api/admin-users';
+import type { User } from '@/lib/api/admin-users';
+import { Users, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
+import { PromoteUserDialog } from '@/components/admin/admin-management';
 
 // User status colors
 const STATUS_COLORS: Record<UserStatus, string> = {
@@ -54,6 +58,7 @@ export default function AdminUsersPage() {
   });
 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [promoteTarget, setPromoteTarget] = useState<User | null>(null);
 
   // Fetch users list
   const { data, isLoading, isError, error } = useAdminUsersList(filters);
@@ -102,8 +107,8 @@ export default function AdminUsersPage() {
       label: 'Total Users',
       value: statistics?.total_users?.toLocaleString() || '0',
       subtext: 'All platform users',
-      icon: '👥',
-      color: 'bg-blue-50'
+      icon: Users,
+      color: 'blue'
     },
     {
       label: 'Active Users',
@@ -111,22 +116,22 @@ export default function AdminUsersPage() {
       subtext: statistics?.total_users
         ? `${((statistics.active_users / statistics.total_users) * 100).toFixed(1)}% of total`
         : '0% of total',
-      icon: '✓',
-      color: 'bg-green-50'
+      icon: CheckCircle,
+      color: 'green'
     },
     {
       label: 'Suspended',
       value: statistics?.suspended_users?.toLocaleString() || '0',
       subtext: 'Requires attention',
-      icon: '⚠️',
-      color: 'bg-red-50'
+      icon: AlertTriangle,
+      color: 'red'
     },
     {
       label: 'Pending',
       value: statistics?.pending_users?.toLocaleString() || '0',
       subtext: 'Awaiting verification',
-      icon: '⏳',
-      color: 'bg-yellow-50'
+      icon: Clock,
+      color: 'yellow'
     },
   ];
 
@@ -156,14 +161,14 @@ export default function AdminUsersPage() {
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => (
-            <Card key={stat.label} className={`p-6 ${stat.color}`}>
+            <Card key={stat.label} className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
                   <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                   <p className="text-xs text-gray-500 mt-1">{stat.subtext}</p>
                 </div>
-                <span className="text-4xl">{stat.icon}</span>
+                <IconBadge icon={stat.icon} color={stat.color} />
               </div>
             </Card>
           ))}
@@ -286,7 +291,7 @@ export default function AdminUsersPage() {
         {/* Users List */}
         {isError ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">⚠️</span>
+            <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
             <h2 className="text-2xl font-semibold mb-2 text-red-600">
               Error Loading Users
             </h2>
@@ -313,7 +318,7 @@ export default function AdminUsersPage() {
           </Card>
         ) : !data?.data || data.data.length === 0 ? (
           <Card className="p-12 text-center">
-            <span className="text-6xl mb-4 block">👥</span>
+            <IconBadge icon={Users} variant="empty-state" color="blue" />
             <h2 className="text-2xl font-semibold mb-2">No Users Found</h2>
             <p className="text-gray-600">
               {Object.keys(filters).length > 4
@@ -377,7 +382,7 @@ export default function AdminUsersPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{user.email}</div>
                           {user.email_verified_at ? (
-                            <div className="text-xs text-green-600">✓ Verified</div>
+                            <div className="text-xs text-green-600 flex items-center gap-1"><CheckCircle className="h-3 w-3" /> Verified</div>
                           ) : (
                             <div className="text-xs text-gray-500">Not verified</div>
                           )}
@@ -409,6 +414,7 @@ export default function AdminUsersPage() {
                             <Can permission={PERMISSIONS.MANAGE_MEMBERS}>
                               {user.status === 'active' && (
                                 <button
+                                  type="button"
                                   onClick={() => handleSuspendUser(user.id)}
                                   className="text-red-600 hover:text-red-900"
                                 >
@@ -417,6 +423,7 @@ export default function AdminUsersPage() {
                               )}
                               {user.status === 'suspended' && (
                                 <button
+                                  type="button"
                                   onClick={() => activateUser(user.id)}
                                   className="text-green-600 hover:text-green-900"
                                 >
@@ -424,11 +431,21 @@ export default function AdminUsersPage() {
                                 </button>
                               )}
                               <button
+                                type="button"
                                 onClick={() => resetPassword(user.id)}
                                 className="text-gray-600 hover:text-gray-900"
                               >
                                 Reset PW
                               </button>
+                              {!user.has_admin_access && (
+                                <button
+                                  type="button"
+                                  onClick={() => setPromoteTarget(user)}
+                                  className="text-purple-600 hover:text-purple-900"
+                                >
+                                  Promote
+                                </button>
+                              )}
                             </Can>
                           </div>
                         </td>
@@ -467,6 +484,13 @@ export default function AdminUsersPage() {
               </div>
             )}
           </>
+        )}
+        {promoteTarget && (
+          <PromoteUserDialog
+            open={!!promoteTarget}
+            onOpenChange={(open) => { if (!open) setPromoteTarget(null); }}
+            user={promoteTarget}
+          />
         )}
       </div>
     </PermissionGuard>

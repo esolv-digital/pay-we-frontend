@@ -7,7 +7,7 @@
  */
 
 import { useState } from 'react';
-import { Upload, X, FileText, CheckCircle } from 'lucide-react';
+import { Upload, X, FileText, CheckCircle, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
@@ -200,7 +200,7 @@ export function KYCUploadForm({ onSubmit, onSkip, isLoading }: KYCUploadFormProp
           </div>
           <div>
             <p className="text-sm text-blue-800">
-              💡 You can skip this step and upload your KYC documents later in{' '}
+              <Lightbulb className="inline h-4 w-4 mr-1" /> You can skip this step and upload your KYC documents later in{' '}
               <strong>Settings → KYC</strong>
             </p>
           </div>

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Middleware for authentication and route protection.
+ * Proxy for authentication and route protection.
  *
  * This implements the BFF pattern as per Agent.md:
  * - Token-based authentication using HTTP-only cookies
@@ -16,17 +16,17 @@ import type { NextRequest } from 'next/server';
  * 3. Redirect to login if token missing
  * 4. Organization verification happens in DashboardLayout via useOrganizationCheck
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip middleware for certain paths
-  const shouldSkipMiddleware =
+  // Skip proxy for certain paths
+  const shouldSkip =
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.includes('.') || // Skip files with extensions (images, fonts, etc.)
     pathname === '/favicon.ico';
 
-  if (shouldSkipMiddleware) {
+  if (shouldSkip) {
     return NextResponse.next();
   }
 
@@ -56,13 +56,13 @@ export async function middleware(request: NextRequest) {
   if (token && userContext && isDashboardRoute) {
     if (userContext === 'admin' && isVendorRoute) {
       // Admin context trying to access vendor route - redirect to admin dashboard
-      console.log(`[Middleware] Admin context user trying to access vendor route: ${pathname}, redirecting to admin dashboard`);
+      console.log(`[Proxy] Admin context user trying to access vendor route: ${pathname}, redirecting to admin dashboard`);
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
 
     if (userContext === 'vendor' && isAdminRoute) {
       // Vendor context trying to access admin route - redirect to vendor dashboard
-      console.log(`[Middleware] Vendor context user trying to access admin route: ${pathname}, redirecting to vendor dashboard`);
+      console.log(`[Proxy] Vendor context user trying to access admin route: ${pathname}, redirecting to vendor dashboard`);
       return NextResponse.redirect(new URL('/vendor/dashboard', request.url));
     }
   }

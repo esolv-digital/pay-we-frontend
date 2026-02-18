@@ -6,6 +6,9 @@ import { formatCurrency } from '@/lib/utils/format';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { VENDOR_ROUTES } from '@/lib/config/routes';
+import { Wallet, DollarSign, CreditCard, Clock, PlusCircle, BarChart3, Banknote } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 export default function VendorDashboardPage() {
   const { user } = useAuth();
@@ -38,22 +41,26 @@ export default function VendorDashboardPage() {
     {
       label: 'Available Balance',
       value: formatCurrency(stats?.balance || 0, 'USD'),
-      icon: '💵',
+      icon: Wallet,
+      color: 'green',
     },
     {
       label: 'Total Revenue',
       value: formatCurrency(stats?.total_revenue || 0, 'USD'),
-      icon: '💰',
+      icon: DollarSign,
+      color: 'emerald',
     },
     {
       label: 'Total Transactions',
       value: stats?.total_transactions?.toLocaleString() || '0',
-      icon: '💳',
+      icon: CreditCard,
+      color: 'blue',
     },
     {
       label: 'Pending Disbursements',
       value: stats?.pending_disbursements || 0,
-      icon: '⏳',
+      icon: Clock,
+      color: 'yellow',
     },
   ];
 
@@ -69,7 +76,7 @@ export default function VendorDashboardPage() {
                 <p className="text-sm text-gray-600 mb-1">{metric.label}</p>
                 <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
               </div>
-              <span className="text-3xl">{metric.icon}</span>
+              <IconBadge icon={metric.icon} color={metric.color} />
             </div>
           </div>
         ))}
@@ -82,21 +89,21 @@ export default function VendorDashboardPage() {
             href={VENDOR_ROUTES.PAYMENT_PAGE_CREATE}
             className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-center"
           >
-            <span className="text-3xl block mb-2">➕</span>
+            <PlusCircle className="h-8 w-8 text-blue-500 mx-auto mb-2" />
             <span className="font-medium">Create Payment Page</span>
           </Link>
           <Link
             href={VENDOR_ROUTES.TRANSACTIONS}
             className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-center"
           >
-            <span className="text-3xl block mb-2">📊</span>
+            <BarChart3 className="h-8 w-8 text-purple-500 mx-auto mb-2" />
             <span className="font-medium">View Transactions</span>
           </Link>
           <Link
             href={VENDOR_ROUTES.DISBURSEMENTS}
             className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors text-center"
           >
-            <span className="text-3xl block mb-2">💸</span>
+            <Banknote className="h-8 w-8 text-green-500 mx-auto mb-2" />
             <span className="font-medium">Request Payout</span>
           </Link>
         </div>

@@ -97,7 +97,7 @@ export function RecoveryCodesDisplay({
             <h1>PayWe Two-Factor Authentication Recovery Codes</h1>
             <p>Generated: ${new Date().toLocaleString()}</p>
             <div class="warning">
-              <strong>⚠️ Important:</strong> Store these codes in a safe place. Each code can only be used once.
+              <strong>Important:</strong> Store these codes in a safe place. Each code can only be used once.
             </div>
             <div class="codes">
               ${codes.map(code => `<span class="code">${code}</span>`).join('')}

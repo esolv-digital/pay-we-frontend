@@ -20,7 +20,7 @@ import {
   useActivateOrganization,
 } from '@/lib/hooks/use-admin-organizations';
 import type { OrganizationFilters as ApiOrganizationFilters } from '@/lib/api/admin-organizations';
-import { Building2, Users, TrendingUp, AlertCircle } from 'lucide-react';
+import { Building2, Users, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function AdminOrganizationsPage() {
   const router = useRouter();
@@ -152,7 +152,7 @@ export default function AdminOrganizationsPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_VIEW_ORGANIZATIONS}>
-      <div className="space-y-6">
+      <div className="p-8 space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -495,8 +495,8 @@ export default function AdminOrganizationsPage() {
                               {org.status}
                             </span>
                             {org.verified_at && (
-                              <div className="mt-1 text-xs text-green-600">
-                                ✓ Verified
+                              <div className="mt-1 flex items-center gap-1 text-xs text-green-600">
+                                <CheckCircle className="h-3 w-3" /> Verified
                               </div>
                             )}
                           </td>

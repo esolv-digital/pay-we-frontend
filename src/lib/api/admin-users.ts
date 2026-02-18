@@ -41,6 +41,10 @@ export interface User {
   organization_id?: string;
   organization_name?: string;
 
+  // Access flags (used for promote/demote logic)
+  has_admin_access?: boolean;
+  has_vendor_access?: boolean;
+
   // Metadata
   email_verified_at?: string;
   last_login_at?: string;

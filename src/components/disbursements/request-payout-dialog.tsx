@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { usePayoutAccounts, useRequestPayout } from '@/lib/hooks/use-payouts';
 import { formatCurrency } from '@/lib/utils/format';
 import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 interface RequestPayoutDialogProps {
   availableBalance: number;
@@ -131,7 +132,7 @@ export function RequestPayoutDialog({ availableBalance, currency, minimumPayoutA
             aria-label="Close dialog"
             className="text-gray-400 hover:text-gray-600"
           >
-            ✕
+            <X className="h-5 w-5" />
           </button>
         </div>
 

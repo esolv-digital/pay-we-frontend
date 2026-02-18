@@ -15,6 +15,8 @@ import { ADMIN_ROUTES } from '@/lib/config/routes';
 import { formatDate, formatCurrency } from '@/lib/utils/format';
 import { useAdminPaymentPage, useSuspendPaymentPage, useActivatePaymentPage } from '@/lib/hooks/use-admin-payment-pages';
 import type { AdminPaymentPageStatus } from '@/lib/api/admin-payment-pages';
+import { AlertTriangle } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 const STATUS_COLORS: Record<AdminPaymentPageStatus, string> = {
   active: 'bg-green-100 text-green-800',
@@ -43,7 +45,7 @@ export default function PaymentPageDetailPage() {
 
   if (error || !page) {
     return (
-      <div className="p-8"><Card className="p-12 text-center"><span className="text-6xl mb-4 block">⚠️</span><h2 className="text-2xl font-semibold mb-2">Payment Page Not Found</h2><p className="text-gray-600 mb-4">The requested payment page could not be found.</p><Link href={ADMIN_ROUTES.PAYMENT_PAGES}><Button>Back to Payment Pages</Button></Link></Card></div>
+      <div className="p-8"><Card className="p-12 text-center"><IconBadge icon={AlertTriangle} variant="empty-state" color="red" /><h2 className="text-2xl font-semibold mb-2">Payment Page Not Found</h2><p className="text-gray-600 mb-4">The requested payment page could not be found.</p><Link href={ADMIN_ROUTES.PAYMENT_PAGES}><Button>Back to Payment Pages</Button></Link></Card></div>
     );
   }
 

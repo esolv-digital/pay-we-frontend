@@ -2,6 +2,8 @@
  * Admin Management React Query Hooks
  *
  * Hooks for managing platform administrators.
+ * NOTE: No delete hook — admins cannot be deleted (ISO 27001).
+ *
  * @module lib/hooks/use-admin-management
  */
 
@@ -15,8 +17,10 @@ import {
   type CreateAdminRequest,
   type UpdateAdminRequest,
   type SuspendAdminRequest,
+  type PromoteUserRequest,
 } from '@/lib/api/admin-management';
 import type { PaginatedResponse } from '@/types/api';
+import { adminUsersKeys } from './use-admin-users';
 
 // ============================================================================
 // QUERY KEYS
@@ -27,7 +31,7 @@ export const adminManagementKeys = {
   lists: () => [...adminManagementKeys.all, 'list'] as const,
   list: (filters: AdminFilters) => [...adminManagementKeys.lists(), filters] as const,
   details: () => [...adminManagementKeys.all, 'detail'] as const,
-  detail: (id: number) => [...adminManagementKeys.details(), id] as const,
+  detail: (id: string) => [...adminManagementKeys.details(), id] as const,
   statistics: () => [...adminManagementKeys.all, 'statistics'] as const,
 };
 
@@ -44,7 +48,7 @@ export function useAdminList(filters: AdminFilters = {}) {
   });
 }
 
-export function useAdminDetail(id: number) {
+export function useAdminDetail(id: string) {
   return useQuery<AdminUser, Error>({
     queryKey: adminManagementKeys.detail(id),
     queryFn: () => adminManagementApi.get(id),
@@ -90,7 +94,7 @@ export function useCreateAdmin() {
 export function useUpdateAdmin() {
   const queryClient = useQueryClient();
 
-  return useMutation<AdminUser, Error, { id: number; data: UpdateAdminRequest }>({
+  return useMutation<AdminUser, Error, { id: string; data: UpdateAdminRequest }>({
     mutationFn: ({ id, data }) => adminManagementApi.update(id, data),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: adminManagementKeys.detail(variables.id) });
@@ -111,7 +115,7 @@ export function useUpdateAdmin() {
 export function useSuspendAdmin() {
   const queryClient = useQueryClient();
 
-  return useMutation<AdminUser, Error, { id: number; data: SuspendAdminRequest }>({
+  return useMutation<AdminUser, Error, { id: string; data: SuspendAdminRequest }>({
     mutationFn: ({ id, data }) => adminManagementApi.suspend(id, data),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: adminManagementKeys.detail(variables.id) });
@@ -132,7 +136,7 @@ export function useSuspendAdmin() {
 export function useActivateAdmin() {
   const queryClient = useQueryClient();
 
-  return useMutation<AdminUser, Error, number>({
+  return useMutation<AdminUser, Error, string>({
     mutationFn: (id) => adminManagementApi.activate(id),
     onSuccess: (data, id) => {
       queryClient.invalidateQueries({ queryKey: adminManagementKeys.detail(id) });
@@ -150,21 +154,43 @@ export function useActivateAdmin() {
   });
 }
 
-export function useRemoveAdmin() {
+export function usePromoteUser() {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, number>({
-    mutationFn: (id) => adminManagementApi.remove(id),
-    onSuccess: (_, id) => {
-      queryClient.removeQueries({ queryKey: adminManagementKeys.detail(id) });
+  return useMutation<AdminUser, Error, { id: string; data: PromoteUserRequest }>({
+    mutationFn: ({ id, data }) => adminManagementApi.promote(id, data),
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: adminManagementKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminManagementKeys.statistics() });
-      toast.success('Administrator removed', {
-        description: 'The administrator has been removed from the platform.',
+      queryClient.invalidateQueries({ queryKey: adminUsersKeys.lists() });
+      toast.success('User promoted to administrator', {
+        description: `${data.full_name} now has admin access.`,
       });
     },
     onError: (error) => {
-      toast.error('Failed to remove administrator', {
+      toast.error('Failed to promote user', {
+        description: error.message || 'An error occurred.',
+      });
+    },
+  });
+}
+
+export function useDemoteAdmin() {
+  const queryClient = useQueryClient();
+
+  return useMutation<AdminUser, Error, string>({
+    mutationFn: (id) => adminManagementApi.demote(id),
+    onSuccess: (data, id) => {
+      queryClient.invalidateQueries({ queryKey: adminManagementKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: adminManagementKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminManagementKeys.statistics() });
+      queryClient.invalidateQueries({ queryKey: adminUsersKeys.lists() });
+      toast.success('Administrator demoted', {
+        description: `${data.full_name} admin rights have been removed.`,
+      });
+    },
+    onError: (error) => {
+      toast.error('Failed to demote administrator', {
         description: error.message || 'An error occurred.',
       });
     },

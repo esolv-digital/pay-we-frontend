@@ -7,6 +7,8 @@ import { formatCurrency } from '@/lib/utils/format';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/use-auth';
+import { XCircle, ClipboardCopy, RotateCcw } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
   completed: { bg: 'bg-green-100', text: 'text-green-800' },
@@ -47,7 +49,7 @@ export default function TransactionDetailsPage({ params }: { params: Promise<{ i
     return (
       <div className="p-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <span className="text-4xl block mb-2">❌</span>
+          <IconBadge icon={XCircle} variant="empty-state" color="red" />
           <h2 className="text-xl font-semibold text-red-800 mb-2">Transaction Not Found</h2>
           <p className="text-red-600 mb-4">
             The transaction you're looking for doesn't exist or you don't have access to it.
@@ -204,7 +206,7 @@ export default function TransactionDetailsPage({ params }: { params: Promise<{ i
                 }}
                 className="w-full px-4 py-2 text-left text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
               >
-                📋 Copy Reference
+                <ClipboardCopy className="inline h-4 w-4 mr-1" /> Copy Reference
               </button>
               {transaction.status === 'completed' && (
                 <button
@@ -212,7 +214,7 @@ export default function TransactionDetailsPage({ params }: { params: Promise<{ i
                   className="w-full px-4 py-2 text-left text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
                   onClick={() => alert('Refund functionality coming soon')}
                 >
-                  ↩️ Initiate Refund
+                  <RotateCcw className="inline h-4 w-4 mr-1" /> Initiate Refund
                 </button>
               )}
             </div>

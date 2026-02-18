@@ -5,6 +5,10 @@
  * Separate from general user management — admins have elevated access.
  *
  * Backend: A12 - Admin Management endpoints
+ * Ref: docs/ADMIN_AND_USER_MANAGEMENT.md
+ *
+ * NOTE: Admins CANNOT be deleted — only suspended/activated (ISO 27001 audit trail).
+ *
  * @module lib/api/admin-management
  */
 
@@ -29,10 +33,11 @@ export interface AdminInfo {
 }
 
 /**
- * Administrator user returned by the backend
+ * Administrator user returned by the backend.
+ * `id` is a UUID string.
  */
 export interface AdminUser {
-  id: number;
+  id: string;
   first_name: string;
   last_name: string;
   full_name: string;
@@ -87,7 +92,7 @@ export interface CreateAdminRequest {
 }
 
 /**
- * Update administrator request
+ * Update administrator request (all fields optional)
  */
 export interface UpdateAdminRequest {
   first_name?: string;
@@ -99,10 +104,20 @@ export interface UpdateAdminRequest {
 
 /**
  * Suspend administrator request
+ * ISO 27001: reason is required for audit trail.
  */
 export interface SuspendAdminRequest {
   reason: string;
+  /** 1-365 days. Omit for indefinite suspension. */
   duration_days?: number;
+}
+
+/**
+ * Promote an existing user to administrator.
+ * Used from User Management to grant admin access.
+ */
+export interface PromoteUserRequest {
+  role: AdminRole;
 }
 
 // ============================================================================
@@ -112,6 +127,7 @@ export interface SuspendAdminRequest {
 export const adminManagementApi = {
   /**
    * List all administrators with pagination
+   * Auth: Platform Admin or Super Admin
    */
   async list(filters: AdminFilters = {}): Promise<PaginatedResponse<AdminUser>> {
     const params = new URLSearchParams();
@@ -130,21 +146,23 @@ export const adminManagementApi = {
 
   /**
    * Get administrator statistics
+   * Auth: Super Admin only
    */
   async getStatistics(): Promise<AdminStatistics> {
     return apiClient.get<AdminStatistics>('/admin/users/admins/statistics');
   },
 
   /**
-   * Get a single administrator by ID
+   * Get a single administrator by UUID
+   * Auth: Platform Admin or Super Admin
    */
-  async get(id: number): Promise<AdminUser> {
+  async get(id: string): Promise<AdminUser> {
     return apiClient.get<AdminUser>(`/admin/users/admins/${id}`);
   },
 
   /**
    * Create a new administrator
-   * Uses the general POST /admin/users endpoint with admin role
+   * Auth: Super Admin only
    */
   async create(data: CreateAdminRequest): Promise<AdminUser> {
     return apiClient.post<AdminUser>('/admin/users', data);
@@ -152,29 +170,46 @@ export const adminManagementApi = {
 
   /**
    * Update an administrator
+   * Auth: Super Admin only
    */
-  async update(id: number, data: UpdateAdminRequest): Promise<AdminUser> {
+  async update(id: string, data: UpdateAdminRequest): Promise<AdminUser> {
     return apiClient.put<AdminUser>(`/admin/users/admins/${id}`, data);
   },
 
   /**
    * Suspend an administrator
+   * Auth: Super Admin only
+   * Self-protection: cannot suspend self or Super Admin (backend enforces)
    */
-  async suspend(id: number, data: SuspendAdminRequest): Promise<AdminUser> {
+  async suspend(id: string, data: SuspendAdminRequest): Promise<AdminUser> {
     return apiClient.post<AdminUser>(`/admin/users/admins/${id}/suspend`, data);
   },
 
   /**
    * Activate a suspended administrator
+   * Auth: Super Admin only
    */
-  async activate(id: number): Promise<AdminUser> {
+  async activate(id: string): Promise<AdminUser> {
     return apiClient.post<AdminUser>(`/admin/users/admins/${id}/activate`);
   },
 
   /**
-   * Soft-delete an administrator
+   * Promote an existing vendor/org user to administrator (creates a dual user).
+   * Auth: Super Admin only
+   * Returns 422 if user is already an admin.
    */
-  async remove(id: number): Promise<void> {
-    await apiClient.delete(`/admin/users/admins/${id}`);
+  async promote(id: string, data: PromoteUserRequest): Promise<AdminUser> {
+    return apiClient.post<AdminUser>(`/admin/users/${id}/promote`, data);
   },
+
+  /**
+   * Demote an administrator — removes all platform admin roles.
+   * Auth: Super Admin only
+   * Self-protection: cannot demote self or Super Admin (backend enforces).
+   */
+  async demote(id: string): Promise<AdminUser> {
+    return apiClient.post<AdminUser>(`/admin/users/admins/${id}/demote`);
+  },
+
+  // NOTE: No delete endpoint — admins cannot be deleted (ISO 27001 audit trail).
 };

@@ -19,19 +19,21 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import type { LucideIcon } from 'lucide-react';
+import { Settings, CreditCard, Mail, CheckCircle, Lock, Plug, DollarSign } from 'lucide-react';
 
 type SettingTab = 'general' | 'payment' | 'email' | 'kyc' | 'security' | 'api';
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingTab>('general');
 
-  const tabs: { id: SettingTab; label: string; icon: string }[] = [
-    { id: 'general', label: 'General', icon: '⚙️' },
-    { id: 'payment', label: 'Payment Gateways', icon: '💳' },
-    { id: 'email', label: 'Email', icon: '✉️' },
-    { id: 'kyc', label: 'KYC/KYB', icon: '✓' },
-    { id: 'security', label: 'Security', icon: '🔒' },
-    { id: 'api', label: 'API', icon: '🔌' },
+  const tabs: { id: SettingTab; label: string; icon: LucideIcon }[] = [
+    { id: 'general', label: 'General', icon: Settings },
+    { id: 'payment', label: 'Payment Gateways', icon: CreditCard },
+    { id: 'email', label: 'Email', icon: Mail },
+    { id: 'kyc', label: 'KYC/KYB', icon: CheckCircle },
+    { id: 'security', label: 'Security', icon: Lock },
+    { id: 'api', label: 'API', icon: Plug },
   ];
 
   return (
@@ -56,7 +58,7 @@ export default function AdminSettingsPage() {
                   : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
               }`}
             >
-              <span>{tab.icon}</span>
+              <tab.icon className="h-4 w-4" />
               {tab.label}
             </button>
           ))}
@@ -138,7 +140,7 @@ export default function AdminSettingsPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <span className="text-2xl">💳</span>
+                        <CreditCard className="h-6 w-6 text-blue-600" />
                       </div>
                       <div>
                         <h3 className="font-semibold">Stripe</h3>
@@ -168,7 +170,7 @@ export default function AdminSettingsPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <span className="text-2xl">💰</span>
+                        <DollarSign className="h-6 w-6 text-green-600" />
                       </div>
                       <div>
                         <h3 className="font-semibold">Paystack</h3>

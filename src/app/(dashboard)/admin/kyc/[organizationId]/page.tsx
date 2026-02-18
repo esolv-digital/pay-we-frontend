@@ -36,6 +36,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { XCircle, Lock, AlertTriangle } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 import type {
   KYCStatus,
   KYCStatusUpdateRequest,
@@ -129,7 +131,7 @@ export default function KYCReviewPage() {
     return (
       <div className="p-8">
         <Card className="p-12 text-center">
-          <span className="text-6xl mb-4 block">❌</span>
+          <IconBadge icon={XCircle} variant="empty-state" color="red" />
           <h2 className="text-2xl font-semibold mb-2">KYC Not Found</h2>
           <p className="text-gray-600 mb-4">
             The requested KYC review could not be found
@@ -169,12 +171,12 @@ export default function KYCReviewPage() {
               </Badge>
               {isLocked && !isSuperAdmin && (
                 <p className="text-xs text-gray-500 mt-2">
-                  🔒 Status Locked
+                  <Lock className="inline h-3 w-3 mr-1" /> Status Locked
                 </p>
               )}
               {isLocked && isSuperAdmin && (
                 <p className="text-xs text-orange-600 mt-2">
-                  ⚠️ Super Admin Override Available
+                  <AlertTriangle className="inline h-3 w-3 mr-1" /> Super Admin Override Available
                 </p>
               )}
             </div>
@@ -367,7 +369,7 @@ export default function KYCReviewPage() {
                 You are about to update the KYC status for {kycReview.organization.name}.
                 {selectedStatus && requiresReason(selectedStatus) && (
                   <span className="block mt-2 text-orange-600 font-medium">
-                    ⚠️ A reason is required for this status change.
+                    <AlertTriangle className="inline h-3 w-3 mr-1" /> A reason is required for this status change.
                   </span>
                 )}
               </AlertDialogDescription>

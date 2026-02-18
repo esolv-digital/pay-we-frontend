@@ -15,6 +15,8 @@ import { ADMIN_ROUTES } from '@/lib/config/routes';
 import { formatDate, formatCurrency } from '@/lib/utils/format';
 import { useAdminDisbursement, useApproveDisbursement, useRejectDisbursement } from '@/lib/hooks/use-admin-disbursements';
 import type { AdminDisbursementStatus } from '@/lib/api/admin-disbursements';
+import { AlertTriangle } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 
 const STATUS_COLORS: Record<AdminDisbursementStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -45,7 +47,7 @@ export default function DisbursementDetailPage() {
 
   if (error || !disbursement) {
     return (
-      <div className="p-8"><Card className="p-12 text-center"><span className="text-6xl mb-4 block">⚠️</span><h2 className="text-2xl font-semibold mb-2">Disbursement Not Found</h2><p className="text-gray-600 mb-4">The requested disbursement could not be found.</p><Link href={ADMIN_ROUTES.DISBURSEMENTS}><Button>Back to Disbursements</Button></Link></Card></div>
+      <div className="p-8"><Card className="p-12 text-center"><IconBadge icon={AlertTriangle} variant="empty-state" color="red" /><h2 className="text-2xl font-semibold mb-2">Disbursement Not Found</h2><p className="text-gray-600 mb-4">The requested disbursement could not be found.</p><Link href={ADMIN_ROUTES.DISBURSEMENTS}><Button>Back to Disbursements</Button></Link></Card></div>
     );
   }
 

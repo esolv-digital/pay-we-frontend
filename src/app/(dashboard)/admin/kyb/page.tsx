@@ -18,6 +18,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Building2, Clock, CheckCircle, XCircle, Landmark } from 'lucide-react';
+import { IconBadge } from '@/components/ui/icon-badge';
 import Link from 'next/link';
 
 type KYBStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'needs_more_info';
@@ -59,10 +61,10 @@ export default function AdminKYBPage() {
 
   // Mock statistics
   const stats = [
-    { label: 'Total Businesses', value: '0', icon: '🏢', color: 'bg-blue-50' },
-    { label: 'Pending Review', value: '0', icon: '⏳', color: 'bg-yellow-50' },
-    { label: 'Approved', value: '0', icon: '✓', color: 'bg-green-50' },
-    { label: 'Rejected', value: '0', icon: '✕', color: 'bg-red-50' },
+    { label: 'Total Businesses', value: '0', icon: Building2, color: 'blue' },
+    { label: 'Pending Review', value: '0', icon: Clock, color: 'yellow' },
+    { label: 'Approved', value: '0', icon: CheckCircle, color: 'green' },
+    { label: 'Rejected', value: '0', icon: XCircle, color: 'red' },
   ];
 
   return (
@@ -86,13 +88,13 @@ export default function AdminKYBPage() {
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => (
-            <Card key={stat.label} className={`p-6 ${stat.color}`}>
+            <Card key={stat.label} className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
                   <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                 </div>
-                <span className="text-4xl">{stat.icon}</span>
+                <IconBadge icon={stat.icon} color={stat.color} />
               </div>
             </Card>
           ))}
@@ -150,7 +152,7 @@ export default function AdminKYBPage() {
 
         {/* Empty State */}
         <Card className="p-12 text-center">
-          <span className="text-6xl mb-4 block">🏛️</span>
+          <IconBadge icon={Landmark} variant="empty-state" color="blue" />
           <h2 className="text-2xl font-semibold mb-2">No Business Verifications Yet</h2>
           <p className="text-gray-600 mb-6">
             Business verification documents will appear here once organizations start submitting
