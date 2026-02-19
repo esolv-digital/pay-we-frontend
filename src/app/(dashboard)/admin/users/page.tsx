@@ -137,9 +137,9 @@ export default function AdminUsersPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.MANAGE_MEMBERS}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
             <p className="text-gray-600 mt-1">

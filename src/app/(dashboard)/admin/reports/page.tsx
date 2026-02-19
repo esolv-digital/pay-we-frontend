@@ -119,11 +119,11 @@ export default function AdminReportsPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_VIEW_REVENUE_REPORTS}>
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Revenue Reports</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Revenue Reports</h1>
             <p className="mt-2 text-sm text-gray-600">
               Comprehensive revenue analytics and performance metrics
             </p>

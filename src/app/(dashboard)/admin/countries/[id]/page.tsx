@@ -211,7 +211,7 @@ export default function CountryDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4" />
           <Card className="p-6"><div className="space-y-4"><div className="h-4 bg-gray-200 rounded w-3/4" /><div className="h-4 bg-gray-200 rounded w-1/2" /></div></Card>
@@ -222,7 +222,7 @@ export default function CountryDetailPage() {
 
   if (error || !country) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <Card className="p-12 text-center">
           <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
           <h2 className="text-2xl font-semibold mb-2">Country Not Found</h2>
@@ -235,7 +235,7 @@ export default function CountryDetailPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_MANAGE_COUNTRIES}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
           <Link href={ADMIN_ROUTES.COUNTRIES} className="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center">
@@ -399,7 +399,7 @@ export default function CountryDetailPage() {
                       </select>
                       <button type="button" onClick={() => handleRemovePM(idx)} className="text-red-500 hover:text-red-700 text-sm">Remove</button>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <div>
                         <label className="block text-xs text-gray-500">Fee %</label>
                         <Input type="number" step="0.01" min="0" max="100" value={pm.additional_fee_percentage} onChange={(e) => setPmForm((prev) => prev.map((p, i) => i === idx ? { ...p, additional_fee_percentage: Number(e.target.value) } : p))} className="h-8 text-sm" />
@@ -478,7 +478,7 @@ export default function CountryDetailPage() {
                       </select>
                       <button type="button" onClick={() => handleRemoveGW(idx)} className="text-red-500 hover:text-red-700 text-sm">Remove</button>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <div>
                         <label className="block text-xs text-gray-500">Fee %</label>
                         <Input type="number" step="0.01" min="0" max="100" value={gw.fee_percentage} onChange={(e) => setGwForm((prev) => prev.map((g, i) => i === idx ? { ...g, fee_percentage: Number(e.target.value) } : g))} className="h-8 text-sm" />

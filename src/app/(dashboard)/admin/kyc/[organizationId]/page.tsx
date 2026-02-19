@@ -113,7 +113,7 @@ export default function KYCReviewPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4" />
           <Card className="p-6">
@@ -129,7 +129,7 @@ export default function KYCReviewPage() {
 
   if (!kycReview) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <Card className="p-12 text-center">
           <IconBadge icon={XCircle} variant="empty-state" color="red" />
           <h2 className="text-2xl font-semibold mb-2">KYC Not Found</h2>
@@ -151,7 +151,7 @@ export default function KYCReviewPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.VIEW_KYC}>
-      <div className="p-8 max-w-6xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <Link

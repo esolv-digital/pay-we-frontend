@@ -60,7 +60,7 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -74,7 +74,7 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
 
   if (!paymentPage) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <h2 className="text-2xl font-semibold mb-2">Payment Page Not Found</h2>
           <p className="text-gray-600 mb-6">The payment page you&apos;re looking for doesn&apos;t exist.</p>
@@ -91,7 +91,7 @@ export default function PaymentPageDetailsPage({ params }: PageProps) {
     : `${window.location.origin}/pay/${paymentPage.short_url}`;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="mb-6">
         <Link

@@ -17,7 +17,7 @@ export default function AdminTransactionDetailsPage({
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="bg-white rounded-lg shadow p-6 space-y-4">
@@ -32,7 +32,7 @@ export default function AdminTransactionDetailsPage({
 
   if (!transaction) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <p className="text-red-700">Transaction not found</p>
         </div>
@@ -41,7 +41,7 @@ export default function AdminTransactionDetailsPage({
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <Link
           href="/admin/transactions"

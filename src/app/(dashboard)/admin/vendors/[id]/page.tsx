@@ -39,7 +39,7 @@ export default function VendorDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4" />
           <Card className="p-6"><div className="space-y-4"><div className="h-4 bg-gray-200 rounded w-3/4" /><div className="h-4 bg-gray-200 rounded w-1/2" /></div></Card>
@@ -50,7 +50,7 @@ export default function VendorDetailPage() {
 
   if (error || !vendor) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <Card className="p-12 text-center">
           <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
           <h2 className="text-2xl font-semibold mb-2">Vendor Not Found</h2>
@@ -63,7 +63,7 @@ export default function VendorDetailPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_VIEW_VENDORS}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="mb-8">
           <Link href={ADMIN_ROUTES.VENDORS} className="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center">
             ← Back to Vendors

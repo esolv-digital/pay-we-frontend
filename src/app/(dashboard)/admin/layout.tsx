@@ -1,6 +1,7 @@
 'use client';
 
 import { AdminSidebar } from '@/components/layouts/admin-sidebar';
+import { MobileHeader } from '@/components/layouts/mobile-header';
 import { useAuth } from '@/lib/hooks/use-auth';
 
 export default function AdminLayout({
@@ -46,9 +47,12 @@ export default function AdminLayout({
   return (
     <div className="flex h-screen">
       <AdminSidebar />
-      <main className="flex-1 overflow-y-auto bg-gray-50">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <MobileHeader title="PayWe Admin" />
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

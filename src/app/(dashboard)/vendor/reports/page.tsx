@@ -42,8 +42,8 @@ export default function VendorReportsPage() {
   };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
         <div className="flex gap-2">
           <button
@@ -143,7 +143,7 @@ export default function VendorReportsPage() {
         {isLoading ? (
           <div className="p-6 animate-pulse space-y-4">
             <div className="h-8 bg-gray-100 rounded w-1/4"></div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-24 bg-gray-100 rounded"></div>
               ))}

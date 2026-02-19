@@ -68,7 +68,7 @@ export default function RoleDetailPage() {
 
   if (isLoadingRole) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4" />
           <Card className="p-6">
@@ -84,7 +84,7 @@ export default function RoleDetailPage() {
 
   if (roleError || !role) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <Card className="p-12 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <AlertCircle className="h-6 w-6 text-red-600" />
@@ -144,7 +144,7 @@ export default function RoleDetailPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.VIEW_ROLES}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
           <Link

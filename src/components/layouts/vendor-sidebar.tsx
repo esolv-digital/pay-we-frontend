@@ -1,16 +1,19 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard, FileText, CreditCard, Wallet, TrendingUp, Lock, Settings,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { VENDOR_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useKYCStatus } from '@/lib/hooks/use-kyc-status';
 import { ContextSwitcher } from '@/components/context-switcher';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { SidebarShell } from './sidebar-shell';
+import { SidebarNavItem } from './sidebar-nav-item';
 
 const baseNavigation: Array<{
   name: string;
@@ -41,43 +44,93 @@ export function VendorSidebar() {
   });
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-white w-64">
-      <div className="p-6 border-b border-gray-800">
-        <h1 className="text-xl font-bold">PayWe</h1>
-        <p className="text-sm text-gray-400 mt-1">{user?.full_name}</p>
-      </div>
-
-      <nav className="flex-1 p-4 space-y-1">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
+    <TooltipProvider>
+      <SidebarShell>
+        {(isCollapsed) => (
+          <>
+            {/* Logo/Header */}
+            <div
               className={cn(
-                'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-gray-800 text-white'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                'border-b border-gray-800 transition-all duration-300',
+                isCollapsed ? 'px-2 py-4 text-center' : 'p-6'
               )}
             >
-              <item.icon className="h-5 w-5 shrink-0" />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
+              <h1
+                className={cn(
+                  'font-bold transition-all duration-300',
+                  isCollapsed ? 'text-sm' : 'text-xl'
+                )}
+              >
+                {isCollapsed ? 'P' : 'PayWe'}
+              </h1>
+              {!isCollapsed && (
+                <p className="text-sm text-gray-400 mt-1 truncate">
+                  {user?.full_name}
+                </p>
+              )}
+            </div>
 
-      <div className="p-4 border-t border-gray-800 space-y-2">
-        <ContextSwitcher />
-        <button
-          type="button"
-          onClick={() => logout()}
-          className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
-        >
-          Sign Out
-        </button>
-      </div>
-    </div>
+            {/* Navigation */}
+            <nav
+              className={cn(
+                'flex-1 overflow-y-auto',
+                isCollapsed ? 'p-2 space-y-1' : 'p-4 space-y-1'
+              )}
+            >
+              {navigation.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  pathname?.startsWith(item.href + '/');
+                return (
+                  <SidebarNavItem
+                    key={item.name}
+                    name={item.name}
+                    href={item.href}
+                    icon={item.icon}
+                    isActive={isActive}
+                    isCollapsed={isCollapsed}
+                  />
+                );
+              })}
+            </nav>
+
+            {/* Footer */}
+            <div
+              className={cn(
+                'border-t border-gray-800',
+                isCollapsed ? 'p-2 space-y-1' : 'p-4 space-y-2'
+              )}
+            >
+              {!isCollapsed && <ContextSwitcher />}
+              {isCollapsed ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() => logout()}
+                      className="w-full flex items-center justify-center p-2 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+                      aria-label="Sign Out"
+                    >
+                      <LogOut className="h-5 w-5 shrink-0" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" sideOffset={8}>
+                    Sign Out
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => logout()}
+                  className="w-full px-4 py-2 text-sm text-left text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  Sign Out
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </SidebarShell>
+    </TooltipProvider>
   );
 }

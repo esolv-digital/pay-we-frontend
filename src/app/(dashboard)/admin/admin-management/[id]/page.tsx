@@ -91,7 +91,7 @@ export default function AdminDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4" />
           <Card className="p-6">
@@ -107,7 +107,7 @@ export default function AdminDetailPage() {
 
   if (error || !admin) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <Card className="p-12 text-center">
           <IconBadge icon={AlertTriangle} variant="empty-state" color="red" />
           <h2 className="text-2xl font-semibold mb-2">Administrator Not Found</h2>
@@ -136,7 +136,7 @@ export default function AdminDetailPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_MANAGE_ADMINS}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Back link */}
         <Link
           href={ADMIN_ROUTES.ADMIN_MANAGEMENT}

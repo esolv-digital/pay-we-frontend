@@ -32,7 +32,7 @@ export default function TransactionDetailsPage({ params }: { params: Promise<{ i
 
   if (isLoading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="bg-white rounded-lg shadow p-6 space-y-4">
@@ -47,7 +47,7 @@ export default function TransactionDetailsPage({ params }: { params: Promise<{ i
 
   if (error || !transaction) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <IconBadge icon={XCircle} variant="empty-state" color="red" />
           <h2 className="text-xl font-semibold text-red-800 mb-2">Transaction Not Found</h2>
@@ -68,9 +68,9 @@ export default function TransactionDetailsPage({ params }: { params: Promise<{ i
   const statusStyle = STATUS_STYLES[transaction.status] || STATUS_STYLES.pending;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <Link
             href="/vendor/transactions"

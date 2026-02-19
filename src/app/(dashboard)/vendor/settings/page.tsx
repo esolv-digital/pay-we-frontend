@@ -27,13 +27,13 @@ export default function VendorSettingsPage() {
   const [securitySubTab, setSecuritySubTab] = useState<SecuritySubTab>('settings');
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
 
       {/* Tab Navigation */}
       <div className="bg-white rounded-lg shadow mb-6">
         <div className="border-b border-gray-200">
-          <nav className="flex -mb-px">
+          <nav className="flex -mb-px overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

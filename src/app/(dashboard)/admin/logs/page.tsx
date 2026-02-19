@@ -131,11 +131,11 @@ export default function AdminLogsPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_VIEW_LOGS}>
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Activity Logs</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Activity Logs</h1>
             <p className="mt-2 text-sm text-gray-600">
               Monitor system activity, user actions, and security events
             </p>
@@ -304,7 +304,7 @@ export default function AdminLogsPage() {
         <Card className="overflow-hidden">
           {/* Error State */}
           {isError && (
-            <div className="p-8 text-center">
+            <div className="p-4 sm:p-6 lg:p-8 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                 <AlertCircle className="h-6 w-6 text-red-600" />
               </div>
@@ -318,7 +318,7 @@ export default function AdminLogsPage() {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
               <div className="space-y-4">
                 {[...Array(10)].map((_, i) => (
                   <div key={i} className="h-20 animate-pulse rounded-lg bg-gray-100" />
@@ -332,7 +332,7 @@ export default function AdminLogsPage() {
             <>
               {/* Empty State */}
               {data.data.length === 0 && (
-                <div className="p-8 text-center">
+                <div className="p-4 sm:p-6 lg:p-8 text-center">
                   <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
                     <Activity className="h-6 w-6 text-gray-400" />
                   </div>

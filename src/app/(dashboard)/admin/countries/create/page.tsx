@@ -115,7 +115,7 @@ export default function CreateCountryPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_MANAGE_COUNTRIES}>
-      <div className="p-8 max-w-3xl">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-3xl">
         {/* Header */}
         <div className="mb-8">
           <Link href={ADMIN_ROUTES.COUNTRIES} className="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center">

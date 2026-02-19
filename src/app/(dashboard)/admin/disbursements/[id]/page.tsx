@@ -41,19 +41,19 @@ export default function DisbursementDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-8"><div className="animate-pulse space-y-6"><div className="h-8 bg-gray-200 rounded w-1/4" /><Card className="p-6"><div className="space-y-4"><div className="h-4 bg-gray-200 rounded w-3/4" /><div className="h-4 bg-gray-200 rounded w-1/2" /></div></Card></div></div>
+      <div className="p-4 sm:p-6 lg:p-8"><div className="animate-pulse space-y-6"><div className="h-8 bg-gray-200 rounded w-1/4" /><Card className="p-6"><div className="space-y-4"><div className="h-4 bg-gray-200 rounded w-3/4" /><div className="h-4 bg-gray-200 rounded w-1/2" /></div></Card></div></div>
     );
   }
 
   if (error || !disbursement) {
     return (
-      <div className="p-8"><Card className="p-12 text-center"><IconBadge icon={AlertTriangle} variant="empty-state" color="red" /><h2 className="text-2xl font-semibold mb-2">Disbursement Not Found</h2><p className="text-gray-600 mb-4">The requested disbursement could not be found.</p><Link href={ADMIN_ROUTES.DISBURSEMENTS}><Button>Back to Disbursements</Button></Link></Card></div>
+      <div className="p-4 sm:p-6 lg:p-8"><Card className="p-12 text-center"><IconBadge icon={AlertTriangle} variant="empty-state" color="red" /><h2 className="text-2xl font-semibold mb-2">Disbursement Not Found</h2><p className="text-gray-600 mb-4">The requested disbursement could not be found.</p><Link href={ADMIN_ROUTES.DISBURSEMENTS}><Button>Back to Disbursements</Button></Link></Card></div>
     );
   }
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_VIEW_DISBURSEMENTS}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="mb-8">
           <Link href={ADMIN_ROUTES.DISBURSEMENTS} className="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center">← Back to Disbursements</Link>
           <div className="flex justify-between items-start mt-4">

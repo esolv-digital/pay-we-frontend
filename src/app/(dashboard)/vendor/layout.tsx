@@ -1,6 +1,7 @@
 'use client';
 
 import { VendorSidebar } from '@/components/layouts/vendor-sidebar';
+import { MobileHeader } from '@/components/layouts/mobile-header';
 import { KYCBanner } from '@/components/kyc/kyc-banner';
 import { useAuth } from '@/lib/hooks/use-auth';
 
@@ -45,12 +46,15 @@ export default function VendorLayout({
   return (
     <div className="flex h-screen">
       <VendorSidebar />
-      <main className="flex-1 overflow-y-auto bg-gray-50">
-        <div className="p-6">
-          <KYCBanner />
-        </div>
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <MobileHeader title="PayWe" />
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="p-4 md:p-6">
+            <KYCBanner />
+          </div>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

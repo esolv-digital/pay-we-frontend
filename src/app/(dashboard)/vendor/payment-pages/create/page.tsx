@@ -113,7 +113,7 @@ export default function CreatePaymentPagePage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
         <Link
           href="/vendor/payment-pages"

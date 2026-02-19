@@ -152,7 +152,7 @@ export default function AdminOrganizationsPage() {
 
   return (
     <PermissionGuard permission={PERMISSIONS.ADMIN_VIEW_ORGANIZATIONS}>
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -363,7 +363,7 @@ export default function AdminOrganizationsPage() {
         <Card className="overflow-hidden">
           {/* Error State */}
           {isError && (
-            <div className="p-8 text-center">
+            <div className="p-4 sm:p-6 lg:p-8 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                 <AlertCircle className="h-6 w-6 text-red-600" />
               </div>
@@ -384,7 +384,7 @@ export default function AdminOrganizationsPage() {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
               <div className="space-y-4">
                 {[...Array(5)].map((_, i) => (
                   <div
@@ -401,7 +401,7 @@ export default function AdminOrganizationsPage() {
             <>
               {/* Empty State */}
               {data.data.length === 0 && (
-                <div className="p-8 text-center">
+                <div className="p-4 sm:p-6 lg:p-8 text-center">
                   <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
                     <Building2 className="h-6 w-6 text-gray-400" />
                   </div>
